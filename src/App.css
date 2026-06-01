@@ -294,6 +294,98 @@
   grid-template-columns: 280px minmax(0, 1fr);
 }
 
+.workspace-shell {
+  align-items: start;
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+}
+
+.workspace-main {
+  min-width: 0;
+}
+
+.flow-rail {
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.94), rgba(244, 241, 232, 0.92)),
+    var(--surface);
+  border-right: 1px solid var(--line);
+  min-height: calc(100svh - 72px);
+  padding: 22px;
+  position: sticky;
+  top: 72px;
+}
+
+.flow-rail-header {
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding-bottom: 16px;
+}
+
+.flow-rail-header span {
+  color: var(--team-primary);
+  font-size: 0.78rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.flow-rail-header strong {
+  color: var(--ink);
+  font-size: 1.24rem;
+  line-height: 1.05;
+}
+
+.flow-rail nav {
+  display: grid;
+  gap: 8px;
+}
+
+.flow-rail a {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--ink);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 38px minmax(0, 1fr);
+  min-height: 58px;
+  padding: 8px;
+  text-decoration: none;
+}
+
+.flow-rail a:hover,
+.flow-rail a:focus-visible {
+  background: #ffffff;
+  border-color: color-mix(in srgb, var(--team-primary), #ffffff 55%);
+}
+
+.flow-icon {
+  align-items: center;
+  background: var(--team-primary);
+  color: var(--team-secondary);
+  display: inline-flex;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.flow-rail a span:last-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.flow-rail a strong {
+  font-size: 0.94rem;
+}
+
+.flow-rail a em {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-style: normal;
+}
+
 .section-heading {
   align-items: center;
   display: flex;
@@ -1165,8 +1257,33 @@
 
   .hero-band,
   .team-strip,
+  .workspace-shell,
   .insight-band {
     grid-template-columns: 1fr;
+  }
+
+  .flow-rail {
+    border-bottom: 1px solid var(--line);
+    border-right: none;
+    min-height: 0;
+    padding: 16px clamp(18px, 5vw, 64px);
+    position: static;
+  }
+
+  .flow-rail-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .flow-rail nav {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .flow-rail a {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
   }
 
   .supporter-panel {
@@ -1213,8 +1330,20 @@
   .team-strip,
   .content-band,
   .insight-band,
-  .leaderboard-band {
+  .leaderboard-band,
+  .flow-rail {
     padding: 28px 16px;
+  }
+
+  .flow-rail nav {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .flow-rail a {
+    flex: 0 0 126px;
   }
 
   .team-picker,

@@ -7,6 +7,7 @@ This document is the project artifact for how the product is being built. Update
 - Keep product logic deterministic for predictions, draws, eligibility, shipping, reviews, and compliance.
 - Use JSON-render as a constrained presentation/spec layer, not as the source of truth for prize or fulfillment logic.
 - Keep team personalization token-driven through CSS variables and typed team data.
+- Maintain `PRODUCT.md` and `DESIGN.md` when product or design direction changes.
 - Avoid official FIFA, tournament, federation, player, and sponsor marks unless the project has rights.
 - After finishing a task: update this file, run verification, and commit.
 
@@ -99,6 +100,7 @@ Current concepts cover Brazil, Argentina, United States, France, England, Spain,
 - Researched JSON-render, POD providers, and Stripe Projects using sub-agents and web sources.
 - Scoped React Fast Refresh away from the mixed JSON-render catalog module.
 - Verified build, lint, and browser interactions.
+- Applied Impeccable-inspired product-design structure: added `PRODUCT.md`, `DESIGN.md`, a desktop workflow rail, cleaner product-state empty copy, and corrected section anchors.
 
 ## Verification
 
@@ -118,10 +120,11 @@ Browser verification covered:
 - verifying winners appear
 - queueing fulfillment and sending review prompts
 - checking browser console errors
+- checking the Impeccable-inspired workflow rail and refined empty draw states
 
 Latest screenshot:
 
-`artifacts/worldcup-predictor-final.png`
+`artifacts/worldcup-layout-enhanced.png`
 
 ## Next Tasks
 

@@ -2,8 +2,11 @@ import { type CSSProperties, useMemo, useRef, useState } from 'react'
 import { Renderer, JSONUIProvider, type StateStore } from '@json-render/react'
 import {
   ChevronRight,
+  Dice5,
   Gift,
+  PackageCheck,
   ShieldCheck,
+  Shirt,
   Target,
   Ticket,
   Trophy,
@@ -145,6 +148,41 @@ function App() {
     (prediction) => prediction.locked,
   ).length
   const drawCount = Object.keys(predictionState.drawResults).length
+  const reviewCount = Object.values(predictionState.reviewPrompts).filter(
+    Boolean,
+  ).length
+  const flowItems = [
+    {
+      href: '#predictions',
+      icon: <Target size={17} />,
+      label: 'Predict',
+      meta: `${lockedCount} locked`,
+    },
+    {
+      href: '#draws',
+      icon: <Dice5 size={17} />,
+      label: 'Draw',
+      meta: `${drawCount} complete`,
+    },
+    {
+      href: '#shirts',
+      icon: <Shirt size={17} />,
+      label: 'Personalize',
+      meta: selectedTeam.code,
+    },
+    {
+      href: '#rewards',
+      icon: <PackageCheck size={17} />,
+      label: 'Fulfill',
+      meta: `${predictionState.fulfillmentQueue.length} queued`,
+    },
+    {
+      href: '#operations',
+      icon: <ShieldCheck size={17} />,
+      label: 'Review',
+      meta: `${reviewCount} sent`,
+    },
+  ]
 
   const themeVars = {
     '--team-primary': selectedTeam.colors.primary,
@@ -165,7 +203,7 @@ function App() {
           <span>World Cup Predictor</span>
         </a>
         <nav className="nav-links" aria-label="Primary navigation">
-          <a href="#predict">Fixtures</a>
+          <a href="#predictions">Fixtures</a>
           <a href="#rewards">Rewards</a>
           <a href="#operations">Operations</a>
         </nav>
@@ -186,7 +224,7 @@ function App() {
             supporter shirts, and move winners into shipping and review flows.
           </p>
           <div className="hero-actions">
-            <a className="primary-action" href="#predict">
+            <a className="primary-action" href="#predictions">
               <Target size={18} />
               <span>Make Picks</span>
               <ChevronRight size={17} />
@@ -258,57 +296,76 @@ function App() {
         </div>
       </section>
 
-      <section className="insight-band" id="predict">
-        <div className="spotlight">
-          <div>
-            <p className="section-kicker">Matchday Command Center</p>
-            <h2>
-              {getTeam(featuredMatch.home).name} vs{' '}
-              {getTeam(featuredMatch.away).name}
-            </h2>
-            <p>
-              Your supporter theme follows the team you choose, and match
-              actions move from prediction to draw, shipping, and review.
-            </p>
+      <div className="workspace-shell">
+        <aside className="flow-rail" aria-label="Prediction workflow">
+          <div className="flow-rail-header">
+            <span>{selectedTeam.code}</span>
+            <strong>Matchday Flow</strong>
           </div>
-          <div className="spotlight-meter" aria-label="Theme intensity">
-            <span />
-            <span />
-            <span />
-          </div>
-        </div>
+          <nav aria-label="Prediction workflow stages">
+            {flowItems.map((item) => (
+              <a href={item.href} key={item.label}>
+                <span className="flow-icon">{item.icon}</span>
+                <span>
+                  <strong>{item.label}</strong>
+                  <em>{item.meta}</em>
+                </span>
+              </a>
+            ))}
+          </nav>
+        </aside>
 
-        <div className="receipt-panel">
-          <div className="receipt-header">
-            <ShieldCheck size={20} />
-            <div>
-              <p className="section-kicker">Live State</p>
-              <h2>{lockedCount} Picks Locked</h2>
+        <div className="workspace-main">
+          <section className="insight-band" id="predict">
+            <div className="spotlight">
+              <div>
+                <p className="section-kicker">Matchday Command Center</p>
+                <h2>
+                  {getTeam(featuredMatch.home).name} vs{' '}
+                  {getTeam(featuredMatch.away).name}
+                </h2>
+                <p>
+                  Your supporter theme follows the team you choose, and match
+                  actions move from prediction to draw, shipping, and review.
+                </p>
+              </div>
+              <div className="spotlight-meter" aria-label="Theme intensity">
+                <span />
+                <span />
+                <span />
+              </div>
             </div>
-          </div>
-          <div className="receipt-list">
-            <div className="receipt-line">
-              <span>Draws run</span>
-              <strong>{drawCount}</strong>
-            </div>
-            <div className="receipt-line">
-              <span>Fulfillment queues</span>
-              <strong>{predictionState.fulfillmentQueue.length}</strong>
-            </div>
-            <div className="receipt-line">
-              <span>Review batches</span>
-              <strong>
-                {Object.values(predictionState.reviewPrompts).filter(Boolean)
-                  .length}
-              </strong>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      <JSONUIProvider registry={registry} store={store}>
-        <Renderer spec={predictionSpec} registry={registry} />
-      </JSONUIProvider>
+            <div className="receipt-panel">
+              <div className="receipt-header">
+                <ShieldCheck size={20} />
+                <div>
+                  <p className="section-kicker">Live State</p>
+                  <h2>{lockedCount} Picks Locked</h2>
+                </div>
+              </div>
+              <div className="receipt-list">
+                <div className="receipt-line">
+                  <span>Draws run</span>
+                  <strong>{drawCount}</strong>
+                </div>
+                <div className="receipt-line">
+                  <span>Fulfillment queues</span>
+                  <strong>{predictionState.fulfillmentQueue.length}</strong>
+                </div>
+                <div className="receipt-line">
+                  <span>Review batches</span>
+                  <strong>{reviewCount}</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <JSONUIProvider registry={registry} store={store}>
+            <Renderer spec={predictionSpec} registry={registry} />
+          </JSONUIProvider>
+        </div>
+      </div>
     </main>
   )
 }

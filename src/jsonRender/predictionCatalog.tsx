@@ -286,7 +286,7 @@ export const predictionSpec = {
     'section-matches': {
       type: 'Section',
       props: {
-        id: 'rewards',
+        id: 'predictions',
         kicker: 'Prediction System',
         title: 'Pick, Score, Lock',
         icon: 'target',
@@ -331,7 +331,7 @@ export const predictionSpec = {
     'section-fulfillment': {
       type: 'Section',
       props: {
-        id: 'fulfillment',
+        id: 'rewards',
         kicker: 'After The Draw',
         title: 'Ship, Track, Review',
         icon: 'package',
@@ -483,8 +483,7 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
                   </div>
                 ) : (
                   <p className="empty-draw">
-                    Draw opens after the final result is confirmed. This demo
-                    uses seeded entries so the flow is repeatable.
+                    Results pending. Winners appear here when the match closes.
                   </p>
                 )}
               </article>
@@ -558,7 +557,7 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
               ))
             ) : (
               <p className="empty-draw">
-                Run a match draw to populate shipment and review actions.
+                Draw winners appear here when a match is ready for fulfillment.
               </p>
             )}
           </aside>
