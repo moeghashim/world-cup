@@ -8,8 +8,9 @@ This document is the project artifact for how the product is being built. Update
 - Use JSON-render as a constrained presentation/spec layer, not as the source of truth for prize or fulfillment logic.
 - Keep team personalization token-driven through CSS variables and typed team data.
 - Maintain `PRODUCT.md` and `DESIGN.md` when product or design direction changes.
+- Maintain `BUILD_BLOG.md` on every commit so it can become the public build article.
 - Avoid official FIFA, tournament, federation, player, and sponsor marks unless the project has rights.
-- After finishing a task: update this file, run verification, and commit.
+- After finishing a task: update this file and `BUILD_BLOG.md`, run verification, and commit.
 
 ## Current Stack
 
@@ -101,6 +102,7 @@ Current concepts cover Brazil, Argentina, United States, France, England, Spain,
 - Scoped React Fast Refresh away from the mixed JSON-render catalog module.
 - Verified build, lint, and browser interactions.
 - Applied Impeccable-inspired product-design structure: added `PRODUCT.md`, `DESIGN.md`, a desktop workflow rail, cleaner product-state empty copy, and corrected section anchors.
+- Added `BUILD_BLOG.md` as the narrative build article artifact and commit-by-commit project history.
 
 ## Verification
 
@@ -135,3 +137,13 @@ Latest screenshot:
 - Integrate a real POD provider API behind server-side actions.
 - Design production shirt artwork files or outsource design refinements.
 - Add responsive visual verification for mobile and tablet breakpoints.
+
+<!-- stripe-projects-cli managed:agents-md:start -->
+## Stripe Projects CLI
+
+This repository is initialized for the Stripe project "World Cup".
+
+## Tools used
+
+- [Stripe CLI](https://docs.stripe.com/stripe-cli) with the `projects` plugin to manage third-party services, credentials, and deployments for this project. Use the stripe-projects-cli to manage deploying and access to third party services.
+<!-- stripe-projects-cli managed:agents-md:end -->
