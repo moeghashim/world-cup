@@ -326,6 +326,13 @@ const sponsorshipAddOns = [
   'Sponsor dashboard export with campaign metrics',
 ]
 
+const aiBuildMetrics = {
+  tokenTotal: '~2.4M',
+  estimatedCost: '~$18',
+  costLabel: 'API-equivalent estimate',
+  note: 'Estimated from Codex build activity; not a billing receipt.',
+} as const
+
 const technologyFlow = [
   {
     label: 'Build Agent',
@@ -1459,31 +1466,59 @@ function Topbar({
   lockedCount: number
 }) {
   return (
-    <header className="topbar">
-      <a className="brand" href="/">
-        <img
-          alt="Win World Cup 2026"
-          className="brand-logo"
-          height="98"
-          src={brandLogo}
-          width="98"
-        />
-      </a>
-      <nav className="nav-links" aria-label="Primary navigation">
-        <a href="/fixtures">Fixtures</a>
-        <a href="/teams">Teams</a>
-        <a href="/prizes">Prizes</a>
-        <a href="/sponsors">Sponsors</a>
-        <a href="/rewards">Rewards</a>
-        <a href="/operations">Operations</a>
-      </nav>
-      <button className="account-button" type="button">
-        <Ticket size={17} />
-        <span>
-          {lockedCount} locked · {drawCount} draws
+    <>
+      <header className="topbar">
+        <a className="brand" href="/">
+          <img
+            alt="Win World Cup 2026"
+            className="brand-logo"
+            height="98"
+            src={brandLogo}
+            width="98"
+          />
+        </a>
+        <nav className="nav-links" aria-label="Primary navigation">
+          <a href="/fixtures">Fixtures</a>
+          <a href="/teams">Teams</a>
+          <a href="/prizes">Prizes</a>
+          <a href="/sponsors">Sponsors</a>
+          <a href="/rewards">Rewards</a>
+          <a href="/operations">Operations</a>
+        </nav>
+        <button className="account-button" type="button">
+          <Ticket size={17} />
+          <span>
+            {lockedCount} locked · {drawCount} draws
+          </span>
+        </button>
+      </header>
+      <AIBuildBanner />
+    </>
+  )
+}
+
+function AIBuildBanner() {
+  return (
+    <aside className="ai-build-banner" aria-label="AI build disclosure">
+      <div>
+        <span className="ai-build-icon">
+          <Sparkles size={17} />
         </span>
-      </button>
-    </header>
+        <strong>Built entirely by AI</strong>
+      </div>
+      <dl aria-label="Estimated AI usage">
+        <div>
+          <dt>Total tokens</dt>
+          <dd>{aiBuildMetrics.tokenTotal}</dd>
+        </div>
+        <div>
+          <dt>Estimated cost</dt>
+          <dd>{aiBuildMetrics.estimatedCost}</dd>
+        </div>
+      </dl>
+      <span>{aiBuildMetrics.costLabel}</span>
+      <em>{aiBuildMetrics.note}</em>
+    </aside>
   )
 }
 

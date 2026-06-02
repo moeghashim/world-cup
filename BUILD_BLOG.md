@@ -253,6 +253,15 @@ The old page/document flow diagram was replaced with a technology flowchart. Tha
 
 The point is to explain the build stack and production path, not to repeat the public page navigation.
 
+## AI Build Disclosure Banner
+
+The site now includes a notification banner directly under the main navigation. It says the project was built entirely by AI and shows a public usage estimate:
+
+- estimated total tokens: `~2.4M`
+- estimated API-equivalent cost: `~$18`
+
+The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
+
 ## Print-On-Demand And Sponsor Package Research
 
 The print-on-demand research led to a practical split:
@@ -340,10 +349,11 @@ Browser checks have covered:
 - header navigation between page paths while preserving app state
 - attached logo rendering at 98px inside the 120px topbar
 - Experiment page redesign with the Build Blog HTML article, AGENTS.md raw log, and technology flowchart
+- AI build disclosure banner with estimated total tokens and API-equivalent cost
 
 Current visual artifact:
 
-`artifacts/experiment-build-blog-redesign.png`
+`artifacts/ai-build-banner.png`
 
 ## Commit Timeline
 
@@ -429,9 +439,13 @@ Replaced public hash navigation with page-style paths for fixtures, teams, draws
 
 Increased the active header logo by another 20%, from 82px to 98px, and raised the sticky topbar from 100px to 120px so the larger mark has matching spacing.
 
-### Current commit - Redesign Experiment build blog page
+### `f1aef46` - Redesign Experiment build blog page
 
 Removed the old multi-document Experiment grid. The page now renders `BUILD_BLOG.md` as the primary HTML article, keeps `AGENTS.md` as the agent-log markdown file, and adds a technology flowchart covering Codex, GitHub, Vercel, React/TypeScript, JSON-render, Stripe Projects, and planned production providers.
+
+### Current commit - Add AI build disclosure banner
+
+Added a site-wide notification banner that says the project was built entirely by AI and displays estimated usage of `~2.4M` total tokens with an API-equivalent estimated cost of `~$18`.
 
 ## Next Build Steps
 

@@ -88,6 +88,84 @@
   background: rgba(255, 255, 255, 0.72);
 }
 
+.ai-build-banner {
+  align-items: center;
+  background:
+    linear-gradient(90deg, var(--team-primary), color-mix(in srgb, var(--team-primary), var(--ink) 28%)),
+    var(--team-primary);
+  color: var(--team-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  padding: 10px clamp(18px, 5vw, 64px);
+}
+
+.ai-build-banner > div,
+.ai-build-banner dl,
+.ai-build-banner dl div {
+  align-items: center;
+  display: flex;
+}
+
+.ai-build-banner > div {
+  gap: 9px;
+}
+
+.ai-build-icon {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  display: inline-flex;
+  height: 30px;
+  justify-content: center;
+  width: 30px;
+}
+
+.ai-build-banner strong {
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.ai-build-banner dl {
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+
+.ai-build-banner dl div {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 9px;
+}
+
+.ai-build-banner dt,
+.ai-build-banner dd,
+.ai-build-banner > span,
+.ai-build-banner em {
+  font-size: 0.78rem;
+  margin: 0;
+}
+
+.ai-build-banner dt,
+.ai-build-banner > span,
+.ai-build-banner em {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.ai-build-banner dd {
+  color: #ffffff;
+  font-weight: 950;
+}
+
+.ai-build-banner em {
+  font-style: normal;
+  margin-left: auto;
+}
+
 .account-button,
 .primary-action,
 .secondary-action,
@@ -3281,6 +3359,26 @@
     gap: 10px;
     min-height: auto;
     padding: 14px 16px;
+  }
+
+  .ai-build-banner {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 12px 16px;
+  }
+
+  .ai-build-banner dl {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ai-build-banner dl div {
+    justify-content: space-between;
+  }
+
+  .ai-build-banner em {
+    margin-left: 0;
   }
 
   .brand span:last-child,
