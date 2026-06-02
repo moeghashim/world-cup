@@ -50,6 +50,26 @@ React maps the selected team into CSS variables:
 
 This keeps personalization flexible without letting team color take over the app. It also makes future team additions straightforward: add a data record, and the UI inherits the theme.
 
+## Tournament Teams And Schedule Snapshot
+
+The app now has a real tournament snapshot section instead of hiding team and fixture context behind the prediction cards.
+
+The schedule data lives in `src/data/worldCupSchedule.ts` and is intentionally typed:
+
+- 48 teams grouped from A through L
+- 72 group-stage fixtures
+- match number, date, ET kickoff time, venue, home team, and away team
+- source metadata dated 2026-06-02
+- a helper that returns the selected supporter team's group fixtures
+
+The UI renders this inside the JSON-render product surface as `TournamentSchedule`. It shows three things:
+
+- a source snapshot panel with a FIFA schedule verification link
+- a highlighted schedule for the selected supporter team
+- all groups and the full group-stage fixture list
+
+This is still a prototype data boundary. The product should replace the snapshot with an official data feed or maintained admin import before any real prize campaign, because schedule changes and source corrections would directly affect prediction eligibility.
+
 ## Why JSON-render Is Used Carefully
 
 The project uses `@json-render/core` and `@json-render/react`, but only as a constrained presentation layer.
@@ -64,6 +84,7 @@ That split came from the design study. JSON-render is useful for catalog-first U
 The JSON-render catalog lives in `src/jsonRender/predictionCatalog.tsx`. It defines product-specific components:
 
 - `MatchBoard`
+- `TournamentSchedule`
 - `DrawControl`
 - `ShirtStudio`
 - `FulfillmentPipeline`
@@ -177,7 +198,9 @@ The generated PNG board is saved as `designs/logos/logo-concept-board.png`. The 
 
 This pass avoids official tournament symbols, federation marks, sponsor marks, mascot art, player likenesses, and official trophy silhouettes.
 
-The selected direction is Variation B, the motion-ball mark. It is copied to `src/assets/winworldcup2026-logo.svg` and now appears in the top navigation as the active website logo.
+The selected direction later changed from Variation B to a user-provided attached SVG. That file is preserved as `designs/logos/worldcup-logo-attached.svg`, copied to `src/assets/winworldcup2026-logo.svg`, and now appears in the top navigation as the active website logo.
+
+The active logo still needs final legal/IP review before launch, especially because contest and tournament-adjacent branding can create avoidable trademark risk.
 
 ## Print-On-Demand And Sponsor Package Research
 
@@ -255,10 +278,14 @@ Browser checks have covered:
 - review prompt actions
 - workflow rail copy
 - console error checks
+- teams/schedule section with 12 group cards and 72 fixture rows
+- supporter schedule switching from Brazil to Japan
+- sticky-header anchor offset and compact fixture-card wrapping
+- attached logo rendering in the header after resizing the topbar logo slot
 
 Current visual artifact:
 
-`artifacts/worldcup-draw-mechanism.png`
+`artifacts/worldcup-attached-logo.png`
 
 ## Commit Timeline
 
@@ -282,13 +309,21 @@ Added receipt-based draw application, participant outcomes, deterministic seeded
 
 Committed the generated shirt concept and design image library under `designs/`, and documented that these files are visual direction assets rather than production POD artwork.
 
-### Current commit - Add logo variations
+### `d9a1b1e` - Add logo variations
 
 Added three SVG logo variations and a generated concept board for `winworldcup2026.com`, with documentation clarifying that the assets are independent brand explorations.
 
-### Current commit - Select motion-ball logo
+### `174695a` - Select motion-ball logo
 
 Selected Variation B as the active website logo, copied it into `src/assets/`, and replaced the original temporary trophy icon in the header brand.
+
+### `3613fde` - Add tournament schedule snapshot
+
+Added a typed tournament schedule snapshot, a JSON-render schedule section, all teams grouped from A through L, 72 group-stage fixture rows, and selected-team schedule highlights tied to supporter mode.
+
+### Current commit - Use attached logo
+
+Replaced the active website logo with the user-provided attached SVG, preserved the source under `designs/logos/`, and verified the SVG and app build.
 
 ## Next Build Steps
 

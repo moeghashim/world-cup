@@ -44,6 +44,13 @@ The data layer lives in `src/data/worldCup.ts` and includes:
 - localized T-shirt concepts
 - provider recommendations
 
+The tournament schedule snapshot lives in `src/data/worldCupSchedule.ts` and includes:
+
+- all 48 teams grouped from A through L
+- 72 group-stage fixtures with match number, date, ET kickoff time, venue, home team, and away team
+- a helper for the selected supporter team's group-stage schedule
+- dated source metadata and a verification warning for real prize campaigns
+
 Draw application happens when a visitor locks a winner prediction. The prototype creates a receipt hash, evaluates the ticket against the demo result, ranks eligible tickets with a public seed plus reveal seed, selects winners, preserves alternates, and shows audit metadata beside the reveal.
 
 ## Research Decisions
@@ -91,7 +98,7 @@ Current concepts cover Brazil, Argentina, United States, France, England, Spain,
 
 Design assets are now stored under `designs/`. The folder includes concept images for the supported teams, generated shirt design mockups for Argentina, Brazil, France, Japan, Morocco, Spain, and the United States, plus a refined concept board. These are visual direction assets, not final POD print files.
 
-Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The current set includes three SVG variations: orbit/cup, motion ball, and shield/globe. Variation B, the motion-ball logo, is selected and copied into `src/assets/winworldcup2026-logo.svg` as the active website header logo. The generated PNG board is a concept reference; the SVG files are the editable usable assets.
+Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The current set includes three SVG variations: orbit/cup, motion ball, and shield/globe. The user-provided `worldcup-logo-attached.svg` is now selected and copied into `src/assets/winworldcup2026-logo.svg` as the active website header logo. The generated PNG board is a concept reference; the SVG files are the editable usable assets. The active logo still needs final legal/IP review before launch.
 
 ## Completed Work
 
@@ -122,6 +129,8 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Added generated localized shirt concept/design assets under `designs/` for the supporter personalization system.
 - Added three logo variations for `winworldcup2026.com` under `designs/logos/` and documented their usage boundary.
 - Selected Variation B as the active website logo and wired it into the top navigation brand.
+- Added a dated tournament snapshot section with all 48 teams, 12 groups, 72 group-stage fixtures, selected supporter-team schedule highlights, source metadata, and a FIFA verification link.
+- Replaced the active website logo with the user-provided attached SVG and preserved it under `designs/logos/worldcup-logo-attached.svg`.
 
 ## Verification
 
@@ -130,7 +139,7 @@ Latest successful commands:
 ```bash
 npm run lint
 npm run build
-xmllint --noout designs/logos/winworldcup2026-logo-a-orbit-cup.svg designs/logos/winworldcup2026-logo-b-motion-ball.svg designs/logos/winworldcup2026-logo-c-shield-globe.svg
+xmllint --noout designs/logos/winworldcup2026-logo-a-orbit-cup.svg designs/logos/winworldcup2026-logo-b-motion-ball.svg designs/logos/winworldcup2026-logo-c-shield-globe.svg designs/logos/worldcup-logo-attached.svg src/assets/winworldcup2026-logo.svg
 ```
 
 Browser verification covered:
@@ -148,10 +157,14 @@ Browser verification covered:
 - verifying public seed, commitment, and audit hash rendering
 - confirming fulfillment and review actions advance the draw lifecycle copy
 - checking the medium-breakpoint draw card layout after the animation pass
+- verifying the teams/schedule section renders 12 group cards and 72 group-stage fixture rows
+- verifying the supporter schedule updates from Brazil to Japan after switching supporter team
+- checking the schedule screenshot after fixing sticky-header anchor offset and compact fixture wrapping
+- verifying the attached logo renders in the header at 68px inside the 84px topbar
 
 Latest screenshot:
 
-`artifacts/worldcup-draw-mechanism.png`
+`artifacts/worldcup-attached-logo.png`
 
 ## Next Tasks
 
@@ -161,6 +174,7 @@ Latest screenshot:
 - Add admin tooling for sponsor campaigns, product SKUs, and fulfillment batches.
 - Integrate a real POD provider API behind server-side actions.
 - Design production shirt artwork files or outsource design refinements.
+- Replace the prototype schedule snapshot with an official data feed or maintained admin import before launch.
 - Add responsive visual verification for mobile and tablet breakpoints.
 
 <!-- stripe-projects-cli managed:agents-md:start -->

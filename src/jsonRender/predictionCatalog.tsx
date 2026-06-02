@@ -6,11 +6,14 @@ import { defineRegistry, useStateStore } from '@json-render/react'
 import { z } from 'zod'
 import {
   Award,
+  CalendarDays,
   Check,
   CircleDollarSign,
+  Clock,
   Dice5,
   ExternalLink,
   Gift,
+  MapPin,
   PackageCheck,
   Palette,
   RefreshCw,
@@ -30,6 +33,18 @@ import {
   type Match,
   type TeamKey,
 } from '../data/worldCup'
+import {
+  formatFixtureDate,
+  formatTimeET,
+  getTournamentTeamCode,
+  getTournamentTeamSchedule,
+  supporterTeamScheduleNames,
+  TOURNAMENT_SOURCE_SNAPSHOT,
+  worldCupFixtures,
+  worldCupGroups,
+  worldCupTeams,
+  type TournamentFixture,
+} from '../data/worldCupSchedule'
 
 export type WinnerPick = TeamKey | 'draw'
 
@@ -562,7 +577,7 @@ const sectionProps = z.object({
   kicker: z.string(),
   title: z.string(),
   icon: z
-    .enum(['target', 'gift', 'shirt', 'package', 'trophy', 'sparkles'])
+    .enum(['target', 'calendar', 'gift', 'shirt', 'package', 'trophy', 'sparkles'])
     .default('target'),
 })
 
@@ -579,6 +594,10 @@ export const predictionCatalog = defineCatalog(schema, {
     MatchBoard: {
       props: z.object({}),
       description: 'Interactive board of match cards and prediction controls.',
+    },
+    TournamentSchedule: {
+      props: z.object({}),
+      description: 'All tournament teams and group-stage fixture schedule.',
     },
     RewardSummary: {
       props: z.object({}),
@@ -652,6 +671,7 @@ export const predictionSpec = {
       props: {},
       children: [
         'section-matches',
+        'section-schedule',
         'section-draw',
         'section-shirts',
         'section-fulfillment',
@@ -670,6 +690,21 @@ export const predictionSpec = {
     },
     'match-board': {
       type: 'MatchBoard',
+      props: {},
+      children: [],
+    },
+    'section-schedule': {
+      type: 'Section',
+      props: {
+        id: 'teams',
+        kicker: 'Tournament Snapshot',
+        title: 'Teams And Group-Stage Schedule',
+        icon: 'calendar',
+      },
+      children: ['tournament-schedule'],
+    },
+    'tournament-schedule': {
+      type: 'TournamentSchedule',
       props: {},
       children: [],
     },
@@ -742,6 +777,7 @@ export const predictionSpec = {
 }
 
 function sectionIcon(icon: z.infer<typeof sectionProps>['icon']) {
+  if (icon === 'calendar') return <CalendarDays size={19} />
   if (icon === 'gift') return <Gift size={19} />
   if (icon === 'shirt') return <Shirt size={19} />
   if (icon === 'package') return <PackageCheck size={19} />
@@ -855,6 +891,163 @@ function DrawAuditPanel({ result }: { result: DrawResult }) {
   )
 }
 
+function TournamentFixtureRow({
+  fixture,
+  focusTeam,
+}: {
+  fixture: TournamentFixture
+  focusTeam?: string
+}) {
+  const highlightsFocus = fixture.home === focusTeam || fixture.away === focusTeam
+
+  return (
+    <article className={`fixture-item ${highlightsFocus ? 'focus-fixture' : ''}`}>
+      <header>
+        <span>Match {fixture.matchNumber}</span>
+        <strong>Group {fixture.group}</strong>
+      </header>
+
+      <div className="fixture-matchup">
+        <span className={fixture.home === focusTeam ? 'focus-team' : undefined}>
+          <strong>{getTournamentTeamCode(fixture.home)}</strong>
+          {fixture.home}
+        </span>
+        <em>vs</em>
+        <span className={fixture.away === focusTeam ? 'focus-team' : undefined}>
+          <strong>{getTournamentTeamCode(fixture.away)}</strong>
+          {fixture.away}
+        </span>
+      </div>
+
+      <footer>
+        <span>
+          <Clock size={14} />
+          {formatFixtureDate(fixture.date)} · {formatTimeET(fixture.timeET)}
+        </span>
+        <span>
+          <MapPin size={14} />
+          {fixture.venue.city}
+        </span>
+      </footer>
+      {fixture.note ? <p>{fixture.note}</p> : null}
+    </article>
+  )
+}
+
+function TournamentSchedulePanel() {
+  const { state } = useStateStore()
+  const selectedTeamKey = (state as PredictionState).selectedTeamKey
+  const selectedTeam = getTeam(selectedTeamKey)
+  const focusTeamName = supporterTeamScheduleNames[selectedTeamKey]
+  const focusFixtures = focusTeamName
+    ? getTournamentTeamSchedule(focusTeamName)
+    : []
+
+  return (
+    <div className="tournament-schedule">
+      <div className="schedule-summary">
+        <div>
+          <p className="section-kicker">Source Snapshot</p>
+          <h3>{TOURNAMENT_SOURCE_SNAPSHOT.asOf}</h3>
+          <span>{TOURNAMENT_SOURCE_SNAPSHOT.note}</span>
+        </div>
+        <div className="schedule-stat-grid" aria-label="Tournament counts">
+          <span>
+            <strong>{worldCupTeams.length}</strong>
+            teams
+          </span>
+          <span>
+            <strong>{worldCupGroups.length}</strong>
+            groups
+          </span>
+          <span>
+            <strong>{worldCupFixtures.length}</strong>
+            group fixtures
+          </span>
+        </div>
+        <a
+          className="source-link"
+          href={TOURNAMENT_SOURCE_SNAPSHOT.officialScheduleUrl}
+          rel="noreferrer"
+          target="_blank"
+        >
+          <ExternalLink size={16} />
+          <span>Check FIFA Schedule</span>
+        </a>
+      </div>
+
+      <section className="supporter-fixtures" aria-labelledby="supporter-fixtures-title">
+        <div>
+          <p className="section-kicker">{selectedTeam.code} Schedule</p>
+          <h3 id="supporter-fixtures-title">{selectedTeam.name} Group Fixtures</h3>
+        </div>
+        <div className="supporter-fixture-list">
+          {focusFixtures.map((fixture) => (
+            <TournamentFixtureRow
+              fixture={fixture}
+              focusTeam={focusTeamName}
+              key={fixture.matchNumber}
+            />
+          ))}
+        </div>
+      </section>
+
+      <div className="schedule-layout">
+        <section className="groups-panel" aria-labelledby="groups-title">
+          <div className="schedule-panel-heading">
+            <div>
+              <p className="section-kicker">All Teams</p>
+              <h3 id="groups-title">Groups A-L</h3>
+            </div>
+            <span>48-team field</span>
+          </div>
+          <div className="group-grid">
+            {worldCupGroups.map((group) => (
+              <article className="group-card" key={group.id}>
+                <header>
+                  <strong>Group {group.id}</strong>
+                  <span>{group.teams.length} teams</span>
+                </header>
+                <div className="group-team-list">
+                  {group.teams.map((team) => (
+                    <span
+                      className={team.name === focusTeamName ? 'selected' : undefined}
+                      key={team.name}
+                    >
+                      <strong>{team.code}</strong>
+                      <em>{team.name}</em>
+                      <small>Pot {team.seedPot}</small>
+                    </span>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="fixtures-panel" aria-labelledby="fixtures-title">
+          <div className="schedule-panel-heading">
+            <div>
+              <p className="section-kicker">Full Schedule</p>
+              <h3 id="fixtures-title">Group Stage Fixtures</h3>
+            </div>
+            <span>{TOURNAMENT_SOURCE_SNAPSHOT.timeZone} kickoff times</span>
+          </div>
+          <div className="fixture-list" role="list">
+            {worldCupFixtures.map((fixture) => (
+              <TournamentFixtureRow
+                fixture={fixture}
+                focusTeam={focusTeamName}
+                key={fixture.matchNumber}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  )
+}
+
 export const { registry, handlers } = defineRegistry(predictionCatalog, {
   components: {
     ExperienceShell: ({ children }) => (
@@ -872,6 +1065,7 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
         {children}
       </section>
     ),
+    TournamentSchedule: () => <TournamentSchedulePanel />,
     MatchBoard: () => {
       const { state } = useStateStore()
       const predictionState = state as PredictionState
@@ -1145,7 +1339,12 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
             <em>{item.risk}</em>
           </article>
         ))}
-        <a className="provider-link" href="https://projects.dev/" target="_blank">
+        <a
+          className="provider-link"
+          href="https://projects.dev/"
+          rel="noreferrer"
+          target="_blank"
+        >
           <ExternalLink size={17} />
           <span>Review Stripe Projects</span>
         </a>

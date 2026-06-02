@@ -1,6 +1,7 @@
 import { type CSSProperties, useMemo, useRef, useState } from 'react'
 import { Renderer, JSONUIProvider, type StateStore } from '@json-render/react'
 import {
+  CalendarDays,
   ChevronRight,
   Dice5,
   Gift,
@@ -159,6 +160,12 @@ function App() {
       meta: `${lockedCount} locked`,
     },
     {
+      href: '#teams',
+      icon: <CalendarDays size={17} />,
+      label: 'Teams',
+      meta: '48-team field',
+    },
+    {
       href: '#draws',
       icon: <Dice5 size={17} />,
       label: 'Draw',
@@ -207,6 +214,7 @@ function App() {
         </a>
         <nav className="nav-links" aria-label="Primary navigation">
           <a href="#predictions">Fixtures</a>
+          <a href="#teams">Teams</a>
           <a href="#rewards">Rewards</a>
           <a href="#operations">Operations</a>
         </nav>
