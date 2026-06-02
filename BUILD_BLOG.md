@@ -202,6 +202,19 @@ The selected direction later changed from Variation B to a user-provided attache
 
 The active logo still needs final legal/IP review before launch, especially because contest and tournament-adjacent branding can create avoidable trademark risk.
 
+## Experiment Page And Public Build Notes
+
+The site now includes a footer-linked `Experiment` section. It imports the project documentation files as raw markdown and renders them as readable panels inside the website:
+
+- `BUILD_BLOG.md`
+- `AGENTS.md`
+- `PRODUCT.md`
+- `DESIGN.md`
+
+This makes the process artifact part of the product experience, not just a repository file. The footer also identifies the site as an experiment from `10claws.com`.
+
+`BUILD_BLOG.md` remains the file that is updated on every commit. It is the running public article for how the project is being built.
+
 ## Print-On-Demand And Sponsor Package Research
 
 The print-on-demand research led to a practical split:
@@ -282,10 +295,11 @@ Browser checks have covered:
 - supporter schedule switching from Brazil to Japan
 - sticky-header anchor offset and compact fixture-card wrapping
 - attached logo rendering in the header after resizing the topbar logo slot
+- footer Experiment link, imported markdown panels, and 10claws.com attribution
 
 Current visual artifact:
 
-`artifacts/worldcup-attached-logo.png`
+`artifacts/worldcup-experiment-page.png`
 
 ## Commit Timeline
 
@@ -321,9 +335,13 @@ Selected Variation B as the active website logo, copied it into `src/assets/`, a
 
 Added a typed tournament schedule snapshot, a JSON-render schedule section, all teams grouped from A through L, 72 group-stage fixture rows, and selected-team schedule highlights tied to supporter mode.
 
-### Current commit - Use attached logo
+### `198b22f` - Use attached logo
 
 Replaced the active website logo with the user-provided attached SVG, preserved the source under `designs/logos/`, and verified the SVG and app build.
+
+### Current commit - Add experiment documentation page
+
+Added a footer-linked Experiment section that renders the project documentation files in the app and labels the site as an experiment from `10claws.com`.
 
 ## Next Build Steps
 

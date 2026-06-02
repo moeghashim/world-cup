@@ -630,6 +630,8 @@
 .secondary-action:focus-visible,
 .source-link:focus-visible,
 .provider-link:focus-visible,
+.experiment-doc summary:focus-visible,
+.site-footer a:focus-visible,
 .nav-links a:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--team-primary), #ffffff 35%);
   outline-offset: 2px;
@@ -1865,6 +1867,177 @@
   text-decoration: none;
 }
 
+.experiment-page {
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.92), rgba(234, 241, 231, 0.86)),
+    var(--surface);
+  border-top: 1px solid var(--line);
+  padding: clamp(34px, 5vw, 64px) clamp(18px, 5vw, 64px);
+  scroll-margin-top: calc(var(--topbar-height) + 14px);
+}
+
+.experiment-heading {
+  align-items: start;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 42px minmax(0, 1fr);
+  margin-bottom: 22px;
+  max-width: 920px;
+}
+
+.experiment-heading h2 {
+  color: var(--ink);
+  font-size: clamp(2rem, 4vw, 3.3rem);
+  line-height: 1.02;
+  margin: 0;
+}
+
+.experiment-heading p:not(.section-kicker) {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 10px 0 0;
+}
+
+.experiment-doc-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.experiment-doc {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 35px rgba(23, 24, 18, 0.08);
+  display: grid;
+  gap: 14px;
+  min-height: 360px;
+  padding: 18px;
+}
+
+.experiment-doc header {
+  display: grid;
+  gap: 8px;
+}
+
+.experiment-doc header span {
+  align-items: center;
+  color: var(--team-primary);
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 950;
+  gap: 7px;
+  text-transform: uppercase;
+}
+
+.experiment-doc h3 {
+  color: var(--ink);
+  font-size: 1.35rem;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.experiment-doc p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.experiment-doc pre {
+  background:
+    linear-gradient(135deg, var(--team-soft), rgba(255, 255, 255, 0.92)),
+    #ffffff;
+  border: 1px solid color-mix(in srgb, var(--team-primary), #ffffff 62%);
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.48;
+  margin: 0;
+  max-height: 220px;
+  overflow: auto;
+  padding: 12px;
+  white-space: pre-wrap;
+}
+
+.experiment-doc details {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.experiment-doc summary {
+  align-items: center;
+  color: var(--team-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 8px;
+  list-style: none;
+}
+
+.experiment-doc summary::-webkit-details-marker {
+  display: none;
+}
+
+.experiment-doc details[open] summary {
+  color: var(--ink);
+}
+
+.experiment-doc details pre {
+  margin-top: 10px;
+  max-height: 430px;
+}
+
+.site-footer {
+  align-items: center;
+  background: var(--ink);
+  color: #ffffff;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  padding: 22px clamp(18px, 5vw, 64px);
+}
+
+.site-footer > div {
+  display: grid;
+  gap: 4px;
+}
+
+.site-footer strong {
+  font-size: 1rem;
+}
+
+.site-footer span,
+.site-footer a {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.site-footer a {
+  align-items: center;
+  display: inline-flex;
+  font-weight: 850;
+  gap: 5px;
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  color: #ffffff;
+}
+
+.site-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.site-footer nav a {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  min-height: 36px;
+  padding: 0 10px;
+}
+
 @keyframes ticketFloat {
   0%,
   100% {
@@ -1965,7 +2138,8 @@
   .shirt-studio,
   .schedule-summary,
   .supporter-fixtures,
-  .schedule-layout {
+  .schedule-layout,
+  .experiment-doc-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2122,5 +2296,22 @@
 
   .shirt-mockup {
     min-height: 310px;
+  }
+
+  .experiment-page {
+    padding: 34px 16px;
+  }
+
+  .experiment-heading {
+    grid-template-columns: 1fr;
+  }
+
+  .site-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .site-footer nav {
+    justify-content: flex-start;
   }
 }
