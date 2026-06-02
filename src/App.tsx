@@ -1471,7 +1471,8 @@ function Topbar({
   lockedCount: number
 }) {
   return (
-    <>
+    <div className="site-chrome">
+      <AIBuildBanner />
       <header className="topbar">
         <a className="brand" href="/">
           <img
@@ -1497,8 +1498,7 @@ function Topbar({
           </span>
         </button>
       </header>
-      <AIBuildBanner />
-    </>
+    </div>
   )
 }
 

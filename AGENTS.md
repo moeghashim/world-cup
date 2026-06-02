@@ -176,6 +176,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Redesigned `/experiment` to remove the old multi-document grid, render `BUILD_BLOG.md` as a polished HTML article, keep `AGENTS.md` as the raw agent-log markdown file, and add a technology flowchart for Codex, GitHub, Vercel, React/TypeScript, JSON-render, Stripe Projects, and planned providers.
 - Added a site-wide AI build disclosure banner that says the project was built entirely by AI and shows estimated usage of `~2.4M` total tokens with an API-equivalent estimated cost of `~$18`.
 - Activated Google Analytics page-view tracking for the user-created GA4 web stream `G-RFPJRPKYQR`, with a `VITE_GA_MEASUREMENT_ID` override for future environment-specific streams.
+- Moved the AI build disclosure into a compact top status bar above the logo and primary navigation, with sticky header offsets updated for the combined status bar and logo header.
 
 ## Verification
 
@@ -221,10 +222,11 @@ Browser verification covered:
 - verifying `/experiment` renders the build blog article, removes the old docs grid, keeps the agent log markdown file, and shows the technology flowchart nodes
 - verifying the AI build disclosure banner renders on the homepage with the estimated token total and cost
 - verifying the Google Analytics gtag script is injected with `G-RFPJRPKYQR`, `/operations` navigation works, and the browser reports no console errors
+- verifying the AI build disclosure renders above the logo as the sticky top status bar on desktop, with compact mobile CSS rules updated for narrow screens
 
 Latest screenshot:
 
-`artifacts/ai-build-banner.png`
+`artifacts/ai-statusbar-banner.png`
 
 ## Next Tasks
 
