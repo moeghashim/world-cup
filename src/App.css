@@ -7,7 +7,7 @@
   --line: rgba(22, 24, 18, 0.13);
   --shadow: 0 22px 60px rgba(25, 28, 18, 0.14);
   --statusbar-height: 42px;
-  --nav-height: 120px;
+  --nav-height: 100px;
   --topbar-height: calc(var(--statusbar-height) + var(--nav-height));
 
   min-height: 100svh;
@@ -65,7 +65,7 @@
 
 .brand-logo {
   display: block;
-  height: 98px;
+  height: 78px;
   max-width: min(240px, 52vw);
   object-fit: contain;
   width: auto;
@@ -3363,7 +3363,7 @@
 
 @media (max-width: 700px) {
   .app-shell {
-    --nav-height: 126px;
+    --nav-height: 106px;
     --statusbar-height: 82px;
   }
 

@@ -352,10 +352,11 @@ Browser checks have covered:
 - AI build disclosure banner with estimated total tokens and API-equivalent cost
 - Google Analytics script injection with `G-RFPJRPKYQR` and GA4 Enhanced Measurement guidance for page routes
 - AI build disclosure moved above the logo as a top status bar
+- header logo reduced from 98px to 78px below the AI status bar
 
 Current visual artifact:
 
-`artifacts/ai-statusbar-banner.png`
+`artifacts/logo-20-smaller-statusbar.png`
 
 ## Commit Timeline
 
@@ -457,9 +458,13 @@ The app now loads `gtag.js` and runs the standard GA4 `config` command once when
 
 The measurement ID is committed as the prototype default, while `VITE_GA_MEASUREMENT_ID` can override it later for staging, production, or a replacement property. The Google Analytics MCP documentation was useful for understanding the tooling boundary, but account/property setup was handled manually in the Google Analytics UI before the measurement ID was wired into the site.
 
-### Current commit - Move AI banner to top status bar
+### `0bb356e` - Move AI banner to top status bar
 
 Moved the "Built entirely by AI" disclosure above the logo and primary navigation so it reads like a site status bar instead of a content banner. The sticky header now treats the AI status bar and logo/nav header as one chrome block, and the mobile layout keeps the disclosure compact by hiding the longer estimate note while preserving the token and cost values.
+
+### Current commit - Reduce oversized header logo
+
+Reduced the active header logo by 20%, from 98px to 78px, after the larger size made the header feel too heavy. The logo/navigation row now uses a 100px height again, while the AI build disclosure remains above it as the separate top status bar.
 
 ## Next Build Steps
 

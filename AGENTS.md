@@ -177,6 +177,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Added a site-wide AI build disclosure banner that says the project was built entirely by AI and shows estimated usage of `~2.4M` total tokens with an API-equivalent estimated cost of `~$18`.
 - Activated Google Analytics page-view tracking for the user-created GA4 web stream `G-RFPJRPKYQR`, with a `VITE_GA_MEASUREMENT_ID` override for future environment-specific streams.
 - Moved the AI build disclosure into a compact top status bar above the logo and primary navigation, with sticky header offsets updated for the combined status bar and logo header.
+- Reduced the active header logo by 20%, from 98px to 78px, and lowered the logo/navigation header row from 120px to 100px.
 
 ## Verification
 
@@ -223,10 +224,11 @@ Browser verification covered:
 - verifying the AI build disclosure banner renders on the homepage with the estimated token total and cost
 - verifying the Google Analytics gtag script is injected with `G-RFPJRPKYQR`, `/operations` navigation works, and the browser reports no console errors
 - verifying the AI build disclosure renders above the logo as the sticky top status bar on desktop, with compact mobile CSS rules updated for narrow screens
+- verifying the smaller 78px logo renders below the AI status bar with the updated 100px navigation row
 
 Latest screenshot:
 
-`artifacts/ai-statusbar-banner.png`
+`artifacts/logo-20-smaller-statusbar.png`
 
 ## Next Tasks
 
