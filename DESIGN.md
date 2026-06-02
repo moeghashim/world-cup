@@ -22,10 +22,33 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Sponsor visuals must remain distinct from team visuals.
 - Never communicate state through color alone.
 
+## Draw Presentation
+
+- The draw should feel like matchday operations, not gambling.
+- Use receipt movement, stadium light sweeps, and sequential winner reveals instead of reels, odds wheels, or slot-machine motion.
+- Always show participant state in plain language: apply, eligibility, seed, reveal, claim.
+- Show audit metadata compactly so transparency does not overwhelm the primary winner reveal.
+- Respect reduced-motion preferences.
+
+## Shirt Design Assets
+
+- Keep generated shirt design files in `designs/` until a POD integration defines final artwork specs.
+- Treat current shirt files as visual direction and personalization assets, not approved manufacturing files.
+- Avoid official tournament, federation, player, sponsor, crest, trophy, and mascot marks in committed artwork.
+- Preserve separate country folders so future design revisions can be localized without changing app data structure.
+
+## Logo Exploration
+
+- Store logo explorations in `designs/logos/`.
+- Keep generated raster boards as concept references only.
+- Prefer SVG source files for usable logo variations so text remains exact and editable.
+- Current directions: orbit/cup, motion ball, and shield/globe for `winworldcup2026.com`.
+- Selected direction: Variation B, the motion-ball logo, is the active website header logo.
+
 ## Component Quality Checklist
 
 - Match cards expose stage, teams, score inputs, winner pick, lock action, and sponsor drops.
-- Draw cards expose match, winner slots, final result, eligible count, and winners.
+- Draw cards expose match, winner slots, participant receipt state, final result, eligible count, winners, alternates, and audit seed data.
 - Fulfillment panels expose queue count, review count, and match-level actions.
 - Shirt studio exposes concept name, print copy, motif, and no-official-branding disclaimer.
 - Provider cards distinguish role, reason, and operational risk.

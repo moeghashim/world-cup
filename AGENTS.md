@@ -27,7 +27,9 @@ The app uses React for the authoritative domain state:
 - selected supporter team
 - match predictions
 - locked picks
+- participant draw receipts
 - match draw results
+- draw audit metadata
 - fulfillment queue
 - review prompt status
 
@@ -41,6 +43,8 @@ The data layer lives in `src/data/worldCup.ts` and includes:
 - community entries for seeded draw simulation
 - localized T-shirt concepts
 - provider recommendations
+
+Draw application happens when a visitor locks a winner prediction. The prototype creates a receipt hash, evaluates the ticket against the demo result, ranks eligible tickets with a public seed plus reveal seed, selects winners, preserves alternates, and shows audit metadata beside the reveal.
 
 ## Research Decisions
 
@@ -85,6 +89,10 @@ Localized supporter shirt concepts are independent fan designs, not official jer
 
 Current concepts cover Brazil, Argentina, United States, France, England, Spain, Morocco, and Japan.
 
+Design assets are now stored under `designs/`. The folder includes concept images for the supported teams, generated shirt design mockups for Argentina, Brazil, France, Japan, Morocco, Spain, and the United States, plus a refined concept board. These are visual direction assets, not final POD print files.
+
+Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The current set includes three SVG variations: orbit/cup, motion ball, and shield/globe. Variation B, the motion-ball logo, is selected and copied into `src/assets/winworldcup2026-logo.svg` as the active website header logo. The generated PNG board is a concept reference; the SVG files are the editable usable assets.
+
 ## Completed Work
 
 ### 2026-06-01
@@ -104,6 +112,17 @@ Current concepts cover Brazil, Argentina, United States, France, England, Spain,
 - Applied Impeccable-inspired product-design structure: added `PRODUCT.md`, `DESIGN.md`, a desktop workflow rail, cleaner product-state empty copy, and corrected section anchors.
 - Added `BUILD_BLOG.md` as the narrative build article artifact and commit-by-commit project history.
 
+### 2026-06-02
+
+- Added participant-aware draw application receipts for locked predictions.
+- Added deterministic winner and alternate ranking with public seed, commitment, reveal seed, and audit hash metadata.
+- Added draw status rail, animated receipt pool, participant outcome panel, winner reveal animation, alternates, and audit panel.
+- Connected fulfillment and review actions to update draw lifecycle status.
+- Updated `PRODUCT.md`, `DESIGN.md`, and `BUILD_BLOG.md` with the draw mechanism and presentation decisions.
+- Added generated localized shirt concept/design assets under `designs/` for the supporter personalization system.
+- Added three logo variations for `winworldcup2026.com` under `designs/logos/` and documented their usage boundary.
+- Selected Variation B as the active website logo and wired it into the top navigation brand.
+
 ## Verification
 
 Latest successful commands:
@@ -111,6 +130,7 @@ Latest successful commands:
 ```bash
 npm run lint
 npm run build
+xmllint --noout designs/logos/winworldcup2026-logo-a-orbit-cup.svg designs/logos/winworldcup2026-logo-b-motion-ball.svg designs/logos/winworldcup2026-logo-c-shield-globe.svg
 ```
 
 Browser verification covered:
@@ -123,10 +143,15 @@ Browser verification covered:
 - queueing fulfillment and sending review prompts
 - checking browser console errors
 - checking the Impeccable-inspired workflow rail and refined empty draw states
+- locking a Brazil prediction as a draw application receipt
+- running the Brazil vs Spain draw with the current visitor in the winner group
+- verifying public seed, commitment, and audit hash rendering
+- confirming fulfillment and review actions advance the draw lifecycle copy
+- checking the medium-breakpoint draw card layout after the animation pass
 
 Latest screenshot:
 
-`artifacts/worldcup-layout-enhanced.png`
+`artifacts/worldcup-draw-mechanism.png`
 
 ## Next Tasks
 
