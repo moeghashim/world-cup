@@ -359,6 +359,8 @@ Added a dedicated prize section to the homepage and per-team prize detail pages 
 
 Verification for this pass included `npm run lint`, `npm run build`, desktop browser checks for `#prizes` and `#prizes/japan`, and a mobile-width check confirming the prize grids/detail page have no horizontal overflow.
 
+Added sponsor package pricing for Global Cup Partner, Matchday Featured Sponsor, and Fan Drop Sponsor campaigns, including winner review-video deliverables, product gift flow, add-ons, and compliance reminders.
+
 ## Next Build Steps
 
 The prototype needs several production layers before it can become a real campaign:

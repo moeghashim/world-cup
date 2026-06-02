@@ -2,6 +2,7 @@ import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { Renderer, JSONUIProvider, type StateStore } from '@json-render/react'
 import {
   ArrowLeft,
+  BadgeDollarSign,
   BookOpen,
   CalendarDays,
   CheckCircle2,
@@ -11,12 +12,15 @@ import {
   FileText,
   FlaskConical,
   Gift,
+  Handshake,
+  Megaphone,
   Minus,
   PackageCheck,
   Palette,
   Plus,
   ShieldCheck,
   Shirt,
+  Sparkles,
   Target,
   Ticket,
   UsersRound,
@@ -274,6 +278,75 @@ const prizeDetails: Record<
     ],
   },
 }
+
+const sponsorshipTiers = [
+  {
+    name: 'Global Cup Partner',
+    price: '$50,000',
+    spots: '2 spots',
+    signal: 'Tournament-wide sponsor presence',
+    icon: Sparkles,
+    featured: true,
+    summary:
+      'The flagship package for brands that want to sit across the whole World Cup prediction experience, not only one match window.',
+    includes: [
+      'Prominent sponsor placement on the website, prediction workspace, prize flow, and winner follow-up moments.',
+      'Ten high-quality winner product review videos, captured after product delivery with a guided review prompt.',
+      'Sponsor product gifts shipped to selected winners alongside the localized supporter shirt workflow.',
+      'Featured sponsor story block with brand-safe product education, offer links, and campaign recap reporting.',
+      'Priority category lockout review so direct competitors are not placed in the same top-tier sponsor position.',
+    ],
+    creative:
+      'Best for national launches, hero product drops, travel, electronics, sportswear, food delivery, streaming, telecom, fintech, and fan-experience brands.',
+  },
+  {
+    name: 'Matchday Featured Sponsor',
+    price: '$10,000',
+    spots: '10 spots',
+    signal: 'Featured match or regional campaign',
+    icon: Megaphone,
+    featured: false,
+    summary:
+      'A high-visibility match package for sponsors that want a focused campaign around key fixtures, markets, or supporter communities.',
+    includes: [
+      'Featured placement on selected match cards, prediction receipts, and qualifying draw screens.',
+      'Sponsor product gift or voucher included in the winner fulfillment queue for the assigned campaign.',
+      'Three guided winner review prompts with photo/video-friendly questions and sponsor-approved talking points.',
+      'Regional or team-theme targeting, such as host-city fans, language markets, or selected supporter teams.',
+      'Post-campaign summary covering entries, qualified draws, winners, shipment status, and review completion.',
+    ],
+    creative:
+      'Best for match launches, retail promotions, watch-party offers, product sampling, city activations, and market-specific brand moments.',
+  },
+  {
+    name: 'Fan Drop Sponsor',
+    price: '$5,000',
+    spots: '30 spots',
+    signal: 'Accessible product sampling package',
+    icon: Gift,
+    featured: false,
+    summary:
+      'A lighter package for brands that want to test demand, seed products, and reach fans without owning a full match campaign.',
+    includes: [
+      'Sponsor mention inside eligible draw pools, reward emails, and winner claim moments.',
+      'Product gift, discount code, or digital perk attached to selected winner packages.',
+      'One guided review prompt after delivery with optional product rating and quote capture.',
+      'Basic sponsor recap with claimed entries, winner fulfillment state, and review response status.',
+      'Upgrade path into Matchday Featured Sponsor if the campaign performs well.',
+    ],
+    creative:
+      'Best for startups, local merchants, creator products, snacks, apps, merch, wellness, accessories, and digital offers.',
+  },
+] as const
+
+const sponsorshipAddOns = [
+  'Custom landing page for a sponsor product drop',
+  'Extra winner review videos or short-form clips',
+  'Localized email and SMS follow-up sequence',
+  'Host-city or supporter-team targeting package',
+  'Creator-style recap reel from winner submissions',
+  'Sponsor dashboard export with campaign metrics',
+]
 
 function getPrizeTeamFromHash(hash: string): TeamKey | null {
   const slug = hash.match(/^#prizes\/([a-z]+)$/)?.[1]
@@ -628,6 +701,7 @@ function App() {
           <a href="#predictions">Fixtures</a>
           <a href="#teams">Teams</a>
           <a href="#prizes">Prizes</a>
+          <a href="#sponsors">Sponsors</a>
           <a href="#rewards">Rewards</a>
           <a href="#operations">Operations</a>
         </nav>
@@ -656,6 +730,10 @@ function App() {
             <a className="secondary-action" href="#prizes">
               <Gift size={18} />
               <span>Free Shirt Prize</span>
+            </a>
+            <a className="secondary-action" href="#sponsors">
+              <Handshake size={18} />
+              <span>Sponsor Packages</span>
             </a>
           </div>
         </div>
@@ -821,6 +899,95 @@ function App() {
               </article>
             )
           })}
+        </div>
+      </section>
+
+      <section
+        className="sponsor-band"
+        id="sponsors"
+        aria-labelledby="sponsor-title"
+      >
+        <div className="sponsor-heading">
+          <div className="section-heading compact">
+            <span className="icon-box">
+              <Handshake size={18} />
+            </span>
+            <div>
+              <p className="section-kicker">Sponsor Packages</p>
+              <h2 id="sponsor-title">Fund The Rewards Fans Remember</h2>
+            </div>
+          </div>
+          <p>
+            Sponsors fund match campaigns, winner product gifts, localized shirt
+            drops, and post-delivery review prompts. Packages are designed for
+            product sampling, media proof, and measurable fan engagement.
+          </p>
+        </div>
+
+        <div className="sponsor-tier-grid" aria-label="Sponsorship tiers">
+          {sponsorshipTiers.map((tier) => {
+            const TierIcon = tier.icon
+
+            return (
+              <article
+                className={`sponsor-tier ${tier.featured ? 'is-featured' : ''}`}
+                key={tier.name}
+              >
+                <header className="sponsor-tier-header">
+                  <span className="sponsor-tier-icon">
+                    <TierIcon size={19} />
+                  </span>
+                  <div>
+                    <p>{tier.signal}</p>
+                    <h3>{tier.name}</h3>
+                  </div>
+                </header>
+                <div className="sponsor-price-row">
+                  <strong>{tier.price}</strong>
+                  <span>{tier.spots}</span>
+                </div>
+                <p className="sponsor-summary">{tier.summary}</p>
+                <ul className="sponsor-feature-list">
+                  {tier.includes.map((item) => (
+                    <li key={item}>
+                      <CheckCircle2 size={16} />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="sponsor-creative">{tier.creative}</p>
+              </article>
+            )
+          })}
+        </div>
+
+        <div className="sponsor-addons">
+          <div>
+            <p className="section-kicker">Creative Add-ons</p>
+            <h3>More Ways To Build The Campaign</h3>
+            <p>
+              Add-ons keep the core sponsorship packages simple while giving
+              larger brands, agencies, and regional partners more room to shape
+              the activation.
+            </p>
+          </div>
+          <ul>
+            {sponsorshipAddOns.map((addOn) => (
+              <li key={addOn}>
+                <BadgeDollarSign size={17} />
+                <span>{addOn}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="sponsor-compliance-note">
+          <ShieldCheck size={18} />
+          <p>
+            Sponsor campaigns must stay separate from official tournament,
+            federation, player, crest, and mascot marks. Prize, review, and
+            fulfillment language should be reviewed before any live campaign.
+          </p>
         </div>
       </section>
 
@@ -1121,6 +1288,7 @@ function SiteFooter() {
         <a href="#predictions">Fixtures</a>
         <a href="#teams">Teams</a>
         <a href="#prizes">Prizes</a>
+        <a href="#sponsors">Sponsors</a>
         <a href="#operations">Operations</a>
       </nav>
     </footer>

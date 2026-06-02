@@ -290,6 +290,7 @@
 .team-strip,
 .prize-home,
 .prize-detail-page,
+.sponsor-band,
 .content-band,
 .insight-band,
 .leaderboard-band {
@@ -306,7 +307,8 @@
 }
 
 .prize-home,
-.prize-detail-page {
+.prize-detail-page,
+.sponsor-band {
   border-bottom: 1px solid var(--line);
   scroll-margin-top: calc(var(--topbar-height) + 14px);
 }
@@ -525,6 +527,244 @@
   font-size: 0.88rem;
   font-weight: 900;
   margin-top: 6px;
+}
+
+.sponsor-band {
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.98), rgba(236, 244, 238, 0.92)),
+    var(--surface);
+  display: grid;
+  gap: 22px;
+}
+
+.sponsor-heading {
+  align-items: end;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(280px, 0.72fr) minmax(0, 0.58fr);
+}
+
+.sponsor-heading > p {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.sponsor-tier-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1.15fr repeat(2, minmax(0, 0.92fr));
+}
+
+.sponsor-tier {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 34px rgba(23, 24, 18, 0.08);
+  display: grid;
+  gap: 14px;
+  min-height: 520px;
+  padding: clamp(16px, 2vw, 22px);
+}
+
+.sponsor-tier.is-featured {
+  background:
+    linear-gradient(135deg, rgba(22, 24, 18, 0.98), rgba(34, 46, 31, 0.95)),
+    var(--ink);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.sponsor-tier-header {
+  align-items: start;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 42px minmax(0, 1fr);
+}
+
+.sponsor-tier-icon {
+  align-items: center;
+  background: var(--team-primary);
+  color: var(--team-secondary);
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+
+.sponsor-tier-header p,
+.sponsor-tier-header h3,
+.sponsor-summary,
+.sponsor-creative,
+.sponsor-addons h3,
+.sponsor-addons p,
+.sponsor-compliance-note p {
+  margin: 0;
+}
+
+.sponsor-tier-header p {
+  color: var(--team-primary);
+  font-size: 0.76rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.sponsor-tier.is-featured .sponsor-tier-header p {
+  color: var(--team-secondary);
+}
+
+.sponsor-tier-header h3 {
+  color: inherit;
+  font-size: clamp(1.55rem, 2.6vw, 2.3rem);
+  line-height: 1;
+}
+
+.sponsor-price-row {
+  align-items: end;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding-bottom: 14px;
+}
+
+.sponsor-tier.is-featured .sponsor-price-row {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.sponsor-price-row strong {
+  font-size: clamp(2.1rem, 4vw, 3.6rem);
+  line-height: 0.9;
+}
+
+.sponsor-price-row span {
+  background: var(--team-soft);
+  border: 1px solid color-mix(in srgb, var(--team-primary), #ffffff 60%);
+  color: var(--team-primary);
+  font-size: 0.8rem;
+  font-weight: 950;
+  padding: 6px 9px;
+  white-space: nowrap;
+}
+
+.sponsor-tier.is-featured .sponsor-price-row span {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+}
+
+.sponsor-summary,
+.sponsor-creative {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.sponsor-tier.is-featured .sponsor-summary,
+.sponsor-tier.is-featured .sponsor-creative {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.sponsor-feature-list,
+.sponsor-addons ul {
+  display: grid;
+  gap: 9px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sponsor-feature-list li {
+  align-items: start;
+  background: var(--team-soft);
+  border: 1px solid color-mix(in srgb, var(--team-primary), #ffffff 65%);
+  display: grid;
+  gap: 9px;
+  grid-template-columns: 20px minmax(0, 1fr);
+  line-height: 1.43;
+  min-height: 42px;
+  padding: 9px 10px;
+}
+
+.sponsor-feature-list svg {
+  color: var(--team-primary);
+  margin-top: 2px;
+}
+
+.sponsor-tier.is-featured .sponsor-feature-list li {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.sponsor-tier.is-featured .sponsor-feature-list svg {
+  color: var(--team-secondary);
+}
+
+.sponsor-creative {
+  border-top: 1px solid var(--line);
+  font-size: 0.93rem;
+  padding-top: 12px;
+}
+
+.sponsor-tier.is-featured .sponsor-creative {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.sponsor-addons {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(260px, 0.48fr) minmax(0, 1fr);
+  padding: clamp(16px, 3vw, 24px);
+}
+
+.sponsor-addons h3 {
+  color: var(--ink);
+  font-size: clamp(1.55rem, 2.7vw, 2.35rem);
+  line-height: 1;
+}
+
+.sponsor-addons p {
+  color: var(--muted);
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+.sponsor-addons ul {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sponsor-addons li {
+  align-items: center;
+  background: var(--team-soft);
+  border: 1px solid color-mix(in srgb, var(--team-primary), #ffffff 65%);
+  display: grid;
+  gap: 9px;
+  grid-template-columns: 22px minmax(0, 1fr);
+  min-height: 44px;
+  padding: 9px 10px;
+}
+
+.sponsor-addons svg {
+  color: var(--team-primary);
+}
+
+.sponsor-compliance-note {
+  align-items: start;
+  background: rgba(22, 24, 18, 0.92);
+  border-radius: 8px;
+  color: #ffffff;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 24px minmax(0, 1fr);
+  line-height: 1.5;
+  padding: 14px 16px;
+}
+
+.sponsor-compliance-note svg {
+  color: var(--team-secondary);
+  margin-top: 2px;
 }
 
 .prize-detail-page {
@@ -2768,14 +3008,17 @@
   .reward-grid,
   .prize-team-grid,
   .prize-detail-grid,
+  .sponsor-tier-grid,
   .provider-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .spotlight,
   .prize-home-heading,
+  .sponsor-heading,
   .featured-prize,
   .prize-detail-hero,
+  .sponsor-addons,
   .pipeline-layout,
   .shirt-studio,
   .schedule-summary,
@@ -2821,6 +3064,7 @@
   .team-strip,
   .prize-home,
   .prize-detail-page,
+  .sponsor-band,
   .content-band,
   .insight-band,
   .leaderboard-band,
@@ -2847,6 +3091,8 @@
   .reward-grid,
   .prize-team-grid,
   .prize-detail-grid,
+  .sponsor-tier-grid,
+  .sponsor-addons ul,
   .provider-grid,
   .supporter-fixture-list,
   .group-grid,
