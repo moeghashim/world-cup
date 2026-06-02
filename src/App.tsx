@@ -40,6 +40,7 @@ import agentsMd from '../AGENTS.md?raw'
 import buildBlogMd from '../BUILD_BLOG.md?raw'
 import designMd from '../DESIGN.md?raw'
 import productMd from '../PRODUCT.md?raw'
+import websiteFlowMd from '../WEBSITE_FLOW.md?raw'
 import {
   getTeam,
   shirtConcepts,
@@ -131,6 +132,12 @@ const experimentDocs = [
     filename: 'PRODUCT.md',
     purpose: 'Product flow, audience, principles, and MVP boundaries.',
     body: productMd,
+  },
+  {
+    title: 'Website Flow',
+    filename: 'WEBSITE_FLOW.md',
+    purpose: 'Diagrams for the visitor journey, app architecture, draw flow, and tools used.',
+    body: websiteFlowMd,
   },
   {
     title: 'Design Context',
