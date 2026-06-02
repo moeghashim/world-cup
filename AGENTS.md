@@ -140,6 +140,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Added visible build attribution for Codex Desktop App and `https://projects.dev/` in the Experiment section, footer, and project documentation.
 - Moved technical build attribution and documentation off the default homepage into the footer-linked Experiment view so the homepage stays focused on matches, prizes, and winners.
 - Added a homepage prize section and hash-addressable team prize detail pages using the generated localized shirt mockups.
+- Added sponsor package pricing and activation details for reward-funded campaigns.
 
 ## Verification
 
@@ -174,6 +175,7 @@ Browser verification covered:
 - verifying the default homepage no longer renders Codex Desktop App, `projects.dev`, or build-documentation copy
 - verifying the homepage prize section renders eight team prize cards with the selected supporter shirt feature
 - verifying `#prizes/japan` renders the team prize detail page and mobile layout without horizontal overflow
+- verifying sponsor package additions with lint and production build
 
 Latest screenshot:
 

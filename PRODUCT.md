@@ -30,6 +30,13 @@ World Cup Predictor is a match prediction and sponsor reward experience for `win
 - Sponsor campaigns need clear separation from team theming.
 - Prize, eligibility, and fulfillment language must be explicit before a real launch.
 
+## Sponsorship Packages
+
+- Global Cup Partner: 2 spots at $50,000 each. Sponsors the whole World Cup experience with prominent website placement, winner product gifting, 10 high-quality winner product review videos, sponsor story content, campaign recap reporting, and category lockout review.
+- Matchday Featured Sponsor: 10 spots at $10,000 each. Sponsors selected matches, regions, or supporter communities with featured match-card placement, product gift or voucher fulfillment, guided review prompts, targeting options, and campaign reporting.
+- Fan Drop Sponsor: 30 spots at $5,000 each. Sponsors lighter product sampling through draw-pool mentions, winner claim moments, product gifts or digital perks, one guided review prompt, and basic fulfillment/review reporting.
+- Creative add-ons can include custom sponsor landing pages, extra review videos, localized email/SMS sequences, host-city targeting, creator-style recap reels, and sponsor dashboard exports.
+
 ## MVP Boundaries
 
 - Demo draws are seeded in local data.
