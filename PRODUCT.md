@@ -48,5 +48,5 @@ World Cup Predictor is a match prediction and sponsor reward experience for `win
 - Public navigation uses page-style routes such as `/fixtures`, `/prizes/japan`, `/sponsors`, `/operations`, and `/experiment`, with legacy hash URLs normalized for backward compatibility.
 - Google Analytics is live only for page-view tracking through the GA4 stream `G-RFPJRPKYQR`. Deeper prediction, draw, fulfillment, and review funnel events are not implemented yet.
 - `/posthog` is now the dashboard contract for product analytics, but PostHog SDK capture and real dashboard tiles are not enabled yet.
-- Provider recommendations are architectural notes, not live integrations except for the current Google Analytics page-view setup and Projects.dev-linked PostHog resource.
+- Provider recommendations are architectural notes, not live integrations except for the current Google Analytics page-view setup and the Projects.dev-linked `worldcup2026-analytics` PostHog resource.
 - No real prize fulfillment, payment, user identity, fraud checks, or legal rules are implemented yet.

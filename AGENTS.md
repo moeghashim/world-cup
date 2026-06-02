@@ -120,9 +120,9 @@ Implementation position: use GA4 only for page-view tracking in the prototype. K
 
 References: https://posthog.com/docs/product-analytics/dashboards and https://posthog.com/docs/libraries/js
 
-The Projects.dev state includes a completed PostHog account link and `analytics` resource. The in-app `/posthog` page is now the dashboard contract for the real PostHog implementation: acquisition, prediction conversion, draw reveal, prize claim, sponsor review, and fulfillment metrics.
+The Projects.dev state includes a completed PostHog account link, the earlier `analytics` resource, and the new `worldcup2026-analytics` analytics project resource created specifically for `winworldcup2026.com`. The in-app `/posthog` page is now the dashboard contract for the real PostHog implementation: acquisition, prediction conversion, draw reveal, prize claim, sponsor review, and fulfillment metrics.
 
-Implementation position: keep personal API keys server-side only. Expose only frontend-safe PostHog project token and host values through Vite env variables when SDK capture is enabled. The current page does not send PostHog events yet.
+Implementation position: keep personal API keys server-side only. When SDK capture is enabled, map the frontend-safe values from `WORLDCUP2026_ANALYTICS_API_KEY` and `WORLDCUP2026_ANALYTICS_HOST` into browser-exposed Vite env variables. Keep `WORLDCUP2026_ANALYTICS_PERSONAL_API_KEY` server-side only. The current page does not send PostHog events yet.
 
 ## T-Shirt Design System
 
@@ -191,6 +191,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Added a `/posthog` dashboard page with metric cards, prediction funnel steps, event taxonomy, setup checklist, PostHog link, header/footer navigation, and legacy `#posthog` redirect support.
 - Added a working rule to refresh the AI build disclosure token total and estimated cost on every commit, and updated the current estimate to `~2.9M` total tokens and `~$22`.
 - Made the `/posthog` route easier to find by labeling the header and footer links as "PostHog Dashboard" and refreshed the AI build estimate to `~3.0M` total tokens and `~$23`.
+- Provisioned a new Projects.dev PostHog analytics project resource named `worldcup2026-analytics`, updated `/posthog` to show that resource instead of the earlier generic dashboard target, and refreshed the AI build estimate to `~3.1M` total tokens and `~$24`.
 
 ## Verification
 
@@ -241,6 +242,8 @@ Browser verification covered:
 - verifying `/posthog` renders four metric cards, six funnel steps, five event groups, five setup items, no horizontal overflow, a working PostHog external link, and legacy `/#posthog` redirect behavior
 - verifying the AI build disclosure renders the refreshed `~2.9M` token total and `~$22` estimated cost with no browser console errors
 - verifying the header and footer both expose "PostHog Dashboard" links to `/posthog`, and the AI build disclosure renders the refreshed `~3.0M` token total and `~$23` estimated cost
+- verifying Projects.dev status shows `worldcup2026-analytics` as a completed PostHog analytics resource in the default environment
+- verifying `/posthog` shows the `worldcup2026-analytics` resource card, the three Projects.dev env var names, the refreshed `~3.1M` token total and `~$24` estimated cost, no old `https://us.posthog.com/dashboard` link, no horizontal overflow, and no browser console errors
 
 Latest screenshot:
 
