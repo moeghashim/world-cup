@@ -20,7 +20,7 @@ This document is the project artifact for how the product is being built. Update
 - `zod` for catalog props/action schemas.
 - `lucide-react` for interface icons.
 - Google Analytics gtag for page-view tracking, with the static homepage snippet using `G-RFPJRPKYQR` and `VITE_GA_MEASUREMENT_ID` reserved for the runtime fallback path.
-- Generated raster stadium hero copied to `src/assets/world-cup-hero.png`.
+- Optimized raster stadium hero loaded from `src/assets/world-cup-hero.jpg`.
 
 ## Architecture Notes
 
@@ -140,6 +140,8 @@ Design assets are now stored under `designs/`. The folder includes concept image
 
 Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The current set includes three SVG variations: orbit/cup, motion ball, and shield/globe. The user-provided `worldcup-logo-attached.svg` is now selected and copied into `src/assets/winworldcup2026-logo.svg` as the active website header logo. The generated PNG board is a concept reference; the SVG files are the editable usable assets. The active logo still needs final legal/IP review before launch.
 
+Runtime website images in `src/assets/` are optimized JPEG exports for page performance. The original full-size PNG design sources remain in `designs/` for future design iteration and POD artwork prep.
+
 ## Completed Work
 
 ### 2026-06-01
@@ -194,6 +196,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Provisioned a new Projects.dev PostHog analytics project resource named `worldcup2026-analytics`, updated `/posthog` to show that resource instead of the earlier generic dashboard target, and refreshed the AI build estimate to `~3.1M` total tokens and `~$24`.
 - Removed the earlier `analytics` PostHog resource from the default Projects.dev environment so the website has a single active PostHog analytics resource, updated `/posthog` copy to say that explicitly, and refreshed the AI build estimate to `~3.2M` total tokens and `~$25`.
 - Moved the GA4 `G-RFPJRPKYQR` tag into the static `index.html` head, kept the runtime analytics initializer as a no-duplicate fallback, and refreshed the AI build estimate to `~3.3M` total tokens and `~$26`.
+- Converted the runtime hero and prize shirt assets from large PNGs to display-sized JPEGs, removed the old runtime PNG copies, and refreshed the AI build estimate to `~3.4M` total tokens and `~$27`.
 
 ## Verification
 
@@ -251,10 +254,12 @@ Browser verification covered:
 - verifying `npm ls posthog-js` is empty and tracked source has no PostHog init/capture calls or hardcoded project tokens
 - verifying `index.html` contains the static GA4 `G-RFPJRPKYQR` snippet and the runtime initializer exits when `window.gtag` already exists
 - verifying the served homepage HTML contains the pasted GA4 snippet and the browser DOM has exactly one `googletagmanager.com/gtag/js?id=G-RFPJRPKYQR` script with no console errors
+- verifying the optimized homepage hero and prize shirt runtime images resolve to `.jpg`, the refreshed `~3.4M` token total and `~$27` estimated cost render in the AI build disclosure, `/prizes/japan` loads the optimized shirt image, there is no horizontal overflow, and there are no browser console errors
 
 Latest screenshot:
 
-`artifacts/posthog-dashboard.png`
+`artifacts/asset-cleanup-homepage.png`
+`artifacts/asset-cleanup-prize-japan.png`
 
 ## Next Tasks
 

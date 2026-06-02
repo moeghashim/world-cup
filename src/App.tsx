@@ -38,16 +38,16 @@ import {
   TrendingUp,
   UsersRound,
 } from 'lucide-react'
-import heroImage from './assets/world-cup-hero.png'
+import heroImage from './assets/world-cup-hero.jpg'
 import brandLogo from './assets/winworldcup2026-logo.svg'
-import argentinaPrizeImage from './assets/prizes/argentina-shirt.png'
-import brazilPrizeImage from './assets/prizes/brazil-shirt.png'
-import englandPrizeImage from './assets/prizes/england-shirt.png'
-import francePrizeImage from './assets/prizes/france-shirt.png'
-import japanPrizeImage from './assets/prizes/japan-shirt.png'
-import moroccoPrizeImage from './assets/prizes/morocco-shirt.png'
-import spainPrizeImage from './assets/prizes/spain-shirt.png'
-import usaPrizeImage from './assets/prizes/usa-shirt.png'
+import argentinaPrizeImage from './assets/prizes/argentina-shirt.jpg'
+import brazilPrizeImage from './assets/prizes/brazil-shirt.jpg'
+import englandPrizeImage from './assets/prizes/england-shirt.jpg'
+import francePrizeImage from './assets/prizes/france-shirt.jpg'
+import japanPrizeImage from './assets/prizes/japan-shirt.jpg'
+import moroccoPrizeImage from './assets/prizes/morocco-shirt.jpg'
+import spainPrizeImage from './assets/prizes/spain-shirt.jpg'
+import usaPrizeImage from './assets/prizes/usa-shirt.jpg'
 import { initializeGoogleAnalytics } from './analytics'
 import './App.css'
 import agentsMd from '../AGENTS.md?raw'
@@ -334,8 +334,8 @@ const sponsorshipAddOns = [
 ]
 
 const aiBuildMetrics = {
-  tokenTotal: '~3.3M',
-  estimatedCost: '~$26',
+  tokenTotal: '~3.4M',
+  estimatedCost: '~$27',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const

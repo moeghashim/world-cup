@@ -26,7 +26,7 @@ The project began in an empty folder, so the first step was to scaffold a Vite, 
 - locked predictions
 - sponsor reward panels
 
-The project also generated a cinematic stadium hero image and saved it at `src/assets/world-cup-hero.png`. The asset gives the site tournament energy without using official FIFA, tournament, sponsor, player, or federation marks.
+The project also generated a cinematic stadium hero image and saved an optimized runtime export at `src/assets/world-cup-hero.jpg`. The asset gives the site tournament energy without using official FIFA, tournament, sponsor, player, or federation marks.
 
 ## Why Team Theming Is Data-Driven
 
@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~3.3M`
-- estimated API-equivalent cost: `~$26`
+- estimated total tokens: `~3.4M`
+- estimated API-equivalent cost: `~$27`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -503,11 +503,21 @@ Removed the earlier `analytics` PostHog resource from the default Projects.dev e
 
 No PostHog SDK or snippet is installed in the website yet, and no events are being sent from the app. This commit updates `/posthog` and the project documentation to make the single-target rule explicit. The current AI build disclosure estimate was refreshed to `~3.2M` total tokens and `~$25`.
 
-### Current commit - Put GA tag in homepage source
+### `c8bdacd` - Put GA tag in homepage source
 
 Moved the GA4 tag for `G-RFPJRPKYQR` into the static `index.html` head so it is visible in the homepage HTML source instead of only being injected after React boots.
 
 The runtime analytics initializer remains in place as a fallback for environments that do not include the static snippet, but it now exits when `window.gtag` already exists. That keeps the homepage source explicit without creating duplicate GA scripts or duplicate initial config calls. The current AI build disclosure estimate was refreshed to `~3.3M` total tokens and `~$26`.
+
+### Current commit - Optimize runtime image assets
+
+Converted the shipped hero and prize-shirt runtime assets from large PNG files to display-sized JPEG files. The original design PNGs stay in `designs/` as source/reference material, while `src/assets/` now carries lighter files for the Vite app.
+
+The cleanup reduces the production image payload substantially without changing the product model, draw behavior, sponsor copy, or design direction. The production build now emits each runtime image between roughly 180 KB and 295 KB, and the runtime image set is about 2.1 MB total instead of the roughly 22 MB full-size design source set.
+
+Verification ran `npm run lint`, `npm run build`, and browser checks for the homepage and `/prizes/japan`. The browser confirmed the `.jpg` hero and prize assets load, the AI build disclosure shows `~3.4M` total tokens and `~$27`, there is no horizontal overflow, and there are no console errors.
+
+The current AI build disclosure estimate was refreshed to `~3.4M` total tokens and `~$27`.
 
 ## Next Build Steps
 
