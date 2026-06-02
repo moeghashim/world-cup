@@ -255,7 +255,7 @@ The point is to explain the build stack and production path, not to repeat the p
 
 ## AI Build Disclosure Banner
 
-The site now includes a notification banner directly under the main navigation. It says the project was built entirely by AI and shows a public usage estimate:
+The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
 - estimated total tokens: `~2.4M`
 - estimated API-equivalent cost: `~$18`
@@ -351,10 +351,12 @@ Browser checks have covered:
 - Experiment page redesign with the Build Blog HTML article, AGENTS.md raw log, and technology flowchart
 - AI build disclosure banner with estimated total tokens and API-equivalent cost
 - Google Analytics script injection with `G-RFPJRPKYQR` and GA4 Enhanced Measurement guidance for page routes
+- AI build disclosure moved above the logo as a top status bar
+- header logo reduced from 98px to 78px below the AI status bar
 
 Current visual artifact:
 
-`artifacts/ai-build-banner.png`
+`artifacts/logo-20-smaller-statusbar.png`
 
 ## Commit Timeline
 
@@ -448,13 +450,21 @@ Removed the old multi-document Experiment grid. The page now renders `BUILD_BLOG
 
 Added a site-wide notification banner that says the project was built entirely by AI and displays estimated usage of `~2.4M` total tokens with an API-equivalent estimated cost of `~$18`.
 
-### Current commit - Activate Google Analytics page views
+### `9b4355a` - Activate Google Analytics page views
 
 Added a small Google Analytics integration around the user-created GA4 web stream `G-RFPJRPKYQR`.
 
 The app now loads `gtag.js` and runs the standard GA4 `config` command once when the React app starts. The website uses client-side page routes such as `/fixtures`, `/prizes/japan`, `/operations`, and `/experiment`, so the GA4 web stream should keep Enhanced Measurement enabled for "Page changes based on browser history events" to count virtual page views from the History API.
 
 The measurement ID is committed as the prototype default, while `VITE_GA_MEASUREMENT_ID` can override it later for staging, production, or a replacement property. The Google Analytics MCP documentation was useful for understanding the tooling boundary, but account/property setup was handled manually in the Google Analytics UI before the measurement ID was wired into the site.
+
+### `0bb356e` - Move AI banner to top status bar
+
+Moved the "Built entirely by AI" disclosure above the logo and primary navigation so it reads like a site status bar instead of a content banner. The sticky header now treats the AI status bar and logo/nav header as one chrome block, and the mobile layout keeps the disclosure compact by hiding the longer estimate note while preserving the token and cost values.
+
+### Current commit - Reduce oversized header logo
+
+Reduced the active header logo by 20%, from 98px to 78px, after the larger size made the header feel too heavy. The logo/navigation row now uses a 100px height again, while the AI build disclosure remains above it as the separate top status bar.
 
 ## Next Build Steps
 

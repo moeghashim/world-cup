@@ -46,6 +46,7 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Prefer SVG source files for usable logo variations so text remains exact and editable.
 - Current directions: orbit/cup, motion ball, and shield/globe for `winworldcup2026.com`.
 - Active direction: the user-provided `worldcup-logo-attached.svg` is copied into `src/assets/winworldcup2026-logo.svg` as the website header logo.
+- Header presentation: keep the active logo at 78px in the main navigation, below the AI status bar.
 - Keep earlier logo variations as exploration history, not the active brand mark.
 
 ## Component Quality Checklist

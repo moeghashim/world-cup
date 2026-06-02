@@ -6,13 +6,21 @@
   --muted: #68685e;
   --line: rgba(22, 24, 18, 0.13);
   --shadow: 0 22px 60px rgba(25, 28, 18, 0.14);
-  --topbar-height: 120px;
+  --statusbar-height: 42px;
+  --nav-height: 100px;
+  --topbar-height: calc(var(--statusbar-height) + var(--nav-height));
 
   min-height: 100svh;
   background:
     linear-gradient(135deg, rgba(244, 241, 232, 0.98), rgba(234, 241, 231, 0.96)),
     var(--page-bg);
   color: var(--ink);
+}
+
+.site-chrome {
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 .topbar {
@@ -22,11 +30,8 @@
   display: grid;
   gap: 18px;
   grid-template-columns: 1fr auto 1fr;
-  min-height: var(--topbar-height);
+  min-height: var(--nav-height);
   padding: 0 clamp(18px, 5vw, 64px);
-  position: sticky;
-  top: 0;
-  z-index: 10;
   backdrop-filter: blur(18px);
 }
 
@@ -60,7 +65,7 @@
 
 .brand-logo {
   display: block;
-  height: 98px;
+  height: 78px;
   max-width: min(240px, 52vw);
   object-fit: contain;
   width: auto;
@@ -93,11 +98,13 @@
   background:
     linear-gradient(90deg, var(--team-primary), color-mix(in srgb, var(--team-primary), var(--ink) 28%)),
     var(--team-primary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--team-secondary);
   display: flex;
   flex-wrap: wrap;
   gap: 10px 18px;
-  padding: 10px clamp(18px, 5vw, 64px);
+  min-height: var(--statusbar-height);
+  padding: 6px clamp(18px, 5vw, 64px);
 }
 
 .ai-build-banner > div,
@@ -3355,6 +3362,11 @@
 }
 
 @media (max-width: 700px) {
+  .app-shell {
+    --nav-height: 106px;
+    --statusbar-height: 82px;
+  }
+
   .topbar {
     gap: 10px;
     min-height: auto;
@@ -3362,23 +3374,23 @@
   }
 
   .ai-build-banner {
-    align-items: stretch;
-    flex-direction: column;
-    padding: 12px 16px;
+    align-items: center;
+    gap: 8px 10px;
+    padding: 8px 16px;
   }
 
   .ai-build-banner dl {
-    align-items: stretch;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
   }
 
   .ai-build-banner dl div {
-    justify-content: space-between;
+    min-height: 28px;
   }
 
+  .ai-build-banner > span,
   .ai-build-banner em {
-    margin-left: 0;
+    display: none;
   }
 
   .brand span:last-child,
