@@ -40,9 +40,10 @@ The public site uses page-style paths instead of hash fragments. Internal links 
 | `/sponsors` | Sponsor package page. |
 | `/rewards` | Fulfillment and review page. |
 | `/operations` | POD, 3PL, and provider plan page. |
+| `/posthog` | Product analytics dashboard contract for PostHog funnels and event taxonomy. |
 | `/experiment` | Build documentation page. |
 
-Legacy URLs such as `/#operations`, `/#experiment`, and `/#prizes/japan` are normalized to `/operations`, `/experiment`, and `/prizes/japan`.
+Legacy URLs such as `/#operations`, `/#posthog`, `/#experiment`, and `/#prizes/japan` are normalized to `/operations`, `/posthog`, `/experiment`, and `/prizes/japan`.
 
 ## App Architecture
 
@@ -52,7 +53,7 @@ React owns the domain state and business behavior. JSON-render controls a constr
 flowchart TB
   subgraph Browser["Website In Browser"]
     App["React App Shell"]
-    Routes["Page Routes: /fixtures, /teams, /prizes, /operations, /experiment"]
+    Routes["Page Routes: /fixtures, /teams, /prizes, /operations, /posthog, /experiment"]
     Theme["Team Theme CSS Variables"]
     Home["Homepage: fixtures, prizes, sponsors, predictions, winners"]
     Experiment["Experiment Page: build docs"]
@@ -127,7 +128,7 @@ sequenceDiagram
 | Build documentation | `AGENTS.md`, `BUILD_BLOG.md`, `PRODUCT.md`, `DESIGN.md`, `WEBSITE_FLOW.md` | Track product decisions, design rules, architecture, tools, and build history. |
 | Build agent | Codex Desktop App | Collaboratively edits code, verifies the app, documents the process, commits, pushes, and opens PRs. |
 | Infrastructure planning | `https://projects.dev/` / Stripe Projects | Tracks planned infrastructure provisioning for database, auth, analytics, hosting, observability, and spend controls. |
-| Analytics | Google Analytics GA4, `gtag.js` | Loads the GA4 tag with measurement ID `G-RFPJRPKYQR`; page-style route views rely on GA4 Enhanced Measurement history tracking, with `VITE_GA_MEASUREMENT_ID` available for environment-specific overrides. |
+| Analytics | Google Analytics GA4, PostHog, `gtag.js` | Loads the GA4 tag with measurement ID `G-RFPJRPKYQR`; `/posthog` defines the product analytics dashboard contract. PostHog SDK capture is still pending tracking and privacy approval. |
 | Source control | Git, GitHub, GitHub CLI | Manage commits, branches, pushes, and pull requests. |
 | Verification | `npm run lint`, `npm run build`, browser checks | Confirm code quality, production build success, and key rendered states. |
 | Deployment routing | `vercel.json` rewrite | Let direct page refreshes such as `/operations` and `/experiment` resolve to the Vite app entry. |
@@ -142,4 +143,5 @@ These are not live production integrations yet:
 - POD provider for localized winner shirts, with Gelato as the first researched option and Printful as a backup/control option.
 - 3PL or kitting partner for sponsor product packages.
 - Admin tooling for sponsor campaigns, product SKUs, winner review videos, and fulfillment batches.
+- PostHog SDK capture, real dashboard tiles, session replay policy, and privacy disclosures.
 - Funnel analytics events for prediction starts, locked receipts, draw entries, winner reveals, claims, deliveries, and review prompts.

@@ -47,6 +47,7 @@ Public navigation now uses page-style paths instead of hash fragments:
 - `/sponsors`
 - `/rewards`
 - `/operations`
+- `/posthog`
 - `/experiment`
 
 Legacy hash URLs such as `/#experiment`, `/#operations`, and `/#prizes/japan` are normalized to their page paths in the browser. `vercel.json` rewrites direct route requests back to the Vite app entry so deployed page refreshes resolve correctly.
@@ -114,6 +115,14 @@ The Google Analytics MCP path is useful for read/reporting workflows, but accoun
 
 Implementation position: use GA4 only for page-view tracking in the prototype. Keep GA4 Enhanced Measurement history tracking enabled for page-style SPA routes. Add explicit product funnel events later for prediction starts, locked receipts, draw entries, winner reveals, fulfillment claims, and review prompts.
 
+### PostHog
+
+References: https://posthog.com/docs/product-analytics/dashboards and https://posthog.com/docs/libraries/js
+
+The Projects.dev state includes a completed PostHog account link and `analytics` resource. The in-app `/posthog` page is now the dashboard contract for the real PostHog implementation: acquisition, prediction conversion, draw reveal, prize claim, sponsor review, and fulfillment metrics.
+
+Implementation position: keep personal API keys server-side only. Expose only frontend-safe PostHog project token and host values through Vite env variables when SDK capture is enabled. The current page does not send PostHog events yet.
+
 ## T-Shirt Design System
 
 Localized supporter shirt concepts are independent fan designs, not official jerseys. Each concept includes:
@@ -178,6 +187,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Activated Google Analytics page-view tracking for the user-created GA4 web stream `G-RFPJRPKYQR`, with a `VITE_GA_MEASUREMENT_ID` override for future environment-specific streams.
 - Moved the AI build disclosure into a compact top status bar above the logo and primary navigation, with sticky header offsets updated for the combined status bar and logo header.
 - Reduced the active header logo by 20%, from 98px to 78px, and lowered the logo/navigation header row from 120px to 100px.
+- Added a `/posthog` dashboard page with metric cards, prediction funnel steps, event taxonomy, setup checklist, PostHog link, header/footer navigation, and legacy `#posthog` redirect support.
 
 ## Verification
 
@@ -225,10 +235,11 @@ Browser verification covered:
 - verifying the Google Analytics gtag script is injected with `G-RFPJRPKYQR`, `/operations` navigation works, and the browser reports no console errors
 - verifying the AI build disclosure renders above the logo as the sticky top status bar on desktop, with compact mobile CSS rules updated for narrow screens
 - verifying the smaller 78px logo renders below the AI status bar with the updated 100px navigation row
+- verifying `/posthog` renders four metric cards, six funnel steps, five event groups, five setup items, no horizontal overflow, a working PostHog external link, and legacy `/#posthog` redirect behavior
 
 Latest screenshot:
 
-`artifacts/logo-20-smaller-statusbar.png`
+`artifacts/posthog-dashboard.png`
 
 ## Next Tasks
 
