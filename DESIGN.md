@@ -22,10 +22,18 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Sponsor visuals must remain distinct from team visuals.
 - Never communicate state through color alone.
 
+## Draw Presentation
+
+- The draw should feel like matchday operations, not gambling.
+- Use receipt movement, stadium light sweeps, and sequential winner reveals instead of reels, odds wheels, or slot-machine motion.
+- Always show participant state in plain language: apply, eligibility, seed, reveal, claim.
+- Show audit metadata compactly so transparency does not overwhelm the primary winner reveal.
+- Respect reduced-motion preferences.
+
 ## Component Quality Checklist
 
 - Match cards expose stage, teams, score inputs, winner pick, lock action, and sponsor drops.
-- Draw cards expose match, winner slots, final result, eligible count, and winners.
+- Draw cards expose match, winner slots, participant receipt state, final result, eligible count, winners, alternates, and audit seed data.
 - Fulfillment panels expose queue count, review count, and match-level actions.
 - Shirt studio exposes concept name, print copy, motif, and no-official-branding disclaimer.
 - Provider cards distinguish role, reason, and operational risk.

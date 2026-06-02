@@ -14,11 +14,12 @@ World Cup Predictor is a match prediction and sponsor reward experience. A user 
 
 1. Choose a supporter team.
 2. Predict match winner and scoreline.
-3. Lock prediction.
+3. Lock prediction to create a draw entry receipt.
 4. Match result closes.
-5. Correct predictions enter a match-level draw.
-6. Winners receive a localized supporter T-shirt and sponsor product package.
-7. Winners are prompted to review sponsor products after delivery.
+5. Correct predictions enter a match-level draw with public audit metadata.
+6. Participants see whether their ticket won, became an alternate, or was not selected.
+7. Winners receive a localized supporter T-shirt and sponsor product package.
+8. Winners are prompted to review sponsor products after delivery.
 
 ## Product Principles
 
@@ -31,6 +32,7 @@ World Cup Predictor is a match prediction and sponsor reward experience. A user 
 ## MVP Boundaries
 
 - Demo draws are seeded in local data.
+- Draw receipts, commitments, seeds, winners, and alternates are prototype records.
 - T-shirt previews are conceptual, not production print files.
 - Provider recommendations are architectural notes, not live integrations.
 - No real prize fulfillment, payment, user identity, fraud checks, or legal rules are implemented yet.

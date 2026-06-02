@@ -40,17 +40,63 @@ export type Prediction = {
   locked: boolean
 }
 
-export type DrawWinner = CommunityEntry & {
+export type DrawStatus =
+  | 'open'
+  | 'locked'
+  | 'result_pending'
+  | 'eligibility_check'
+  | 'draw_ready'
+  | 'drawing'
+  | 'winners_selected'
+  | 'claiming'
+  | 'fulfillment'
+  | 'review_prompted'
+  | 'closed'
+
+export type EntryEligibilityStatus = 'pending' | 'qualified' | 'not_qualified'
+
+export type DrawEntry = CommunityEntry & {
+  receiptHash: string
+  lockedAt: string
+  rulesVersion: string
+  isCurrentUser?: boolean
+  eligibilityStatus: EntryEligibilityStatus
+}
+
+export type DrawWinner = DrawEntry & {
   exactScore: boolean
   prize: string
   fulfillmentStatus: 'Awaiting address' | 'POD queued' | 'Sponsor kit queued'
 }
 
+export type ParticipantOutcome = {
+  tone: 'pending' | 'qualified' | 'winner' | 'alternate' | 'not_selected' | 'not_qualified'
+  title: string
+  detail: string
+}
+
+export type DrawAudit = {
+  publicSeed: string
+  secretCommitment: string
+  revealSeed: string
+  algorithm: string
+  auditHash: string
+  drawnAt: string
+  eligibleEntryIds: string[]
+  alternateEntryIds: string[]
+}
+
 export type DrawResult = {
   matchId: string
+  status: DrawStatus
   resultLabel: string
+  entryCount: number
   eligibleCount: number
   winners: DrawWinner[]
+  alternates: DrawEntry[]
+  participantOutcome: ParticipantOutcome
+  currentUserEntry?: DrawEntry
+  audit: DrawAudit
   reviewPrompted: boolean
 }
 
@@ -80,6 +126,11 @@ export const defaultPrediction: Prediction = {
   awayScore: 1,
   locked: false,
 }
+
+const DEMO_RULES_VERSION = 'rules-v0-demo'
+const DRAW_ALGORITHM =
+  'Rank eligible receipt hashes by public seed plus reveal seed, then select winner slots and preserve alternates.'
+const ALTERNATE_COUNT = 3
 
 export const initialPredictionState: PredictionState = {
   selectedTeamKey: 'brazil',
@@ -112,23 +163,107 @@ function getMatch(matchId: string) {
   return matches.find((match) => match.id === matchId) ?? matches[0]
 }
 
-function deterministicShuffle<T>(items: T[], seed: string) {
-  return [...items]
-    .map((item, index) => {
-      let hash = 0
-      const input = `${seed}:${index}`
+function hashString(input: string) {
+  let hash = 2166136261
 
-      for (let charIndex = 0; charIndex < input.length; charIndex += 1) {
-        hash = (hash * 31 + input.charCodeAt(charIndex)) % 9973
-      }
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
 
-      return { item, weight: hash }
-    })
-    .sort((a, b) => a.weight - b.weight)
-    .map(({ item }) => item)
+  return (hash >>> 0).toString(16).padStart(8, '0').toUpperCase()
 }
 
-function scoreMatchesEntry(entry: CommunityEntry, match: Match) {
+function createReceiptHash(
+  match: Match,
+  prediction: Prediction,
+  supporter: TeamKey,
+) {
+  const hash = hashString(
+    [
+      match.id,
+      supporter,
+      prediction.winner ?? 'none',
+      prediction.homeScore,
+      prediction.awayScore,
+      DEMO_RULES_VERSION,
+    ].join(':'),
+  ).slice(0, 6)
+
+  return `${getTeam(supporter).code}-${hash}`
+}
+
+function createCommunityReceipt(entry: CommunityEntry): DrawEntry {
+  return {
+    ...entry,
+    receiptHash: hashString(
+      [
+        entry.id,
+        entry.matchId,
+        entry.winner,
+        entry.homeScore,
+        entry.awayScore,
+        DEMO_RULES_VERSION,
+      ].join(':'),
+    ),
+    lockedAt: 'Seeded community ticket',
+    rulesVersion: DEMO_RULES_VERSION,
+    eligibilityStatus: 'pending',
+  }
+}
+
+function createCurrentUserEntry(
+  match: Match,
+  prediction: Prediction,
+  supporter: TeamKey,
+): DrawEntry | undefined {
+  if (!prediction.locked || !prediction.winner) {
+    return undefined
+  }
+
+  return {
+    id: `you-${match.id}`,
+    matchId: match.id,
+    name: 'Your ticket',
+    supporter,
+    winner: prediction.winner,
+    homeScore: prediction.homeScore,
+    awayScore: prediction.awayScore,
+    receiptHash: createReceiptHash(match, prediction, supporter),
+    lockedAt: 'Locked before result close',
+    rulesVersion: DEMO_RULES_VERSION,
+    isCurrentUser: true,
+    eligibilityStatus: 'pending',
+  }
+}
+
+function entryQualifies(entry: DrawEntry, match: Match) {
+  return entry.winner === match.demoResult.winner
+}
+
+function resolveEligibility(entry: DrawEntry, match: Match): DrawEntry {
+  return {
+    ...entry,
+    eligibilityStatus: entryQualifies(entry, match) ? 'qualified' : 'not_qualified',
+  }
+}
+
+function getDrawEntries(match: Match, state: PredictionState): DrawEntry[] {
+  const userEntry = createCurrentUserEntry(
+    match,
+    getPrediction(state, match.id),
+    state.selectedTeamKey,
+  )
+  const seededEntries = communityEntries
+    .filter((entry) => entry.matchId === match.id)
+    .map(createCommunityReceipt)
+
+  return [...seededEntries, ...(userEntry ? [userEntry] : [])].map((entry) =>
+    resolveEligibility(entry, match),
+  )
+}
+
+function scoreMatchesEntry(entry: DrawEntry, match: Match) {
   return (
     entry.winner === match.demoResult.winner &&
     entry.homeScore === match.demoResult.homeScore &&
@@ -136,12 +271,103 @@ function scoreMatchesEntry(entry: CommunityEntry, match: Match) {
   )
 }
 
-function createDrawResult(match: Match): DrawResult {
-  const eligible = communityEntries.filter(
-    (entry) =>
-      entry.matchId === match.id && entry.winner === match.demoResult.winner,
+function rankEligibleEntries(entries: DrawEntry[], rankingSeed: string) {
+  return [...entries]
+    .map((entry) => ({
+      entry,
+      weight: hashString(`${rankingSeed}:${entry.receiptHash}:${entry.id}`),
+    }))
+    .sort((a, b) => a.weight.localeCompare(b.weight))
+    .map(({ entry }) => entry)
+}
+
+function createParticipantOutcome(
+  participantEntry: DrawEntry | undefined,
+  winners: DrawWinner[],
+  alternates: DrawEntry[],
+): ParticipantOutcome {
+  if (!participantEntry) {
+    return {
+      tone: 'pending',
+      title: 'Lock a pick to apply',
+      detail:
+        'A locked winner prediction creates a receipt and adds your ticket to the match draw after results close.',
+    }
+  }
+
+  if (participantEntry.eligibilityStatus !== 'qualified') {
+    return {
+      tone: 'not_qualified',
+      title: 'Ticket checked: not eligible',
+      detail: `Your ${getPickLabel(participantEntry.winner)} pick did not match the final result, so this ticket stayed out of the winner pool.`,
+    }
+  }
+
+  if (winners.some((winner) => winner.id === participantEntry.id)) {
+    return {
+      tone: 'winner',
+      title: 'Your ticket is in the winner group',
+      detail:
+        'The claim window opens next so the shirt order and sponsor package can be queued with address details.',
+    }
+  }
+
+  if (alternates.some((alternate) => alternate.id === participantEntry.id)) {
+    return {
+      tone: 'alternate',
+      title: 'Your ticket is an alternate',
+      detail:
+        'You qualified and will move into the winner group if a selected winner misses the claim window.',
+    }
+  }
+
+  return {
+    tone: 'not_selected',
+    title: 'Qualified, not selected',
+    detail:
+      'Your ticket passed eligibility and remains in the audit record, but it was not inside the winner slots for this match.',
+  }
+}
+
+function createDrawAudit(
+  eligible: DrawEntry[],
+  winners: DrawWinner[],
+  alternates: DrawEntry[],
+  publicSeed: string,
+  secretCommitment: string,
+  revealSeed: string,
+): DrawAudit {
+  return {
+    publicSeed,
+    secretCommitment,
+    revealSeed,
+    algorithm: DRAW_ALGORITHM,
+    auditHash: hashString(
+      [
+        publicSeed,
+        secretCommitment,
+        ...eligible.map((entry) => entry.receiptHash),
+        ...winners.map((winner) => winner.receiptHash),
+        ...alternates.map((alternate) => alternate.receiptHash),
+      ].join(':'),
+    ),
+    drawnAt: 'After final result close',
+    eligibleEntryIds: eligible.map((entry) => entry.id),
+    alternateEntryIds: alternates.map((entry) => entry.id),
+  }
+}
+
+function createDrawResult(match: Match, state: PredictionState): DrawResult {
+  const entries = getDrawEntries(match, state)
+  const eligible = entries.filter((entry) => entry.eligibilityStatus === 'qualified')
+  const publicSeed = `${match.id}:${match.demoResult.homeScore}-${match.demoResult.awayScore}:${match.winnerSlots}`
+  const revealSeed = `${DEMO_RULES_VERSION}:${match.id}:sponsor-rewards-demo`
+  const secretCommitment = hashString(revealSeed)
+  const rankedEntries = rankEligibleEntries(
+    eligible,
+    `${publicSeed}:${revealSeed}`,
   )
-  const winners = deterministicShuffle(eligible, match.id)
+  const winners = rankedEntries
     .slice(0, match.winnerSlots)
     .map((entry, index) => ({
       ...entry,
@@ -154,12 +380,35 @@ function createDrawResult(match: Match): DrawResult {
             ? 'POD queued'
             : 'Sponsor kit queued',
     })) satisfies DrawWinner[]
+  const alternates = rankedEntries.slice(
+    match.winnerSlots,
+    match.winnerSlots + ALTERNATE_COUNT,
+  )
+  const currentUserEntry = entries.find((entry) => entry.isCurrentUser)
+  const audit = createDrawAudit(
+    eligible,
+    winners,
+    alternates,
+    publicSeed,
+    secretCommitment,
+    revealSeed,
+  )
 
   return {
     matchId: match.id,
+    status: 'winners_selected',
     resultLabel: `${getTeam(match.home).code} ${match.demoResult.homeScore} - ${match.demoResult.awayScore} ${getTeam(match.away).code}`,
+    entryCount: entries.length,
     eligibleCount: eligible.length,
     winners,
+    alternates,
+    participantOutcome: createParticipantOutcome(
+      currentUserEntry,
+      winners,
+      alternates,
+    ),
+    currentUserEntry,
+    audit,
     reviewPrompted: false,
   }
 }
@@ -180,6 +429,132 @@ function updatePredictionInState(
       },
     },
   }
+}
+
+function updateDrawResultStatus(
+  state: PredictionState,
+  matchId: string,
+  status: DrawStatus,
+  patch: Partial<DrawResult> = {},
+): PredictionState {
+  const result = state.drawResults[matchId]
+
+  if (!result) {
+    return state
+  }
+
+  return {
+    ...state,
+    drawResults: {
+      ...state.drawResults,
+      [matchId]: {
+        ...result,
+        ...patch,
+        participantOutcome: advanceParticipantOutcome(
+          patch.participantOutcome ?? result.participantOutcome,
+          status,
+        ),
+        status,
+      },
+    },
+  }
+}
+
+const drawTimeline = [
+  { label: 'Apply', progress: 1 },
+  { label: 'Check', progress: 2 },
+  { label: 'Seed', progress: 3 },
+  { label: 'Reveal', progress: 4 },
+  { label: 'Claim', progress: 5 },
+] as const
+
+const drawStatusProgress: Record<DrawStatus, number> = {
+  open: 0,
+  locked: 1,
+  result_pending: 1,
+  eligibility_check: 2,
+  draw_ready: 3,
+  drawing: 3,
+  winners_selected: 4,
+  claiming: 5,
+  fulfillment: 5,
+  review_prompted: 5,
+  closed: 5,
+}
+
+function getPendingDrawStatus(prediction: Prediction): DrawStatus {
+  if (prediction.locked) {
+    return 'result_pending'
+  }
+
+  if (prediction.winner) {
+    return 'locked'
+  }
+
+  return 'open'
+}
+
+function getDrawStatusLabel(status: DrawStatus) {
+  if (status === 'open') return 'Open for predictions'
+  if (status === 'locked') return 'Pick selected'
+  if (status === 'result_pending') return 'Ticket waiting for result'
+  if (status === 'eligibility_check') return 'Checking eligibility'
+  if (status === 'draw_ready') return 'Draw seed ready'
+  if (status === 'drawing') return 'Drawing winners'
+  if (status === 'winners_selected') return 'Winners selected'
+  if (status === 'claiming') return 'Claim window'
+  if (status === 'fulfillment') return 'Fulfillment queued'
+  if (status === 'review_prompted') return 'Reviews prompted'
+
+  return 'Closed'
+}
+
+function getPreDrawOutcome(
+  currentUserEntry: DrawEntry | undefined,
+): ParticipantOutcome {
+  if (!currentUserEntry) {
+    return {
+      tone: 'pending',
+      title: 'Lock a pick to apply',
+      detail:
+        'Choose a winner, set the score, and lock the prediction to create your draw receipt.',
+    }
+  }
+
+  return {
+    tone: 'qualified',
+    title: 'Draw application received',
+    detail: `${currentUserEntry.receiptHash} is waiting for the final score and eligibility check.`,
+  }
+}
+
+function advanceParticipantOutcome(
+  outcome: ParticipantOutcome,
+  status: DrawStatus,
+): ParticipantOutcome {
+  if (outcome.tone !== 'winner') {
+    return outcome
+  }
+
+  if (status === 'fulfillment') {
+    return {
+      ...outcome,
+      title: 'Your reward is queued',
+      detail:
+        'The localized shirt order and sponsor package are ready for fulfillment once address details are confirmed.',
+    }
+  }
+
+  if (status === 'review_prompted') {
+    return {
+      ...outcome,
+      title: 'Review prompt ready after delivery',
+      detail:
+        'The reward flow has moved through fulfillment and will ask for sponsor product feedback after delivery.',
+    }
+  }
+
+  return outcome
 }
 
 const sectionProps = z.object({
@@ -376,6 +751,110 @@ function sectionIcon(icon: z.infer<typeof sectionProps>['icon']) {
   return <Award size={19} />
 }
 
+function DrawStatusRail({ status }: { status: DrawStatus }) {
+  const progress = drawStatusProgress[status]
+
+  return (
+    <div className="draw-status-rail" aria-label={getDrawStatusLabel(status)}>
+      {drawTimeline.map((step) => {
+        const state =
+          progress > step.progress
+            ? 'complete'
+            : progress === step.progress
+              ? 'current'
+              : 'pending'
+
+        return (
+          <span className={`draw-status-step ${state}`} key={step.label}>
+            <em>{step.label}</em>
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
+function DrawTheater({
+  currentUserEntry,
+  match,
+  result,
+  status,
+}: {
+  currentUserEntry?: DrawEntry
+  match: Match
+  result?: DrawResult
+  status: DrawStatus
+}) {
+  const outcome = result?.participantOutcome ?? getPreDrawOutcome(currentUserEntry)
+  const ticketCodes = [
+    getTeam(match.home).code,
+    getTeam(match.away).code,
+    getTeam(match.home).code,
+    getTeam(match.away).code,
+    'FAN',
+    'KIT',
+  ]
+
+  return (
+    <div className={`draw-theater status-${status}`}>
+      <div className="ticket-pool" aria-hidden="true">
+        <span className="draw-light" />
+        {ticketCodes.map((code, index) => (
+          <span
+            className="animated-ticket"
+            key={`${code}-${index}`}
+            style={
+              {
+                '--ticket-delay': `${index * 120}ms`,
+              } as CSSProperties
+            }
+          >
+            {code}
+          </span>
+        ))}
+      </div>
+
+      <div className={`participant-outcome ${outcome.tone}`} aria-live="polite">
+        <span>{getDrawStatusLabel(status)}</span>
+        <strong>{outcome.title}</strong>
+        <p>{outcome.detail}</p>
+        {currentUserEntry ? (
+          <dl className="receipt-details">
+            <div>
+              <dt>Receipt</dt>
+              <dd>{currentUserEntry.receiptHash}</dd>
+            </div>
+            <div>
+              <dt>Pick</dt>
+              <dd>{getPickLabel(currentUserEntry.winner)}</dd>
+            </div>
+          </dl>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+function DrawAuditPanel({ result }: { result: DrawResult }) {
+  return (
+    <div className="draw-audit-panel">
+      <div>
+        <span>Public seed</span>
+        <strong>{result.audit.publicSeed}</strong>
+      </div>
+      <div>
+        <span>Commitment</span>
+        <strong>{result.audit.secretCommitment}</strong>
+      </div>
+      <div>
+        <span>Audit hash</span>
+        <strong>{result.audit.auditHash}</strong>
+      </div>
+      <p>{result.audit.algorithm}</p>
+    </div>
+  )
+}
+
 export const { registry, handlers } = defineRegistry(predictionCatalog, {
   components: {
     ExperienceShell: ({ children }) => (
@@ -445,6 +924,15 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
         <div className="draw-grid">
           {matches.map((match) => {
             const result = predictionState.drawResults[match.id]
+            const prediction = getPrediction(predictionState, match.id)
+            const currentUserEntry =
+              result?.currentUserEntry ??
+              createCurrentUserEntry(
+                match,
+                prediction,
+                predictionState.selectedTeamKey,
+              )
+            const status = result?.status ?? getPendingDrawStatus(prediction)
 
             return (
               <article className="draw-card" key={match.id}>
@@ -462,28 +950,58 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
                     tone="primary"
                   >
                     <Dice5 size={17} />
-                    <span>{result ? 'Redraw Demo' : 'Run Draw'}</span>
+                    <span>{result ? 'Replay Draw' : 'Start Draw'}</span>
                   </ActionButton>
                 </div>
+
+                <DrawStatusRail status={status} />
+                <DrawTheater
+                  currentUserEntry={currentUserEntry}
+                  match={match}
+                  result={result}
+                  status={status}
+                />
 
                 {result ? (
                   <div className="winner-list">
                     <div className="result-ribbon">
                       <span>Final result</span>
                       <strong>{result.resultLabel}</strong>
-                      <em>{result.eligibleCount} eligible entries</em>
+                      <em>
+                        {result.eligibleCount} of {result.entryCount} entries eligible
+                      </em>
                     </div>
-                    {result.winners.map((winner) => (
-                      <div className="winner-row" key={winner.id}>
+                    {result.winners.map((winner, index) => (
+                      <div
+                        className={`winner-row ${winner.isCurrentUser ? 'current-user' : ''}`}
+                        key={winner.id}
+                        style={
+                          {
+                            '--winner-delay': `${index * 70}ms`,
+                          } as CSSProperties
+                        }
+                      >
                         <span>{winner.name}</span>
                         <strong>{getTeam(winner.supporter).code}</strong>
                         <em>{winner.exactScore ? 'Exact score' : 'Winner pick'}</em>
                       </div>
                     ))}
+                    {result.alternates.length > 0 ? (
+                      <div className="alternate-list">
+                        <span>Alternates</span>
+                        {result.alternates.map((alternate) => (
+                          <em key={alternate.id}>
+                            {alternate.name} - {alternate.receiptHash}
+                          </em>
+                        ))}
+                      </div>
+                    ) : null}
+                    <DrawAuditPanel result={result} />
                   </div>
                 ) : (
                   <p className="empty-draw">
-                    Results pending. Winners appear here when the match closes.
+                    Results pending. The draw will reveal eligible receipts,
+                    winner slots, alternates, and the audit seed.
                   </p>
                 )}
               </article>
@@ -658,20 +1176,27 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
     lockPrediction: async (params, setState) => {
       if (!params) return
 
-      setState((previous) =>
-        updatePredictionInState(previous as PredictionState, params.matchId, {
+      setState((previous) => {
+        const typedPrevious = previous as PredictionState
+        const prediction = getPrediction(typedPrevious, params.matchId)
+
+        if (!prediction.winner) {
+          return typedPrevious
+        }
+
+        return updatePredictionInState(typedPrevious, params.matchId, {
           locked: true,
-        }),
-      )
+        })
+      })
     },
     runDraw: async (params, setState) => {
       if (!params) return
 
       const match = getMatch(params.matchId)
-      const result = createDrawResult(match)
 
       setState((previous) => {
         const typedPrevious = previous as PredictionState
+        const result = createDrawResult(match, typedPrevious)
 
         return {
           ...typedPrevious,
@@ -688,13 +1213,18 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
       setState((previous) => {
         const typedPrevious = previous as PredictionState
 
-        return {
-          ...typedPrevious,
-          reviewPrompts: {
-            ...typedPrevious.reviewPrompts,
-            [params.matchId]: true,
+        return updateDrawResultStatus(
+          {
+            ...typedPrevious,
+            reviewPrompts: {
+              ...typedPrevious.reviewPrompts,
+              [params.matchId]: true,
+            },
           },
-        }
+          params.matchId,
+          'review_prompted',
+          { reviewPrompted: true },
+        )
       })
     },
     queueFulfillment: async (params, setState) => {
@@ -705,10 +1235,14 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
         const nextQueue = new Set(typedPrevious.fulfillmentQueue)
         nextQueue.add(params.matchId)
 
-        return {
-          ...typedPrevious,
-          fulfillmentQueue: [...nextQueue],
-        }
+        return updateDrawResultStatus(
+          {
+            ...typedPrevious,
+            fulfillmentQueue: [...nextQueue],
+          },
+          params.matchId,
+          'fulfillment',
+        )
       })
     },
   },
@@ -801,6 +1335,16 @@ function RenderedMatchCard({
           <span>{prediction.locked ? 'Locked' : 'Lock Pick'}</span>
         </ActionButton>
       </div>
+
+      {prediction.locked && prediction.winner ? (
+        <div className="entry-receipt">
+          <span>
+            <Check size={15} />
+            Draw application received
+          </span>
+          <strong>{createReceiptHash(match, prediction, selectedTeamKey)}</strong>
+        </div>
+      ) : null}
 
       <div className="drop-row">
         {match.sponsorDrops.map((drop) => (

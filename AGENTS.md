@@ -27,7 +27,9 @@ The app uses React for the authoritative domain state:
 - selected supporter team
 - match predictions
 - locked picks
+- participant draw receipts
 - match draw results
+- draw audit metadata
 - fulfillment queue
 - review prompt status
 
@@ -41,6 +43,8 @@ The data layer lives in `src/data/worldCup.ts` and includes:
 - community entries for seeded draw simulation
 - localized T-shirt concepts
 - provider recommendations
+
+Draw application happens when a visitor locks a winner prediction. The prototype creates a receipt hash, evaluates the ticket against the demo result, ranks eligible tickets with a public seed plus reveal seed, selects winners, preserves alternates, and shows audit metadata beside the reveal.
 
 ## Research Decisions
 
@@ -104,6 +108,14 @@ Current concepts cover Brazil, Argentina, United States, France, England, Spain,
 - Applied Impeccable-inspired product-design structure: added `PRODUCT.md`, `DESIGN.md`, a desktop workflow rail, cleaner product-state empty copy, and corrected section anchors.
 - Added `BUILD_BLOG.md` as the narrative build article artifact and commit-by-commit project history.
 
+### 2026-06-02
+
+- Added participant-aware draw application receipts for locked predictions.
+- Added deterministic winner and alternate ranking with public seed, commitment, reveal seed, and audit hash metadata.
+- Added draw status rail, animated receipt pool, participant outcome panel, winner reveal animation, alternates, and audit panel.
+- Connected fulfillment and review actions to update draw lifecycle status.
+- Updated `PRODUCT.md`, `DESIGN.md`, and `BUILD_BLOG.md` with the draw mechanism and presentation decisions.
+
 ## Verification
 
 Latest successful commands:
@@ -123,10 +135,15 @@ Browser verification covered:
 - queueing fulfillment and sending review prompts
 - checking browser console errors
 - checking the Impeccable-inspired workflow rail and refined empty draw states
+- locking a Brazil prediction as a draw application receipt
+- running the Brazil vs Spain draw with the current visitor in the winner group
+- verifying public seed, commitment, and audit hash rendering
+- confirming fulfillment and review actions advance the draw lifecycle copy
+- checking the medium-breakpoint draw card layout after the animation pass
 
 Latest screenshot:
 
-`artifacts/worldcup-layout-enhanced.png`
+`artifacts/worldcup-draw-mechanism.png`
 
 ## Next Tasks
 
