@@ -334,13 +334,19 @@ const sponsorshipAddOns = [
 ]
 
 const aiBuildMetrics = {
-  tokenTotal: '~3.0M',
-  estimatedCost: '~$23',
+  tokenTotal: '~3.3M',
+  estimatedCost: '~$26',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
 
-const posthogDashboardUrl = 'https://us.posthog.com/dashboard'
+const posthogDashboardUrl = 'https://us.posthog.com'
+const posthogResourceName = 'worldcup2026-analytics'
+const posthogEnvVars = [
+  'WORLDCUP2026_ANALYTICS_API_KEY',
+  'WORLDCUP2026_ANALYTICS_HOST',
+  'WORLDCUP2026_ANALYTICS_PERSONAL_API_KEY',
+] as const
 
 const posthogDashboardMetrics = [
   {
@@ -411,8 +417,8 @@ const posthogEventPlan = [
 ] as const
 
 const posthogSetupItems = [
-  'Use the existing Projects.dev PostHog analytics resource and frontend-safe project token.',
-  'Expose only VITE_POSTHOG_KEY and VITE_POSTHOG_HOST to the browser; keep personal API keys server-side.',
+  'Use the new Projects.dev PostHog analytics project resource named worldcup2026-analytics.',
+  'Map the frontend-safe API key and host into Vite env variables; keep the personal API key server-side.',
   'Install posthog-js or the PostHog web snippet after the final tracking policy is approved.',
   'Create a real PostHog dashboard with prediction funnel, route traffic, sponsor conversions, fulfillment queue, and review completion tiles.',
   'Add privacy copy before enabling session replay or person-level identity tracking.',
@@ -1591,7 +1597,7 @@ function PostHogDashboardPage() {
               target="_blank"
             >
               <BarChart3 size={17} />
-              <span>Open PostHog</span>
+              <span>Open PostHog Account</span>
               <ExternalLink size={15} />
             </a>
             <a className="prize-action secondary" href="/operations">
@@ -1668,11 +1674,26 @@ function PostHogDashboardPage() {
           <p className="section-kicker">Setup State</p>
           <h2>Connected Through Projects.dev, Capture Still Pending</h2>
           <p>
-            The PostHog account and analytics resource are present in the
-            project state. The dashboard is ready as a tracking contract, but
-            real product events should wait until the SDK, privacy copy, and
-            production event names are approved.
+            The new PostHog project resource is present in the Projects.dev
+            state as <code>{posthogResourceName}</code>. The dashboard is ready
+            as a tracking contract, but real product events should wait until
+            the SDK, privacy copy, and production event names are approved.
           </p>
+        </div>
+        <div className="posthog-resource-panel" aria-label="PostHog resource">
+          <span>Projects.dev Resource</span>
+          <strong>{posthogResourceName}</strong>
+          <p>
+            Provisioned on the PostHog free analytics tier and kept as the only
+            active PostHog analytics resource in the default environment.
+          </p>
+          <ul>
+            {posthogEnvVars.map((envVar) => (
+              <li key={envVar}>
+                <code>{envVar}</code>
+              </li>
+            ))}
+          </ul>
         </div>
         <ul className="posthog-setup-list">
           {posthogSetupItems.map((item) => (

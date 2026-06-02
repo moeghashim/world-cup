@@ -18,6 +18,11 @@ let hasInitializedAnalytics = false
 export function initializeGoogleAnalytics() {
   if (hasInitializedAnalytics || !googleAnalyticsMeasurementId) return
 
+  if (window.gtag) {
+    hasInitializedAnalytics = true
+    return
+  }
+
   window.dataLayer = window.dataLayer ?? []
   window.gtag = (...args: GtagArguments) => {
     window.dataLayer?.push(args)

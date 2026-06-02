@@ -1096,7 +1096,53 @@
 
 .posthog-setup-panel {
   align-items: start;
-  grid-template-columns: minmax(280px, 0.55fr) minmax(0, 1fr);
+  grid-template-columns: minmax(260px, 0.42fr) minmax(0, 1fr);
+}
+
+.posthog-resource-panel {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.78)),
+    var(--team-soft);
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.posthog-resource-panel span {
+  color: var(--team-primary);
+  font-size: 0.72rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.posthog-resource-panel strong {
+  color: var(--ink);
+  font-size: 1.12rem;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.posthog-resource-panel ul {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+
+.posthog-resource-panel code,
+.posthog-setup-panel p code {
+  background: rgba(23, 24, 18, 0.08);
+  color: var(--ink);
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
+  padding: 2px 5px;
+}
+
+.posthog-setup-panel .posthog-setup-list {
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .posthog-setup-list li {
@@ -3577,6 +3623,10 @@
   .supporter-fixtures,
   .schedule-layout,
   .technology-flow-heading {
+    grid-template-columns: 1fr;
+  }
+
+  .posthog-setup-panel .posthog-setup-list {
     grid-template-columns: 1fr;
   }
 
