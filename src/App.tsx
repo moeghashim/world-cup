@@ -250,9 +250,9 @@ function App() {
           <img
             alt="Win World Cup 2026"
             className="brand-logo"
-            height="52"
+            height="82"
             src={brandLogo}
-            width="196"
+            width="82"
           />
         </a>
         <nav className="nav-links" aria-label="Primary navigation">

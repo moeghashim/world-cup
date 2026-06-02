@@ -6,7 +6,7 @@
   --muted: #68685e;
   --line: rgba(22, 24, 18, 0.13);
   --shadow: 0 22px 60px rgba(25, 28, 18, 0.14);
-  --topbar-height: 84px;
+  --topbar-height: 100px;
 
   min-height: 100svh;
   background:
@@ -57,7 +57,7 @@
 
 .brand-logo {
   display: block;
-  height: 68px;
+  height: 82px;
   max-width: min(240px, 52vw);
   object-fit: contain;
   width: auto;

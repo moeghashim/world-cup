@@ -294,12 +294,12 @@ Browser checks have covered:
 - teams/schedule section with 12 group cards and 72 fixture rows
 - supporter schedule switching from Brazil to Japan
 - sticky-header anchor offset and compact fixture-card wrapping
-- attached logo rendering in the header after resizing the topbar logo slot
+- attached logo rendering in the header after resizing the topbar logo slot, including the later 20% logo increase
 - footer Experiment link, imported markdown panels, and 10claws.com attribution
 
 Current visual artifact:
 
-`artifacts/worldcup-experiment-page.png`
+`artifacts/worldcup-logo-20-bigger.png`
 
 ## Commit Timeline
 
@@ -339,9 +339,13 @@ Added a typed tournament schedule snapshot, a JSON-render schedule section, all 
 
 Replaced the active website logo with the user-provided attached SVG, preserved the source under `designs/logos/`, and verified the SVG and app build.
 
-### Current commit - Add experiment documentation page
+### `5c56fa7` - Add experiment documentation page
 
 Added a footer-linked Experiment section that renders the project documentation files in the app and labels the site as an experiment from `10claws.com`.
+
+### Current commit - Increase attached logo size
+
+Increased the active header logo from 68px to 82px, kept the square SVG metadata aligned, and raised the sticky topbar to 100px so the larger logo keeps appropriate spacing.
 
 ## Next Build Steps
 

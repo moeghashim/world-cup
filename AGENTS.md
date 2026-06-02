@@ -134,6 +134,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Added a dated tournament snapshot section with all 48 teams, 12 groups, 72 group-stage fixtures, selected supporter-team schedule highlights, source metadata, and a FIFA verification link.
 - Replaced the active website logo with the user-provided attached SVG and preserved it under `designs/logos/worldcup-logo-attached.svg`.
 - Added a footer-linked Experiment section that renders the project documentation files and labels the site as an experiment from `10claws.com`.
+- Increased the active header logo by 20%, from 68px to 82px, and adjusted the sticky topbar height to 100px.
 
 ## Verification
 
@@ -162,12 +163,12 @@ Browser verification covered:
 - verifying the teams/schedule section renders 12 group cards and 72 group-stage fixture rows
 - verifying the supporter schedule updates from Brazil to Japan after switching supporter team
 - checking the schedule screenshot after fixing sticky-header anchor offset and compact fixture wrapping
-- verifying the attached logo renders in the header at 68px inside the 84px topbar
+- verifying the attached logo renders in the header at 82px inside the 100px topbar
 - verifying the footer Experiment link jumps to the documentation section and the imported markdown files render
 
 Latest screenshot:
 
-`artifacts/worldcup-experiment-page.png`
+`artifacts/worldcup-logo-20-bigger.png`
 
 ## Next Tasks
 
