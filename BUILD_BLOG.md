@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~2.4M`
-- estimated API-equivalent cost: `~$18`
+- estimated total tokens: `~2.9M`
+- estimated API-equivalent cost: `~$22`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -350,11 +350,12 @@ Browser checks have covered:
 - header navigation between page paths while preserving app state
 - attached logo rendering at 98px inside the 120px topbar
 - Experiment page redesign with the Build Blog HTML article, AGENTS.md raw log, and technology flowchart
-- AI build disclosure banner with estimated total tokens and API-equivalent cost
+- AI build disclosure banner with refreshed estimated total tokens and API-equivalent cost
 - Google Analytics script injection with `G-RFPJRPKYQR` and GA4 Enhanced Measurement guidance for page routes
 - AI build disclosure moved above the logo as a top status bar
 - header logo reduced from 98px to 78px below the AI status bar
 - `/posthog` dashboard page with metric cards, funnel steps, event taxonomy, setup checklist, and legacy `#posthog` redirect
+- AI build disclosure estimate refreshed to `~2.9M` total tokens and `~$22` estimated API-equivalent cost
 
 Current visual artifact:
 
@@ -468,11 +469,15 @@ Moved the "Built entirely by AI" disclosure above the logo and primary navigatio
 
 Reduced the active header logo by 20%, from 98px to 78px, after the larger size made the header feel too heavy. The logo/navigation row now uses a 100px height again, while the AI build disclosure remains above it as the separate top status bar.
 
-### Current commit - Add PostHog dashboard page
+### `be43398` - Add PostHog dashboard page
 
 Added `/posthog` as the first PostHog dashboard surface for the product. The page defines the metrics the real PostHog dashboard should track: acquisition, prediction conversion, prize claims, fulfillment health, visitor-to-reward funnel steps, event taxonomy, ownership, and setup state.
 
 The dashboard links to the PostHog app, but it does not send events yet. That boundary is deliberate: the Projects.dev PostHog analytics resource exists, while SDK capture, privacy copy, session replay policy, and final event names still need approval before production tracking begins.
+
+### Current commit - Add token estimate maintenance rule
+
+Added a maintenance rule that every commit must refresh the public AI build disclosure token total and API-equivalent estimated cost. The current estimate was updated to `~2.9M` total tokens and `~$22` so this commit follows the rule immediately.
 
 ## Next Build Steps
 
@@ -496,4 +501,5 @@ Every commit should update this file with:
 - why the change was made
 - which files or systems were affected
 - what verification was run
+- latest total token estimate and API-equivalent estimated cost shown in the AI build disclosure
 - what the next relevant build step is

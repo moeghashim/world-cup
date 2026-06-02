@@ -9,6 +9,7 @@ This document is the project artifact for how the product is being built. Update
 - Keep team personalization token-driven through CSS variables and typed team data.
 - Maintain `PRODUCT.md` and `DESIGN.md` when product or design direction changes.
 - Maintain `BUILD_BLOG.md` on every commit so it can become the public build article.
+- Update the AI build disclosure total token estimate and API-equivalent estimated cost in `src/App.tsx` and `BUILD_BLOG.md` on every commit.
 - Avoid official FIFA, tournament, federation, player, and sponsor marks unless the project has rights.
 - After finishing a task: update this file and `BUILD_BLOG.md`, run verification, and commit.
 
@@ -183,11 +184,12 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Replaced hash-fragment navigation with page-style URLs for fixtures, teams, prizes, sponsors, rewards, operations, and Experiment. Added focused route rendering for `/operations`, `/experiment`, `/prizes`, `/prizes/:team`, `/sponsors`, and the JSON-render section pages, plus a Vercel rewrite for direct route refreshes.
 - Increased the active header logo by another 20%, from 82px to 98px, and adjusted the sticky topbar height from 100px to 120px.
 - Redesigned `/experiment` to remove the old multi-document grid, render `BUILD_BLOG.md` as a polished HTML article, keep `AGENTS.md` as the raw agent-log markdown file, and add a technology flowchart for Codex, GitHub, Vercel, React/TypeScript, JSON-render, Stripe Projects, and planned providers.
-- Added a site-wide AI build disclosure banner that says the project was built entirely by AI and shows estimated usage of `~2.4M` total tokens with an API-equivalent estimated cost of `~$18`.
+- Added a site-wide AI build disclosure banner that says the project was built entirely by AI and shows the current estimated total tokens plus API-equivalent estimated cost.
 - Activated Google Analytics page-view tracking for the user-created GA4 web stream `G-RFPJRPKYQR`, with a `VITE_GA_MEASUREMENT_ID` override for future environment-specific streams.
 - Moved the AI build disclosure into a compact top status bar above the logo and primary navigation, with sticky header offsets updated for the combined status bar and logo header.
 - Reduced the active header logo by 20%, from 98px to 78px, and lowered the logo/navigation header row from 120px to 100px.
 - Added a `/posthog` dashboard page with metric cards, prediction funnel steps, event taxonomy, setup checklist, PostHog link, header/footer navigation, and legacy `#posthog` redirect support.
+- Added a working rule to refresh the AI build disclosure token total and estimated cost on every commit, and updated the current estimate to `~2.9M` total tokens and `~$22`.
 
 ## Verification
 
@@ -236,6 +238,7 @@ Browser verification covered:
 - verifying the AI build disclosure renders above the logo as the sticky top status bar on desktop, with compact mobile CSS rules updated for narrow screens
 - verifying the smaller 78px logo renders below the AI status bar with the updated 100px navigation row
 - verifying `/posthog` renders four metric cards, six funnel steps, five event groups, five setup items, no horizontal overflow, a working PostHog external link, and legacy `/#posthog` redirect behavior
+- verifying the AI build disclosure renders the refreshed `~2.9M` token total and `~$22` estimated cost with no browser console errors
 
 Latest screenshot:
 
