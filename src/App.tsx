@@ -438,6 +438,18 @@ function App() {
               build process can be reviewed alongside the match prediction
               experience.
             </p>
+            <p>
+              This project is being built with Codex Desktop App and{' '}
+              <a
+                href="https://projects.dev/"
+                rel="noreferrer"
+                target="_blank"
+              >
+                projects.dev
+                <ExternalLink size={13} />
+              </a>
+              .
+            </p>
           </div>
         </div>
 
@@ -474,6 +486,13 @@ function App() {
             An experiment from{' '}
             <a href="https://10claws.com/" rel="noreferrer" target="_blank">
               10claws.com
+              <ExternalLink size={13} />
+            </a>
+          </span>
+          <span className="build-attribution">
+            Built with Codex Desktop App and{' '}
+            <a href="https://projects.dev/" rel="noreferrer" target="_blank">
+              projects.dev
               <ExternalLink size={13} />
             </a>
           </span>
