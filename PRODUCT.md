@@ -46,5 +46,6 @@ World Cup Predictor is a match prediction and sponsor reward experience for `win
 - Tournament teams and group-stage fixtures are a dated source snapshot. They should be verified against official sources or replaced with a maintained data feed before real eligibility decisions.
 - The footer-linked Experiment view exposes build documentation and names Codex Desktop App plus `https://projects.dev/` as part of the build stack; the default homepage stays focused on matches, prizes, and winners.
 - Public navigation uses page-style routes such as `/fixtures`, `/prizes/japan`, `/sponsors`, `/operations`, and `/experiment`, with legacy hash URLs normalized for backward compatibility.
-- Provider recommendations are architectural notes, not live integrations.
+- Google Analytics is live only for page-view tracking through the GA4 stream `G-RFPJRPKYQR`. Deeper prediction, draw, fulfillment, and review funnel events are not implemented yet.
+- Provider recommendations are architectural notes, not live integrations except for the current Google Analytics page-view setup.
 - No real prize fulfillment, payment, user identity, fraud checks, or legal rules are implemented yet.

@@ -127,6 +127,7 @@ sequenceDiagram
 | Build documentation | `AGENTS.md`, `BUILD_BLOG.md`, `PRODUCT.md`, `DESIGN.md`, `WEBSITE_FLOW.md` | Track product decisions, design rules, architecture, tools, and build history. |
 | Build agent | Codex Desktop App | Collaboratively edits code, verifies the app, documents the process, commits, pushes, and opens PRs. |
 | Infrastructure planning | `https://projects.dev/` / Stripe Projects | Tracks planned infrastructure provisioning for database, auth, analytics, hosting, observability, and spend controls. |
+| Analytics | Google Analytics GA4, `gtag.js` | Loads the GA4 tag with measurement ID `G-RFPJRPKYQR`; page-style route views rely on GA4 Enhanced Measurement history tracking, with `VITE_GA_MEASUREMENT_ID` available for environment-specific overrides. |
 | Source control | Git, GitHub, GitHub CLI | Manage commits, branches, pushes, and pull requests. |
 | Verification | `npm run lint`, `npm run build`, browser checks | Confirm code quality, production build success, and key rendered states. |
 | Deployment routing | `vercel.json` rewrite | Let direct page refreshes such as `/operations` and `/experiment` resolve to the Vite app entry. |
@@ -141,3 +142,4 @@ These are not live production integrations yet:
 - POD provider for localized winner shirts, with Gelato as the first researched option and Printful as a backup/control option.
 - 3PL or kitting partner for sponsor product packages.
 - Admin tooling for sponsor campaigns, product SKUs, winner review videos, and fulfillment batches.
+- Funnel analytics events for prediction starts, locked receipts, draw entries, winner reveals, claims, deliveries, and review prompts.
