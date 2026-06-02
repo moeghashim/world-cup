@@ -1,4 +1,11 @@
-import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  type CSSProperties,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Renderer, JSONUIProvider, type StateStore } from '@json-render/react'
 import {
   ArrowLeft,
@@ -38,9 +45,6 @@ import usaPrizeImage from './assets/prizes/usa-shirt.png'
 import './App.css'
 import agentsMd from '../AGENTS.md?raw'
 import buildBlogMd from '../BUILD_BLOG.md?raw'
-import designMd from '../DESIGN.md?raw'
-import productMd from '../PRODUCT.md?raw'
-import websiteFlowMd from '../WEBSITE_FLOW.md?raw'
 import {
   getTeam,
   shirtConcepts,
@@ -113,39 +117,6 @@ function setByPointer<T extends Record<string, unknown>>(
       : value,
   } as T
 }
-
-const experimentDocs = [
-  {
-    title: 'Build Blog',
-    filename: 'BUILD_BLOG.md',
-    purpose: 'Narrative article for how the project was built over time.',
-    body: buildBlogMd,
-  },
-  {
-    title: 'Agent Build Log',
-    filename: 'AGENTS.md',
-    purpose: 'Working agreement, architecture notes, completed work, and verification trail.',
-    body: agentsMd,
-  },
-  {
-    title: 'Product Context',
-    filename: 'PRODUCT.md',
-    purpose: 'Product flow, audience, principles, and MVP boundaries.',
-    body: productMd,
-  },
-  {
-    title: 'Website Flow',
-    filename: 'WEBSITE_FLOW.md',
-    purpose: 'Diagrams for the visitor journey, app architecture, draw flow, and tools used.',
-    body: websiteFlowMd,
-  },
-  {
-    title: 'Design Context',
-    filename: 'DESIGN.md',
-    purpose: 'Design direction, layout rules, theming guidance, and quality checklist.',
-    body: designMd,
-  },
-] as const
 
 const prizeImages: Record<TeamKey, string> = {
   brazil: brazilPrizeImage,
@@ -355,6 +326,58 @@ const sponsorshipAddOns = [
   'Sponsor dashboard export with campaign metrics',
 ]
 
+const technologyFlow = [
+  {
+    label: 'Build Agent',
+    title: 'Codex Desktop App',
+    detail:
+      'Coordinates the local workspace, edits the product, verifies behavior, and updates the build artifact.',
+    tools: ['OpenAI Codex', 'local app browser'],
+  },
+  {
+    label: 'Source Control',
+    title: 'GitHub',
+    detail:
+      'Stores commits, branches, pull requests, and the public review trail for each coherent build task.',
+    tools: ['Git', 'GitHub CLI', 'PRs'],
+  },
+  {
+    label: 'Deployment',
+    title: 'Vercel',
+    detail:
+      'Serves the Vite app and uses a rewrite so clean page routes resolve on direct refresh.',
+    tools: ['Vite build', 'vercel.json'],
+  },
+  {
+    label: 'Frontend Runtime',
+    title: 'React + TypeScript',
+    detail:
+      'Owns supporter team state, predictions, draw receipts, fulfillment status, and routed views.',
+    tools: ['React', 'TypeScript', 'CSS variables'],
+  },
+  {
+    label: 'Spec Layer',
+    title: 'JSON-render',
+    detail:
+      'Composes controlled prediction, schedule, draw, reward, and operations sections from a typed catalog.',
+    tools: ['@json-render/react', 'zod'],
+  },
+  {
+    label: 'Infrastructure Planning',
+    title: 'Stripe Projects',
+    detail:
+      'Tracks provider setup and future operational services without replacing contest or fulfillment rules.',
+    tools: ['projects.dev', 'Stripe CLI'],
+  },
+  {
+    label: 'Production Services',
+    title: 'Providers',
+    detail:
+      'Planned services for analytics, auth, database, observability, shirts, sponsor kits, and reviews.',
+    tools: ['PostHog', 'WorkOS', 'Neon', 'POD', '3PL'],
+  },
+] as const
+
 const sectionRouteMap = {
   '/fixtures': 'predictions',
   '/teams': 'teams',
@@ -491,14 +514,6 @@ function getRoutePredictionSpec(sectionPath: SectionPath | null) {
       },
     },
   }
-}
-
-function getMarkdownExcerpt(markdown: string) {
-  return markdown
-    .split('\n')
-    .filter((line) => line.trim().length > 0)
-    .slice(0, 7)
-    .join('\n')
 }
 
 function usePredictionStore(
@@ -1472,6 +1487,215 @@ function Topbar({
   )
 }
 
+function renderInlineMarkdown(text: string) {
+  const inlineNodes: ReactNode[] = []
+  const inlinePattern = /(\[[^\]]+\]\([^)]+\)|`[^`]+`)/g
+  let lastIndex = 0
+
+  text.replace(inlinePattern, (match, _capture, offset) => {
+    if (offset > lastIndex) {
+      inlineNodes.push(text.slice(lastIndex, offset))
+    }
+
+    if (match.startsWith('[')) {
+      const linkMatch = match.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
+
+      if (linkMatch) {
+        inlineNodes.push(
+          <a
+            href={linkMatch[2]}
+            key={`${match}-${offset}`}
+            rel="noreferrer"
+            target={linkMatch[2].startsWith('http') ? '_blank' : undefined}
+          >
+            {linkMatch[1]}
+          </a>,
+        )
+      }
+    } else {
+      inlineNodes.push(<code key={`${match}-${offset}`}>{match.slice(1, -1)}</code>)
+    }
+
+    lastIndex = offset + match.length
+    return match
+  })
+
+  if (lastIndex < text.length) {
+    inlineNodes.push(text.slice(lastIndex))
+  }
+
+  return inlineNodes.length ? inlineNodes : [text]
+}
+
+function renderMarkdownHeading(
+  level: number,
+  content: string,
+  key: string,
+) {
+  if (level === 1) return <h1 key={key}>{renderInlineMarkdown(content)}</h1>
+  if (level === 2) return <h2 key={key}>{renderInlineMarkdown(content)}</h2>
+  if (level === 3) return <h3 key={key}>{renderInlineMarkdown(content)}</h3>
+
+  return <h4 key={key}>{renderInlineMarkdown(content)}</h4>
+}
+
+function MarkdownArticle({ markdown }: { markdown: string }) {
+  const blocks: ReactNode[] = []
+  const lines = markdown.split('\n')
+  let index = 0
+  let blockIndex = 0
+
+  const isBlockStart = (line: string) =>
+    /^#{1,6}\s+/.test(line) ||
+    /^-\s+/.test(line) ||
+    /^\d+\.\s+/.test(line) ||
+    /^```/.test(line)
+
+  while (index < lines.length) {
+    const line = lines[index]
+
+    if (!line.trim()) {
+      index += 1
+      continue
+    }
+
+    if (line.startsWith('```')) {
+      const language = line.replace(/^```/, '').trim()
+      const codeLines: string[] = []
+      index += 1
+
+      while (index < lines.length && !lines[index].startsWith('```')) {
+        codeLines.push(lines[index])
+        index += 1
+      }
+
+      if (index < lines.length) index += 1
+
+      blocks.push(
+        <pre className="markdown-code" key={`code-${blockIndex}`}>
+          <code data-language={language || undefined}>{codeLines.join('\n')}</code>
+        </pre>,
+      )
+      blockIndex += 1
+      continue
+    }
+
+    const heading = line.match(/^(#{1,6})\s+(.+)$/)
+
+    if (heading) {
+      blocks.push(
+        renderMarkdownHeading(
+          Math.min(heading[1].length, 4),
+          heading[2],
+          `heading-${blockIndex}`,
+        ),
+      )
+      blockIndex += 1
+      index += 1
+      continue
+    }
+
+    if (/^-\s+/.test(line)) {
+      const items: string[] = []
+
+      while (index < lines.length && /^-\s+/.test(lines[index])) {
+        items.push(lines[index].replace(/^-\s+/, ''))
+        index += 1
+      }
+
+      blocks.push(
+        <ul key={`list-${blockIndex}`}>
+          {items.map((item) => (
+            <li key={item}>{renderInlineMarkdown(item)}</li>
+          ))}
+        </ul>,
+      )
+      blockIndex += 1
+      continue
+    }
+
+    if (/^\d+\.\s+/.test(line)) {
+      const items: string[] = []
+
+      while (index < lines.length && /^\d+\.\s+/.test(lines[index])) {
+        items.push(lines[index].replace(/^\d+\.\s+/, ''))
+        index += 1
+      }
+
+      blocks.push(
+        <ol key={`ordered-${blockIndex}`}>
+          {items.map((item) => (
+            <li key={item}>{renderInlineMarkdown(item)}</li>
+          ))}
+        </ol>,
+      )
+      blockIndex += 1
+      continue
+    }
+
+    const paragraphLines: string[] = []
+
+    while (
+      index < lines.length &&
+      lines[index].trim() &&
+      !isBlockStart(lines[index])
+    ) {
+      paragraphLines.push(lines[index].trim())
+      index += 1
+    }
+
+    blocks.push(
+      <p key={`paragraph-${blockIndex}`}>
+        {renderInlineMarkdown(paragraphLines.join(' '))}
+      </p>,
+    )
+    blockIndex += 1
+  }
+
+  return <div className="markdown-article">{blocks}</div>
+}
+
+function TechnologyFlowChart() {
+  return (
+    <section
+      className="technology-flow-card"
+      aria-labelledby="technology-flow-title"
+    >
+      <div className="technology-flow-heading">
+        <span className="icon-box">
+          <Sparkles size={18} />
+        </span>
+        <div>
+          <p className="section-kicker">Technology Flow</p>
+          <h3 id="technology-flow-title">How The App Is Built And Operated</h3>
+          <p>
+            This flowchart focuses on the tools and services around the app, not
+            the public website pages.
+          </p>
+        </div>
+      </div>
+
+      <div className="technology-flow-grid" role="list">
+        {technologyFlow.map((item, index) => (
+          <article className="technology-flow-node" key={item.title} role="listitem">
+            <span className="technology-flow-step">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <p>{item.label}</p>
+            <h4>{item.title}</h4>
+            <span>{item.detail}</span>
+            <div aria-label={`${item.title} tools`}>
+              {item.tools.map((tool) => (
+                <em key={tool}>{tool}</em>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function ExperimentPage() {
   return (
     <section
@@ -1485,11 +1709,10 @@ function ExperimentPage() {
         </span>
         <div>
           <p className="section-kicker">Experiment</p>
-          <h2 id="experiment-title">How This Was Built</h2>
+          <h2 id="experiment-title">Build Blog</h2>
           <p>
-            This section keeps the working docs visible in the product so the
-            build process can be reviewed alongside the match prediction
-            experience.
+            The Experiment page now keeps the public build article front and
+            center, with the agent log preserved as a markdown file below.
           </p>
           <p>
             This project is being built with{' '}
@@ -1507,30 +1730,43 @@ function ExperimentPage() {
         </div>
       </div>
 
-      <div className="experiment-doc-grid">
-        {experimentDocs.map((doc) => (
-          <article className="experiment-doc" key={doc.filename}>
-            <header>
-              <span>
-                <FileText size={17} />
-                {doc.filename}
-              </span>
-              <h3>{doc.title}</h3>
-              <p>{doc.purpose}</p>
-            </header>
-            <pre aria-label={`${doc.filename} excerpt`}>
-              {getMarkdownExcerpt(doc.body)}
-            </pre>
-            <details>
-              <summary>
-                <BookOpen size={16} />
-                <span>Read Full File</span>
-              </summary>
-              <pre>{doc.body}</pre>
-            </details>
-          </article>
-        ))}
-      </div>
+      <TechnologyFlowChart />
+
+      <article className="build-blog-card" aria-label="Build blog article">
+        <header className="build-blog-header">
+          <span>
+            <BookOpen size={18} />
+            BUILD_BLOG.md
+          </span>
+          <h3>Public Build Article</h3>
+          <p>
+            A readable HTML version of the project story, decisions,
+            verification trail, and next build steps.
+          </p>
+        </header>
+        <MarkdownArticle markdown={buildBlogMd} />
+      </article>
+
+      <section className="agent-log-card" aria-labelledby="agent-log-title">
+        <header>
+          <span>
+            <FileText size={18} />
+            AGENTS.md
+          </span>
+          <h3 id="agent-log-title">Agent Log Markdown File</h3>
+          <p>
+            The working agreement, architecture notes, task history, and
+            verification log stay available as the raw markdown source.
+          </p>
+        </header>
+        <details>
+          <summary>
+            <BookOpen size={16} />
+            <span>Open Agent Log</span>
+          </summary>
+          <pre>{agentsMd}</pre>
+        </details>
+      </section>
     </section>
   )
 }

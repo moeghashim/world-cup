@@ -52,7 +52,7 @@ The interface should behave like a matchday operations surface with fan energy, 
 
 - Match cards expose stage, teams, score inputs, winner pick, lock action, and sponsor drops.
 - Schedule panels expose source date, verification warning, all groups, all teams, full group-stage fixtures, and selected supporter-team fixtures.
-- Experiment documentation panels expose the build files with compact excerpts, scrollable full markdown views, diagram documentation, and the Codex Desktop App plus `https://projects.dev/` build attribution. The default homepage should not expose technical build copy.
+- Experiment documentation exposes `BUILD_BLOG.md` as the primary HTML article, keeps `AGENTS.md` as the raw agent-log markdown file, and shows a technology flowchart for Codex, GitHub, Vercel, React/TypeScript, JSON-render, Stripe Projects, and planned providers. The default homepage should not expose technical build copy.
 - Draw cards expose match, winner slots, participant receipt state, final result, eligible count, winners, alternates, and audit seed data.
 - Fulfillment panels expose queue count, review count, and match-level actions.
 - Shirt studio exposes concept name, print copy, motif, and no-official-branding disclaimer.

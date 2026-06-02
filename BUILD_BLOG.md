@@ -235,6 +235,24 @@ The React app still owns the interactive prediction state, but internal links no
 
 This gives the site cleaner public URLs and lets pages like `/operations`, `/experiment`, `/prizes`, `/prizes/:team`, and `/sponsors` render as focused views instead of appended homepage sections.
 
+## Experiment Page Redesign
+
+The Experiment page was simplified after the site moved to page routes. Instead of showing every project document as a card, it now has one primary artifact: the build blog itself.
+
+The page renders `BUILD_BLOG.md` as a structured HTML article with headings, paragraphs, lists, links, inline code, and code blocks. The agent log stays available as `AGENTS.md`, but it is kept as a raw markdown file in a collapsible panel rather than competing with the article.
+
+The old page/document flow diagram was replaced with a technology flowchart. That flow focuses on how the app is built and operated:
+
+- Codex Desktop App
+- GitHub
+- Vercel
+- React + TypeScript
+- JSON-render
+- Stripe Projects
+- planned providers such as PostHog, WorkOS, Neon, POD, and 3PL
+
+The point is to explain the build stack and production path, not to repeat the public page navigation.
+
 ## Print-On-Demand And Sponsor Package Research
 
 The print-on-demand research led to a practical split:
@@ -321,10 +339,11 @@ Browser checks have covered:
 - legacy hash URL normalization from `/#experiment` and `/#operations` to page paths
 - header navigation between page paths while preserving app state
 - attached logo rendering at 98px inside the 120px topbar
+- Experiment page redesign with the Build Blog HTML article, AGENTS.md raw log, and technology flowchart
 
 Current visual artifact:
 
-`artifacts/worldcup-logo-20-bigger-again.png`
+`artifacts/experiment-build-blog-redesign.png`
 
 ## Commit Timeline
 
@@ -406,9 +425,13 @@ Changed the header logo link from an in-page section hash to `/` so clicking the
 
 Replaced public hash navigation with page-style paths for fixtures, teams, draws, prizes, sponsors, rewards, operations, and Experiment. Added focused route rendering for JSON-render sections, `/prizes`, `/prizes/:team`, `/sponsors`, and `/experiment`; preserved legacy hash URLs as redirects to clean paths; and added `vercel.json` so deployed direct page refreshes resolve correctly.
 
-### Current commit - Increase attached logo again
+### `e6ebe78` - Increase attached logo again
 
 Increased the active header logo by another 20%, from 82px to 98px, and raised the sticky topbar from 100px to 120px so the larger mark has matching spacing.
+
+### Current commit - Redesign Experiment build blog page
+
+Removed the old multi-document Experiment grid. The page now renders `BUILD_BLOG.md` as the primary HTML article, keeps `AGENTS.md` as the agent-log markdown file, and adds a technology flowchart covering Codex, GitHub, Vercel, React/TypeScript, JSON-render, Stripe Projects, and planned production providers.
 
 ## Next Build Steps
 

@@ -162,6 +162,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Updated the header logo link to navigate to `/` so it clears hash routes like `#experiment` and returns to the homepage without a fragment.
 - Replaced hash-fragment navigation with page-style URLs for fixtures, teams, prizes, sponsors, rewards, operations, and Experiment. Added focused route rendering for `/operations`, `/experiment`, `/prizes`, `/prizes/:team`, `/sponsors`, and the JSON-render section pages, plus a Vercel rewrite for direct route refreshes.
 - Increased the active header logo by another 20%, from 82px to 98px, and adjusted the sticky topbar height from 100px to 120px.
+- Redesigned `/experiment` to remove the old multi-document grid, render `BUILD_BLOG.md` as a polished HTML article, keep `AGENTS.md` as the raw agent-log markdown file, and add a technology flowchart for Codex, GitHub, Vercel, React/TypeScript, JSON-render, Stripe Projects, and planned providers.
 
 ## Verification
 
@@ -204,10 +205,11 @@ Browser verification covered:
 - verifying `/operations`, `/experiment`, `/prizes`, `/prizes/japan`, `/sponsors`, and legacy `/#operations` or `/#experiment` load without `#` fragments
 - verifying header navigation changes URLs client-side while preserving app state
 - verifying the attached logo renders at 98px inside the 120px topbar
+- verifying `/experiment` renders the build blog article, removes the old docs grid, keeps the agent log markdown file, and shows the technology flowchart nodes
 
 Latest screenshot:
 
-`artifacts/worldcup-logo-20-bigger-again.png`
+`artifacts/experiment-build-blog-redesign.png`
 
 ## Next Tasks
 
