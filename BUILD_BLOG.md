@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~3.1M`
-- estimated API-equivalent cost: `~$24`
+- estimated total tokens: `~3.2M`
+- estimated API-equivalent cost: `~$25`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -288,7 +288,7 @@ Current external project status from the sub-agent:
 - AgentMail API service exists as `agent-email`.
 - Cloudflare free Workers plan is provisioned, but hosting is not wired through it.
 - Sentry monitoring service exists as `monitoring`, but the frontend SDK is not wired yet.
-- PostHog account is linked through Projects.dev, with `worldcup2026-analytics` provisioned as the dedicated analytics project resource for this website; event capture and the real dashboard tiles are still pending.
+- PostHog account is linked through Projects.dev, with `worldcup2026-analytics` provisioned as the dedicated analytics project resource for this website. The earlier `analytics` resource remains provisioned but is removed from the default environment so the site has one active PostHog analytics target; event capture and the real dashboard tiles are still pending.
 - Vercel is blocked by Vercel-side signup verification.
 - Spend limits are not configured yet.
 
@@ -361,6 +361,8 @@ Browser checks have covered:
 - AI build disclosure estimate refreshed to `~2.9M` total tokens and `~$22` estimated API-equivalent cost
 - PostHog dashboard navigation made explicit in the header and footer
 - dedicated `worldcup2026-analytics` PostHog resource card on `/posthog`, including env var names, refreshed `~3.1M` token and `~$24` cost estimate, no old dashboard URL, no horizontal overflow, and no console errors
+- Projects.dev cleanup that removed the earlier `analytics` PostHog resource from the default environment, leaving `worldcup2026-analytics` as the only active PostHog analytics resource for future site wiring
+- confirmation that `posthog-js` is not installed and tracked source has no PostHog init/capture calls or hardcoded project tokens
 
 Current visual artifact:
 
@@ -488,11 +490,17 @@ Added a maintenance rule that every commit must refresh the public AI build disc
 
 Changed the header and footer navigation labels from generic analytics/PostHog wording to `PostHog Dashboard` so the dashboard route is visible at a glance. The current AI build disclosure estimate was refreshed to `~3.0M` total tokens and `~$23` for this commit.
 
-### Current commit - Create dedicated PostHog project
+### `3879d96` - Create dedicated PostHog project
 
 Created a new Projects.dev PostHog analytics project resource named `worldcup2026-analytics` for this website after the earlier dashboard reference turned out to be the wrong project.
 
 The `/posthog` page now names the exact resource, shows the Projects.dev-provisioned env var names without exposing secret values, and links to the PostHog account entry point instead of a misleading old dashboard URL. The current AI build disclosure estimate was refreshed to `~3.1M` total tokens and `~$24` for this commit.
+
+### Current commit - Keep one active PostHog target
+
+Removed the earlier `analytics` PostHog resource from the default Projects.dev environment so future website tracking has one active PostHog analytics target: `worldcup2026-analytics`.
+
+No PostHog SDK or snippet is installed in the website yet, and no events are being sent from the app. This commit updates `/posthog` and the project documentation to make the single-target rule explicit. The current AI build disclosure estimate was refreshed to `~3.2M` total tokens and `~$25`.
 
 ## Next Build Steps
 

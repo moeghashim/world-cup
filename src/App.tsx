@@ -334,8 +334,8 @@ const sponsorshipAddOns = [
 ]
 
 const aiBuildMetrics = {
-  tokenTotal: '~3.1M',
-  estimatedCost: '~$24',
+  tokenTotal: '~3.2M',
+  estimatedCost: '~$25',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
@@ -1683,7 +1683,10 @@ function PostHogDashboardPage() {
         <div className="posthog-resource-panel" aria-label="PostHog resource">
           <span>Projects.dev Resource</span>
           <strong>{posthogResourceName}</strong>
-          <p>Provisioned on the PostHog free analytics tier.</p>
+          <p>
+            Provisioned on the PostHog free analytics tier and kept as the only
+            active PostHog analytics resource in the default environment.
+          </p>
           <ul>
             {posthogEnvVars.map((envVar) => (
               <li key={envVar}>
