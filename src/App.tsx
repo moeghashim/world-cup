@@ -8,8 +8,10 @@ import {
 } from 'react'
 import { Renderer, JSONUIProvider, type StateStore } from '@json-render/react'
 import {
+  Activity,
   ArrowLeft,
   BadgeDollarSign,
+  BarChart3,
   BookOpen,
   CalendarDays,
   CheckCircle2,
@@ -18,10 +20,13 @@ import {
   ExternalLink,
   FileText,
   FlaskConical,
+  Gauge,
   Gift,
   Handshake,
+  ListChecks,
   Megaphone,
   Minus,
+  MousePointerClick,
   PackageCheck,
   Palette,
   Plus,
@@ -30,6 +35,7 @@ import {
   Sparkles,
   Target,
   Ticket,
+  TrendingUp,
   UsersRound,
 } from 'lucide-react'
 import heroImage from './assets/world-cup-hero.png'
@@ -328,11 +334,89 @@ const sponsorshipAddOns = [
 ]
 
 const aiBuildMetrics = {
-  tokenTotal: '~2.4M',
-  estimatedCost: '~$18',
+  tokenTotal: '~3.0M',
+  estimatedCost: '~$23',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
+
+const posthogDashboardUrl = 'https://us.posthog.com/dashboard'
+
+const posthogDashboardMetrics = [
+  {
+    label: 'Acquisition',
+    title: 'Supporter Visits',
+    value: '$pageview',
+    detail: 'Track page paths, referrers, selected team pages, and sponsor routes.',
+    icon: MousePointerClick,
+  },
+  {
+    label: 'Core Funnel',
+    title: 'Prediction Conversion',
+    value: '5 events',
+    detail: 'Follow a visitor from first pick through locked receipt and draw entry.',
+    icon: TrendingUp,
+  },
+  {
+    label: 'Reward Flow',
+    title: 'Prize Claims',
+    value: '3 stages',
+    detail: 'Monitor winner reveal, claim start, shipment queue, and review prompt.',
+    icon: Gift,
+  },
+  {
+    label: 'Operations',
+    title: 'Fulfillment Health',
+    value: 'Live queue',
+    detail: 'Give sponsors a clean status readout for packages, shirts, and reviews.',
+    icon: Gauge,
+  },
+] as const
+
+const posthogFunnelSteps = [
+  ['Visit match page', '$pageview', 'Route-level traffic by fixture, team, and campaign.'],
+  ['Start prediction', 'prediction_started', 'Visitor selects a match or begins score entry.'],
+  ['Lock receipt', 'prediction_locked', 'A draw receipt is created and committed.'],
+  ['Enter draw', 'draw_entry_created', 'Correct prediction qualifies for match reward draw.'],
+  ['Reveal result', 'draw_revealed', 'Participant sees winner, alternate, or not-selected state.'],
+  ['Claim reward', 'reward_claim_started', 'Winner starts shirt and sponsor package claim.'],
+] as const
+
+const posthogEventPlan = [
+  {
+    area: 'Prediction',
+    events: ['prediction_started', 'prediction_locked', 'score_changed'],
+    owner: 'Frontend',
+  },
+  {
+    area: 'Draw',
+    events: ['draw_entry_created', 'draw_revealed', 'winner_selected'],
+    owner: 'Draw engine',
+  },
+  {
+    area: 'Prizes',
+    events: ['prize_detail_viewed', 'reward_claim_started', 'shirt_selected'],
+    owner: 'Rewards UI',
+  },
+  {
+    area: 'Sponsors',
+    events: ['sponsor_card_viewed', 'sponsor_cta_clicked', 'review_prompt_sent'],
+    owner: 'Campaign ops',
+  },
+  {
+    area: 'Fulfillment',
+    events: ['fulfillment_queued', 'shipment_created', 'review_completed'],
+    owner: 'Operations',
+  },
+] as const
+
+const posthogSetupItems = [
+  'Use the existing Projects.dev PostHog analytics resource and frontend-safe project token.',
+  'Expose only VITE_POSTHOG_KEY and VITE_POSTHOG_HOST to the browser; keep personal API keys server-side.',
+  'Install posthog-js or the PostHog web snippet after the final tracking policy is approved.',
+  'Create a real PostHog dashboard with prediction funnel, route traffic, sponsor conversions, fulfillment queue, and review completion tiles.',
+  'Add privacy copy before enabling session replay or person-level identity tracking.',
+] as const
 
 const technologyFlow = [
   {
@@ -463,6 +547,8 @@ function getLegacyHashPath(hash: string) {
     '#sponsors': '/sponsors',
     '#rewards': '/rewards',
     '#operations': '/operations',
+    '#posthog': '/posthog',
+    '#analytics': '/posthog',
     '#experiment': '/experiment',
   }
 
@@ -886,6 +972,16 @@ function App() {
       <main className="app-shell" style={themeVars}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
         <SponsorSection />
+        <SiteFooter />
+      </main>
+    )
+  }
+
+  if (routeState.pathname === '/posthog') {
+    return (
+      <main className="app-shell" style={themeVars}>
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
+        <PostHogDashboardPage />
         <SiteFooter />
       </main>
     )
@@ -1463,6 +1559,134 @@ function SponsorSection() {
   )
 }
 
+function PostHogDashboardPage() {
+  return (
+    <section
+      className="posthog-dashboard"
+      id="posthog"
+      aria-labelledby="posthog-title"
+    >
+      <div className="posthog-dashboard-hero">
+        <div className="section-heading compact">
+          <span className="icon-box">
+            <BarChart3 size={18} />
+          </span>
+          <div>
+            <p className="section-kicker">PostHog Dashboard</p>
+            <h1 id="posthog-title">Measure The Prediction Funnel</h1>
+          </div>
+        </div>
+        <div>
+          <p>
+            This dashboard defines the PostHog view for visitor acquisition,
+            prediction conversion, draw reveals, prize claims, sponsor reviews,
+            and fulfillment health. It is the operational map for the real
+            PostHog insights once event capture is enabled.
+          </p>
+          <div className="posthog-dashboard-actions">
+            <a
+              className="prize-action"
+              href={posthogDashboardUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <BarChart3 size={17} />
+              <span>Open PostHog</span>
+              <ExternalLink size={15} />
+            </a>
+            <a className="prize-action secondary" href="/operations">
+              <ShieldCheck size={17} />
+              <span>Operations Plan</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div className="posthog-status-grid" aria-label="Dashboard metrics">
+        {posthogDashboardMetrics.map((metric) => {
+          const MetricIcon = metric.icon
+
+          return (
+            <article className="posthog-metric-card" key={metric.title}>
+              <span className="posthog-metric-icon">
+                <MetricIcon size={18} />
+              </span>
+              <p>{metric.label}</p>
+              <h2>{metric.title}</h2>
+              <strong>{metric.value}</strong>
+              <span>{metric.detail}</span>
+            </article>
+          )
+        })}
+      </div>
+
+      <div className="posthog-dashboard-layout">
+        <article className="posthog-panel">
+          <header>
+            <Activity size={18} />
+            <div>
+              <p className="section-kicker">Main Funnel</p>
+              <h2>Visitor To Reward Claim</h2>
+            </div>
+          </header>
+          <ol className="posthog-funnel-list">
+            {posthogFunnelSteps.map(([title, eventName, detail], index) => (
+              <li className="posthog-funnel-step" key={eventName}>
+                <span>{index + 1}</span>
+                <div>
+                  <strong>{title}</strong>
+                  <code>{eventName}</code>
+                  <p>{detail}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </article>
+
+        <article className="posthog-panel">
+          <header>
+            <ListChecks size={18} />
+            <div>
+              <p className="section-kicker">Event Taxonomy</p>
+              <h2>Dashboard Tiles To Build</h2>
+            </div>
+          </header>
+          <div className="posthog-event-table" role="table">
+            {posthogEventPlan.map((group) => (
+              <div className="posthog-event-row" role="row" key={group.area}>
+                <strong>{group.area}</strong>
+                <span>{group.events.join(', ')}</span>
+                <em>{group.owner}</em>
+              </div>
+            ))}
+          </div>
+        </article>
+      </div>
+
+      <aside className="posthog-setup-panel">
+        <div>
+          <p className="section-kicker">Setup State</p>
+          <h2>Connected Through Projects.dev, Capture Still Pending</h2>
+          <p>
+            The PostHog account and analytics resource are present in the
+            project state. The dashboard is ready as a tracking contract, but
+            real product events should wait until the SDK, privacy copy, and
+            production event names are approved.
+          </p>
+        </div>
+        <ul className="posthog-setup-list">
+          {posthogSetupItems.map((item) => (
+            <li key={item}>
+              <CheckCircle2 size={16} />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    </section>
+  )
+}
+
 function Topbar({
   drawCount,
   lockedCount,
@@ -1490,6 +1714,7 @@ function Topbar({
           <a href="/sponsors">Sponsors</a>
           <a href="/rewards">Rewards</a>
           <a href="/operations">Operations</a>
+          <a href="/posthog">PostHog Dashboard</a>
         </nav>
         <button className="account-button" type="button">
           <Ticket size={17} />
@@ -1831,6 +2056,7 @@ function SiteFooter() {
         <a href="/prizes">Prizes</a>
         <a href="/sponsors">Sponsors</a>
         <a href="/operations">Operations</a>
+        <a href="/posthog">PostHog Dashboard</a>
       </nav>
     </footer>
   )

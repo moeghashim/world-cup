@@ -376,6 +376,7 @@
 .prize-home,
 .prize-detail-page,
 .sponsor-band,
+.posthog-dashboard,
 .route-page-hero,
 .content-band,
 .insight-band,
@@ -421,7 +422,8 @@
 
 .prize-home,
 .prize-detail-page,
-.sponsor-band {
+.sponsor-band,
+.posthog-dashboard {
   border-bottom: 1px solid var(--line);
   scroll-margin-top: calc(var(--topbar-height) + 14px);
 }
@@ -877,6 +879,239 @@
 
 .sponsor-compliance-note svg {
   color: var(--team-secondary);
+  margin-top: 2px;
+}
+
+.posthog-dashboard {
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.98), rgba(234, 241, 231, 0.92)),
+    var(--surface);
+  display: grid;
+  gap: 22px;
+}
+
+.posthog-dashboard-hero {
+  align-items: end;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(300px, 0.75fr) minmax(0, 0.6fr);
+}
+
+.posthog-dashboard-hero > div:last-child {
+  color: var(--muted);
+  display: grid;
+  gap: 16px;
+  line-height: 1.55;
+}
+
+.posthog-dashboard-hero p {
+  margin: 0;
+}
+
+.posthog-dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.posthog-status-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.posthog-metric-card,
+.posthog-panel,
+.posthog-setup-panel {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 34px rgba(23, 24, 18, 0.08);
+}
+
+.posthog-metric-card {
+  display: grid;
+  gap: 8px;
+  min-height: 230px;
+  padding: 16px;
+}
+
+.posthog-metric-icon {
+  align-items: center;
+  background: var(--team-primary);
+  color: var(--team-secondary);
+  display: inline-flex;
+  height: 40px;
+  justify-content: center;
+  width: 40px;
+}
+
+.posthog-metric-card p,
+.posthog-panel header p,
+.posthog-setup-panel p,
+.posthog-metric-card h2,
+.posthog-panel h2,
+.posthog-setup-panel h2 {
+  margin: 0;
+}
+
+.posthog-metric-card p {
+  color: var(--team-primary);
+  font-size: 0.76rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.posthog-metric-card h2,
+.posthog-panel h2,
+.posthog-setup-panel h2 {
+  color: var(--ink);
+  font-size: clamp(1.35rem, 2.2vw, 2rem);
+  line-height: 1;
+}
+
+.posthog-metric-card strong {
+  color: var(--team-primary);
+  font-size: clamp(1.9rem, 3.2vw, 2.7rem);
+  line-height: 0.95;
+}
+
+.posthog-metric-card > span:last-child,
+.posthog-setup-panel p {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.posthog-dashboard-layout {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 0.95fr) minmax(340px, 0.75fr);
+}
+
+.posthog-panel,
+.posthog-setup-panel {
+  display: grid;
+  gap: 16px;
+  padding: clamp(16px, 2.4vw, 24px);
+}
+
+.posthog-panel header {
+  align-items: start;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 24px minmax(0, 1fr);
+}
+
+.posthog-panel header svg {
+  color: var(--team-primary);
+  margin-top: 2px;
+}
+
+.posthog-funnel-list,
+.posthog-setup-list {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.posthog-funnel-step {
+  align-items: start;
+  background: var(--team-soft);
+  border: 1px solid color-mix(in srgb, var(--team-primary), #ffffff 65%);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 36px minmax(0, 1fr);
+  padding: 12px;
+}
+
+.posthog-funnel-step > span {
+  align-items: center;
+  background: var(--team-primary);
+  color: var(--team-secondary);
+  display: inline-flex;
+  font-weight: 950;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.posthog-funnel-step strong,
+.posthog-funnel-step code,
+.posthog-funnel-step p {
+  display: block;
+}
+
+.posthog-funnel-step strong {
+  color: var(--ink);
+}
+
+.posthog-funnel-step code {
+  color: var(--team-primary);
+  font-size: 0.82rem;
+  font-weight: 900;
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+.posthog-funnel-step p {
+  color: var(--muted);
+  line-height: 1.43;
+  margin: 5px 0 0;
+}
+
+.posthog-event-table {
+  border: 1px solid var(--line);
+  display: grid;
+}
+
+.posthog-event-row {
+  align-items: start;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 112px minmax(0, 1fr) 110px;
+  padding: 12px;
+}
+
+.posthog-event-row + .posthog-event-row {
+  border-top: 1px solid var(--line);
+}
+
+.posthog-event-row strong {
+  color: var(--ink);
+}
+
+.posthog-event-row span {
+  color: var(--muted);
+  line-height: 1.42;
+  overflow-wrap: anywhere;
+}
+
+.posthog-event-row em {
+  color: var(--team-primary);
+  font-style: normal;
+  font-weight: 900;
+}
+
+.posthog-setup-panel {
+  align-items: start;
+  grid-template-columns: minmax(280px, 0.55fr) minmax(0, 1fr);
+}
+
+.posthog-setup-list li {
+  align-items: start;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 9px;
+  grid-template-columns: 20px minmax(0, 1fr);
+  line-height: 1.43;
+  padding: 10px;
+}
+
+.posthog-setup-list svg {
+  color: var(--team-primary);
   margin-top: 2px;
 }
 
@@ -3322,6 +3557,7 @@
   .prize-team-grid,
   .prize-detail-grid,
   .sponsor-tier-grid,
+  .posthog-status-grid,
   .provider-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3329,6 +3565,9 @@
   .spotlight,
   .prize-home-heading,
   .sponsor-heading,
+  .posthog-dashboard-hero,
+  .posthog-dashboard-layout,
+  .posthog-setup-panel,
   .featured-prize,
   .prize-detail-hero,
   .sponsor-addons,
@@ -3411,6 +3650,7 @@
   .prize-home,
   .prize-detail-page,
   .sponsor-band,
+  .posthog-dashboard,
   .content-band,
   .insight-band,
   .leaderboard-band,
@@ -3439,11 +3679,16 @@
   .prize-detail-grid,
   .sponsor-tier-grid,
   .sponsor-addons ul,
+  .posthog-status-grid,
   .provider-grid,
   .supporter-fixture-list,
   .group-grid,
   .schedule-stat-grid,
   .next-score-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .posthog-event-row {
     grid-template-columns: 1fr;
   }
 

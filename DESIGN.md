@@ -11,7 +11,7 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Lead with the usable prediction experience.
 - Keep the hero cinematic, but let workflow and match cards dominate the product.
 - Use a persistent workflow rail on desktop: Predict, Teams, Draw, Personalize, Fulfill, Review.
-- Use clean page paths for primary sections instead of hash fragments, so visitors can open `/operations`, `/prizes/japan`, and `/experiment` as standalone URLs.
+- Use clean page paths for primary sections instead of hash fragments, so visitors can open `/operations`, `/posthog`, `/prizes/japan`, and `/experiment` as standalone URLs.
 - Use full-width bands and unframed workspace sections; reserve cards for repeated items, panels, and operational modules.
 - Keep repeated match, draw, reward, and provider modules visually consistent.
 - Keep footer attribution restrained and operational: show the Experiment link and `10claws.com` association on the homepage, but keep Codex Desktop App and `https://projects.dev/` inside the Experiment view and build documentation.
@@ -58,6 +58,7 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Fulfillment panels expose queue count, review count, and match-level actions.
 - Shirt studio exposes concept name, print copy, motif, and no-official-branding disclaimer.
 - Provider cards distinguish role, reason, and operational risk.
+- PostHog dashboard cards expose acquisition, prediction funnel, prize claim, fulfillment health, event taxonomy, and setup state without implying live tracking before SDK capture is enabled.
 
 ## Polish Checklist
 

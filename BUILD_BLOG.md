@@ -229,11 +229,12 @@ The navigation moved from hash fragments such as `/#operations` and `/#prizes/ja
 - `/sponsors`
 - `/rewards`
 - `/operations`
+- `/posthog`
 - `/experiment`
 
 The React app still owns the interactive prediction state, but internal links now push real paths into browser history instead of changing `window.location.hash`. That keeps predictions and draw state alive while visitors move between pages. Direct page refreshes are supported by a Vercel rewrite in `vercel.json`, and legacy hash URLs are normalized to the new paths for backward compatibility.
 
-This gives the site cleaner public URLs and lets pages like `/operations`, `/experiment`, `/prizes`, `/prizes/:team`, and `/sponsors` render as focused views instead of appended homepage sections.
+This gives the site cleaner public URLs and lets pages like `/operations`, `/posthog`, `/experiment`, `/prizes`, `/prizes/:team`, and `/sponsors` render as focused views instead of appended homepage sections.
 
 ## Experiment Page Redesign
 
@@ -249,7 +250,7 @@ The old page/document flow diagram was replaced with a technology flowchart. Tha
 - React + TypeScript
 - JSON-render
 - Stripe Projects
-- planned providers such as PostHog, WorkOS, Neon, POD, and 3PL
+- planned and active providers such as PostHog, WorkOS, Neon, POD, and 3PL
 
 The point is to explain the build stack and production path, not to repeat the public page navigation.
 
@@ -257,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~2.4M`
-- estimated API-equivalent cost: `~$18`
+- estimated total tokens: `~3.0M`
+- estimated API-equivalent cost: `~$23`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -284,7 +285,7 @@ Current external project status from the sub-agent:
 - Neon free plan is provisioned.
 - Neon Postgres service exists as `primary-db`.
 - WorkOS AuthKit sandbox service exists as `auth`.
-- PostHog account is linked, but its service setup is incomplete.
+- PostHog account and analytics resource are linked through Projects.dev; event capture and the real dashboard tiles are still pending.
 - Vercel is blocked by Vercel-side signup verification.
 - Cloudflare, Sentry, and spend limits are not configured yet.
 
@@ -349,14 +350,17 @@ Browser checks have covered:
 - header navigation between page paths while preserving app state
 - attached logo rendering at 98px inside the 120px topbar
 - Experiment page redesign with the Build Blog HTML article, AGENTS.md raw log, and technology flowchart
-- AI build disclosure banner with estimated total tokens and API-equivalent cost
+- AI build disclosure banner with refreshed estimated total tokens and API-equivalent cost
 - Google Analytics script injection with `G-RFPJRPKYQR` and GA4 Enhanced Measurement guidance for page routes
 - AI build disclosure moved above the logo as a top status bar
 - header logo reduced from 98px to 78px below the AI status bar
+- `/posthog` dashboard page with metric cards, funnel steps, event taxonomy, setup checklist, and legacy `#posthog` redirect
+- AI build disclosure estimate refreshed to `~2.9M` total tokens and `~$22` estimated API-equivalent cost
+- PostHog dashboard navigation made explicit in the header and footer
 
 Current visual artifact:
 
-`artifacts/logo-20-smaller-statusbar.png`
+`artifacts/posthog-dashboard.png`
 
 ## Commit Timeline
 
@@ -462,9 +466,23 @@ The measurement ID is committed as the prototype default, while `VITE_GA_MEASURE
 
 Moved the "Built entirely by AI" disclosure above the logo and primary navigation so it reads like a site status bar instead of a content banner. The sticky header now treats the AI status bar and logo/nav header as one chrome block, and the mobile layout keeps the disclosure compact by hiding the longer estimate note while preserving the token and cost values.
 
-### Current commit - Reduce oversized header logo
+### `972cd94` - Reduce oversized header logo
 
 Reduced the active header logo by 20%, from 98px to 78px, after the larger size made the header feel too heavy. The logo/navigation row now uses a 100px height again, while the AI build disclosure remains above it as the separate top status bar.
+
+### `be43398` - Add PostHog dashboard page
+
+Added `/posthog` as the first PostHog dashboard surface for the product. The page defines the metrics the real PostHog dashboard should track: acquisition, prediction conversion, prize claims, fulfillment health, visitor-to-reward funnel steps, event taxonomy, ownership, and setup state.
+
+The dashboard links to the PostHog app, but it does not send events yet. That boundary is deliberate: the Projects.dev PostHog analytics resource exists, while SDK capture, privacy copy, session replay policy, and final event names still need approval before production tracking begins.
+
+### `141afb0` - Add token estimate maintenance rule
+
+Added a maintenance rule that every commit must refresh the public AI build disclosure token total and API-equivalent estimated cost. The current estimate was updated to `~2.9M` total tokens and `~$22` so this commit follows the rule immediately.
+
+### Current commit - Make PostHog dashboard visible
+
+Changed the header and footer navigation labels from generic analytics/PostHog wording to `PostHog Dashboard` so the dashboard route is visible at a glance. The current AI build disclosure estimate was refreshed to `~3.0M` total tokens and `~$23` for this commit.
 
 ## Next Build Steps
 
@@ -476,6 +494,7 @@ The prototype needs several production layers before it can become a real campai
 - admin tooling for sponsors, matches, product SKUs, and fulfillment batches
 - real POD integration for T-shirt orders
 - real 3PL/kitting integration for sponsor boxes
+- enable PostHog SDK capture for the `/posthog` dashboard events after the tracking and privacy policy is approved
 - deeper analytics events for prediction starts, locked receipts, draw entries, winner reveals, claims, deliveries, and review prompts
 - mobile and tablet visual verification
 
@@ -487,4 +506,5 @@ Every commit should update this file with:
 - why the change was made
 - which files or systems were affected
 - what verification was run
+- latest total token estimate and API-equivalent estimated cost shown in the AI build disclosure
 - what the next relevant build step is
