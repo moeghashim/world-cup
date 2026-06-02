@@ -42,6 +42,7 @@ import japanPrizeImage from './assets/prizes/japan-shirt.png'
 import moroccoPrizeImage from './assets/prizes/morocco-shirt.png'
 import spainPrizeImage from './assets/prizes/spain-shirt.png'
 import usaPrizeImage from './assets/prizes/usa-shirt.png'
+import { initializeGoogleAnalytics } from './analytics'
 import './App.css'
 import agentsMd from '../AGENTS.md?raw'
 import buildBlogMd from '../BUILD_BLOG.md?raw'
@@ -740,6 +741,10 @@ function App() {
     return () => {
       document.removeEventListener('click', navigateToInternalPage)
     }
+  }, [])
+
+  useEffect(() => {
+    initializeGoogleAnalytics()
   }, [])
 
   useEffect(() => {

@@ -350,6 +350,7 @@ Browser checks have covered:
 - attached logo rendering at 98px inside the 120px topbar
 - Experiment page redesign with the Build Blog HTML article, AGENTS.md raw log, and technology flowchart
 - AI build disclosure banner with estimated total tokens and API-equivalent cost
+- Google Analytics script injection with `G-RFPJRPKYQR` and GA4 Enhanced Measurement guidance for page routes
 
 Current visual artifact:
 
@@ -443,9 +444,17 @@ Increased the active header logo by another 20%, from 82px to 98px, and raised t
 
 Removed the old multi-document Experiment grid. The page now renders `BUILD_BLOG.md` as the primary HTML article, keeps `AGENTS.md` as the agent-log markdown file, and adds a technology flowchart covering Codex, GitHub, Vercel, React/TypeScript, JSON-render, Stripe Projects, and planned production providers.
 
-### Current commit - Add AI build disclosure banner
+### `9e2160a` - Add AI build disclosure banner
 
 Added a site-wide notification banner that says the project was built entirely by AI and displays estimated usage of `~2.4M` total tokens with an API-equivalent estimated cost of `~$18`.
+
+### Current commit - Activate Google Analytics page views
+
+Added a small Google Analytics integration around the user-created GA4 web stream `G-RFPJRPKYQR`.
+
+The app now loads `gtag.js` and runs the standard GA4 `config` command once when the React app starts. The website uses client-side page routes such as `/fixtures`, `/prizes/japan`, `/operations`, and `/experiment`, so the GA4 web stream should keep Enhanced Measurement enabled for "Page changes based on browser history events" to count virtual page views from the History API.
+
+The measurement ID is committed as the prototype default, while `VITE_GA_MEASUREMENT_ID` can override it later for staging, production, or a replacement property. The Google Analytics MCP documentation was useful for understanding the tooling boundary, but account/property setup was handled manually in the Google Analytics UI before the measurement ID was wired into the site.
 
 ## Next Build Steps
 
@@ -457,7 +466,7 @@ The prototype needs several production layers before it can become a real campai
 - admin tooling for sponsors, matches, product SKUs, and fulfillment batches
 - real POD integration for T-shirt orders
 - real 3PL/kitting integration for sponsor boxes
-- analytics events for prediction, draw, claim, delivery, and review funnels
+- deeper analytics events for prediction starts, locked receipts, draw entries, winner reveals, claims, deliveries, and review prompts
 - mobile and tablet visual verification
 
 ## Maintenance Rule

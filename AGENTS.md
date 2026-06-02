@@ -18,6 +18,7 @@ This document is the project artifact for how the product is being built. Update
 - `@json-render/core` and `@json-render/react` for the spec-driven product surface.
 - `zod` for catalog props/action schemas.
 - `lucide-react` for interface icons.
+- Google Analytics gtag for page-view tracking, using `G-RFPJRPKYQR` by default with `VITE_GA_MEASUREMENT_ID` as the environment override.
 - Generated raster stadium hero copied to `src/assets/world-cup-hero.png`.
 
 ## Architecture Notes
@@ -49,6 +50,8 @@ Public navigation now uses page-style paths instead of hash fragments:
 - `/experiment`
 
 Legacy hash URLs such as `/#experiment`, `/#operations`, and `/#prizes/japan` are normalized to their page paths in the browser. `vercel.json` rewrites direct route requests back to the Vite app entry so deployed page refreshes resolve correctly.
+
+Google Analytics is initialized from `src/analytics.ts`. The app loads `gtag.js` once and uses the standard GA4 `config` command. SPA route changes should be tracked by GA4 Enhanced Measurement when "Page changes based on browser history events" is enabled on the web data stream.
 
 The JSON-render layer lives in `src/jsonRender/predictionCatalog.tsx`. It defines a domain catalog with components like `MatchBoard`, `DrawControl`, `ShirtStudio`, `FulfillmentPipeline`, and `ProviderPlan`. The JSON spec controls section composition while registered actions call deterministic state updates.
 
@@ -102,6 +105,14 @@ It does not replace payments, contest compliance, prize fulfillment, POD APIs, 3
 Recommended use: use Stripe Projects for the build stack and SaaS spend limits. Keep Stripe payment products separate for sponsor billing, taxes, identity checks, fraud controls, and approved payout flows.
 
 Public build attribution: this project is being built with [Codex](https://chatgpt.com/codex) Desktop App by OpenAI and [projects.dev](https://projects.dev/) by Stripe without writing a single line of code. Keep that attribution in the footer-linked Experiment view and documentation, not in the default homepage experience.
+
+### Google Analytics
+
+References: https://developers.google.com/analytics/devguides/MCP and https://developers.google.com/analytics/devguides/collection/ga4
+
+The Google Analytics MCP path is useful for read/reporting workflows, but account and property setup still happened through the Google Analytics UI for this project. The user-created GA4 web stream measurement ID is `G-RFPJRPKYQR`.
+
+Implementation position: use GA4 only for page-view tracking in the prototype. Keep GA4 Enhanced Measurement history tracking enabled for page-style SPA routes. Add explicit product funnel events later for prediction starts, locked receipts, draw entries, winner reveals, fulfillment claims, and review prompts.
 
 ## T-Shirt Design System
 
@@ -164,6 +175,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Increased the active header logo by another 20%, from 82px to 98px, and adjusted the sticky topbar height from 100px to 120px.
 - Redesigned `/experiment` to remove the old multi-document grid, render `BUILD_BLOG.md` as a polished HTML article, keep `AGENTS.md` as the raw agent-log markdown file, and add a technology flowchart for Codex, GitHub, Vercel, React/TypeScript, JSON-render, Stripe Projects, and planned providers.
 - Added a site-wide AI build disclosure banner that says the project was built entirely by AI and shows estimated usage of `~2.4M` total tokens with an API-equivalent estimated cost of `~$18`.
+- Activated Google Analytics page-view tracking for the user-created GA4 web stream `G-RFPJRPKYQR`, with a `VITE_GA_MEASUREMENT_ID` override for future environment-specific streams.
 
 ## Verification
 
@@ -208,6 +220,7 @@ Browser verification covered:
 - verifying the attached logo renders at 98px inside the 120px topbar
 - verifying `/experiment` renders the build blog article, removes the old docs grid, keeps the agent log markdown file, and shows the technology flowchart nodes
 - verifying the AI build disclosure banner renders on the homepage with the estimated token total and cost
+- verifying the Google Analytics gtag script is injected with `G-RFPJRPKYQR`, `/operations` navigation works, and the browser reports no console errors
 
 Latest screenshot:
 
