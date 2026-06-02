@@ -24,6 +24,26 @@ flowchart LR
   N --> O["Winner is prompted to review sponsor products"]
 ```
 
+## Page Routes
+
+The public site uses page-style paths instead of hash fragments. Internal links update browser history without reloading the app, and a Vercel rewrite supports direct refreshes on deployed routes.
+
+| Path | Purpose |
+| --- | --- |
+| `/` | Homepage with supporter team, prize, sponsor, and prediction workflow overview. |
+| `/fixtures` | Focused prediction system page. |
+| `/teams` | Teams and group-stage schedule page. |
+| `/draws` | Match-level draw page. |
+| `/prizes` | All localized shirt prize previews. |
+| `/prizes/:team` | Standalone team prize page, such as `/prizes/japan`. |
+| `/shirts` | Supporter T-shirt studio page. |
+| `/sponsors` | Sponsor package page. |
+| `/rewards` | Fulfillment and review page. |
+| `/operations` | POD, 3PL, and provider plan page. |
+| `/experiment` | Build documentation page. |
+
+Legacy URLs such as `/#operations`, `/#experiment`, and `/#prizes/japan` are normalized to `/operations`, `/experiment`, and `/prizes/japan`.
+
 ## App Architecture
 
 React owns the domain state and business behavior. JSON-render controls a constrained, spec-driven product surface, but it does not own prize, draw, fulfillment, or eligibility rules.
@@ -32,9 +52,10 @@ React owns the domain state and business behavior. JSON-render controls a constr
 flowchart TB
   subgraph Browser["Website In Browser"]
     App["React App Shell"]
+    Routes["Page Routes: /fixtures, /teams, /prizes, /operations, /experiment"]
     Theme["Team Theme CSS Variables"]
     Home["Homepage: fixtures, prizes, sponsors, predictions, winners"]
-    Experiment["Experiment View: build docs"]
+    Experiment["Experiment Page: build docs"]
   end
 
   subgraph State["Authoritative App State"]
@@ -59,6 +80,7 @@ flowchart TB
   end
 
   App --> Theme
+  App --> Routes
   App --> Home
   App --> Experiment
   App --> State
@@ -95,7 +117,7 @@ sequenceDiagram
 
 | Area | Tools | How They Are Used |
 | --- | --- | --- |
-| App framework | Vite, React, TypeScript | Build the single-page interactive website. |
+| App framework | Vite, React, TypeScript | Build the page-routed interactive website. |
 | Spec-driven UI | `@json-render/core`, `@json-render/react` | Render controlled product sections from a JSON spec and registered component catalog. |
 | Validation | `zod` | Define typed component props and action schemas for the JSON-render catalog. |
 | Icons | `lucide-react` | Provide consistent interface icons for buttons, navigation, prizes, draws, sponsor packages, and operations. |
@@ -107,6 +129,7 @@ sequenceDiagram
 | Infrastructure planning | `https://projects.dev/` / Stripe Projects | Tracks planned infrastructure provisioning for database, auth, analytics, hosting, observability, and spend controls. |
 | Source control | Git, GitHub, GitHub CLI | Manage commits, branches, pushes, and pull requests. |
 | Verification | `npm run lint`, `npm run build`, browser checks | Confirm code quality, production build success, and key rendered states. |
+| Deployment routing | `vercel.json` rewrite | Let direct page refreshes such as `/operations` and `/experiment` resolve to the Vite app entry. |
 
 ## Planned Production Integrations
 

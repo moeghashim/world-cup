@@ -11,6 +11,7 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Lead with the usable prediction experience.
 - Keep the hero cinematic, but let workflow and match cards dominate the product.
 - Use a persistent workflow rail on desktop: Predict, Teams, Draw, Personalize, Fulfill, Review.
+- Use clean page paths for primary sections instead of hash fragments, so visitors can open `/operations`, `/prizes/japan`, and `/experiment` as standalone URLs.
 - Use full-width bands and unframed workspace sections; reserve cards for repeated items, panels, and operational modules.
 - Keep repeated match, draw, reward, and provider modules visually consistent.
 - Keep footer attribution restrained and operational: show the Experiment link and `10claws.com` association on the homepage, but keep Codex Desktop App and `https://projects.dev/` inside the Experiment view and build documentation.
@@ -62,5 +63,5 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Text must fit buttons and cards at desktop and mobile widths.
 - Button labels must remain visible in every team theme.
 - Empty states should be product states, not implementation notes.
-- The top navigation and workflow rail should link to real sections.
+- The top navigation and workflow rail should link to real page paths.
 - Run lint, build, and browser verification after visual changes.

@@ -291,10 +291,38 @@
 .prize-home,
 .prize-detail-page,
 .sponsor-band,
+.route-page-hero,
 .content-band,
 .insight-band,
 .leaderboard-band {
   padding: clamp(28px, 5vw, 58px) clamp(18px, 5vw, 64px);
+}
+
+.route-page-hero {
+  background:
+    linear-gradient(135deg, rgba(255, 250, 240, 0.96), rgba(234, 241, 231, 0.92)),
+    var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.route-page-hero .section-heading {
+  align-items: start;
+  max-width: 920px;
+}
+
+.route-page-hero h1 {
+  color: var(--ink);
+  font-size: clamp(2.1rem, 4.5vw, 4.8rem);
+  line-height: 0.98;
+  margin: 0;
+}
+
+.route-page-hero p:not(.section-kicker) {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.55;
+  margin: 12px 0 0;
+  max-width: 680px;
 }
 
 .team-strip {
@@ -886,6 +914,10 @@
   align-items: start;
   display: grid;
   grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+}
+
+.route-workspace {
+  border-bottom: 1px solid var(--line);
 }
 
 .workspace-main {

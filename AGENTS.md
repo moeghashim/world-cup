@@ -33,7 +33,22 @@ The app uses React for the authoritative domain state:
 - fulfillment queue
 - review prompt status
 
-The app also exposes an `#experiment` section from the footer. That section imports `BUILD_BLOG.md`, `AGENTS.md`, `PRODUCT.md`, `WEBSITE_FLOW.md`, and `DESIGN.md` as raw markdown so the build process is visible inside the website experience.
+The app also exposes an `/experiment` page from the footer. That page imports `BUILD_BLOG.md`, `AGENTS.md`, `PRODUCT.md`, `WEBSITE_FLOW.md`, and `DESIGN.md` as raw markdown so the build process is visible inside the website experience.
+
+Public navigation now uses page-style paths instead of hash fragments:
+
+- `/fixtures`
+- `/teams`
+- `/draws`
+- `/prizes`
+- `/prizes/:team`
+- `/shirts`
+- `/sponsors`
+- `/rewards`
+- `/operations`
+- `/experiment`
+
+Legacy hash URLs such as `/#experiment`, `/#operations`, and `/#prizes/japan` are normalized to their page paths in the browser. `vercel.json` rewrites direct route requests back to the Vite app entry so deployed page refreshes resolve correctly.
 
 The JSON-render layer lives in `src/jsonRender/predictionCatalog.tsx`. It defines a domain catalog with components like `MatchBoard`, `DrawControl`, `ShirtStudio`, `FulfillmentPipeline`, and `ProviderPlan`. The JSON spec controls section composition while registered actions call deterministic state updates.
 
@@ -145,6 +160,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Updated the homepage supporter picker heading from "Choose Your Theme" to "Choose Your Team" so the public copy focuses on team choice rather than implementation theming.
 - Updated the Experiment view build attribution to link Codex and projects.dev and describe the no-code build process.
 - Updated the header logo link to navigate to `/` so it clears hash routes like `#experiment` and returns to the homepage without a fragment.
+- Replaced hash-fragment navigation with page-style URLs for fixtures, teams, prizes, sponsors, rewards, operations, and Experiment. Added focused route rendering for `/operations`, `/experiment`, `/prizes`, `/prizes/:team`, `/sponsors`, and the JSON-render section pages, plus a Vercel rewrite for direct route refreshes.
 
 ## Verification
 
@@ -184,6 +200,8 @@ Browser verification covered:
 - verifying the homepage supporter picker renders "Choose Your Team"
 - verifying the Experiment view renders the updated Codex and projects.dev attribution links
 - verifying the header logo link points to `/`
+- verifying `/operations`, `/experiment`, `/prizes`, `/prizes/japan`, `/sponsors`, and legacy `/#operations` or `/#experiment` load without `#` fragments
+- verifying header navigation changes URLs client-side while preserving app state
 
 Latest screenshot:
 

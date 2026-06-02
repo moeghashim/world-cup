@@ -216,6 +216,25 @@ This makes the process artifact part of the product experience, not just a repos
 
 `BUILD_BLOG.md` remains the file that is updated on every commit. It is the running public article for how the project is being built.
 
+## From Hash Anchors To Page Routes
+
+The navigation moved from hash fragments such as `/#operations` and `/#prizes/japan` to page-style URLs:
+
+- `/fixtures`
+- `/teams`
+- `/draws`
+- `/prizes`
+- `/prizes/japan`
+- `/shirts`
+- `/sponsors`
+- `/rewards`
+- `/operations`
+- `/experiment`
+
+The React app still owns the interactive prediction state, but internal links now push real paths into browser history instead of changing `window.location.hash`. That keeps predictions and draw state alive while visitors move between pages. Direct page refreshes are supported by a Vercel rewrite in `vercel.json`, and legacy hash URLs are normalized to the new paths for backward compatibility.
+
+This gives the site cleaner public URLs and lets pages like `/operations`, `/experiment`, `/prizes`, `/prizes/:team`, and `/sponsors` render as focused views instead of appended homepage sections.
+
 ## Print-On-Demand And Sponsor Package Research
 
 The print-on-demand research led to a practical split:
@@ -298,6 +317,9 @@ Browser checks have covered:
 - attached logo rendering in the header after resizing the topbar logo slot, including the later 20% logo increase
 - footer Experiment link, imported markdown panels, 10claws.com attribution, and homepage checks that keep Codex Desktop App plus projects.dev attribution out of the default match experience
 - Experiment documentation panel import for `WEBSITE_FLOW.md`
+- page-path routes for `/operations`, `/experiment`, `/prizes`, `/prizes/japan`, and `/sponsors`
+- legacy hash URL normalization from `/#experiment` and `/#operations` to page paths
+- header navigation between page paths while preserving app state
 
 Current visual artifact:
 
@@ -375,9 +397,13 @@ Changed the homepage supporter picker heading from "Choose Your Theme" to "Choos
 
 Changed the Experiment view attribution to say the project is being built with [Codex](https://chatgpt.com/codex) Desktop App by OpenAI and [projects.dev](https://projects.dev/) by Stripe without writing a single line of code.
 
-### Current commit - Point logo to homepage root
+### `0973091` - Point logo to homepage root
 
 Changed the header logo link from an in-page section hash to `/` so clicking the logo always returns visitors to the homepage without leaving a `#` fragment in the URL.
+
+### Current commit - Use page routes instead of hash navigation
+
+Replaced public hash navigation with page-style paths for fixtures, teams, draws, prizes, sponsors, rewards, operations, and Experiment. Added focused route rendering for JSON-render sections, `/prizes`, `/prizes/:team`, `/sponsors`, and `/experiment`; preserved legacy hash URLs as redirects to clean paths; and added `vercel.json` so deployed direct page refreshes resolve correctly.
 
 ## Next Build Steps
 

@@ -355,14 +355,142 @@ const sponsorshipAddOns = [
   'Sponsor dashboard export with campaign metrics',
 ]
 
-function getPrizeTeamFromHash(hash: string): TeamKey | null {
-  const slug = hash.match(/^#prizes\/([a-z]+)$/)?.[1]
+const sectionRouteMap = {
+  '/fixtures': 'predictions',
+  '/teams': 'teams',
+  '/draws': 'draws',
+  '/shirts': 'shirts',
+  '/rewards': 'rewards',
+  '/operations': 'operations',
+} as const
 
-  if (!slug) return null
+const pageTitleMap = {
+  '/fixtures': {
+    kicker: 'Fixtures',
+    title: 'Pick, Score, Lock',
+    copy: 'Predict match scores, lock receipts, and enter sponsor-funded draws when the result is right.',
+  },
+  '/teams': {
+    kicker: 'Teams',
+    title: 'Teams And Schedule',
+    copy: 'Review all participating teams, groups, fixtures, kickoff times, and the selected supporter-team schedule.',
+  },
+  '/draws': {
+    kicker: 'Draws',
+    title: 'Match-Level Winner Draws',
+    copy: 'Run deterministic winner reveals with eligible receipts, alternates, participant outcomes, and audit metadata.',
+  },
+  '/shirts': {
+    kicker: 'Shirts',
+    title: 'Localized Shirt Studio',
+    copy: 'Preview independent supporter-shirt concepts that change with the team a visitor supports.',
+  },
+  '/rewards': {
+    kicker: 'Rewards',
+    title: 'Ship, Track, Review',
+    copy: 'Move winners through sponsor packages, localized shirts, fulfillment queues, and post-delivery review prompts.',
+  },
+  '/operations': {
+    kicker: 'Operations',
+    title: 'POD, 3PL, And Provider Plan',
+    copy: 'Review how shirt production, sponsor kits, infrastructure providers, and campaign operations fit together.',
+  },
+} as const
 
-  return teamThemes.some((team) => team.key === slug)
-    ? (slug as TeamKey)
-    : null
+type SectionPath = keyof typeof sectionRouteMap
+
+type RouteState = {
+  activePrizeKey: TeamKey | null
+  isExperimentView: boolean
+  pathname: string
+  sectionPath: SectionPath | null
+}
+
+function normalizePathname(pathname: string) {
+  if (pathname === '/') return pathname
+
+  return pathname.replace(/\/+$/, '')
+}
+
+function isTeamKey(value: string): value is TeamKey {
+  return teamThemes.some((team) => team.key === value)
+}
+
+function getPrizeTeamFromPath(pathname: string): TeamKey | null {
+  const slug = normalizePathname(pathname).match(/^\/prizes\/([a-z]+)$/)?.[1]
+
+  return slug && isTeamKey(slug) ? slug : null
+}
+
+function getLegacyHashPath(hash: string) {
+  const hashPathMap: Record<string, string> = {
+    '#predictions': '/fixtures',
+    '#teams': '/teams',
+    '#draws': '/draws',
+    '#prizes': '/prizes',
+    '#shirts': '/shirts',
+    '#sponsors': '/sponsors',
+    '#rewards': '/rewards',
+    '#operations': '/operations',
+    '#experiment': '/experiment',
+  }
+
+  if (hashPathMap[hash]) return hashPathMap[hash]
+
+  const prizeSlug = hash.match(/^#prizes\/([a-z]+)$/)?.[1]
+
+  if (prizeSlug && isTeamKey(prizeSlug)) {
+    return `/prizes/${prizeSlug}`
+  }
+
+  return null
+}
+
+function getCurrentRouteState(): RouteState {
+  const legacyPath = getLegacyHashPath(window.location.hash)
+
+  if (legacyPath) {
+    window.history.replaceState(null, '', legacyPath)
+  }
+
+  const pathname = normalizePathname(window.location.pathname)
+  const activePrizeKey = getPrizeTeamFromPath(pathname)
+  const sectionPath =
+    pathname in sectionRouteMap ? (pathname as SectionPath) : null
+
+  return {
+    activePrizeKey,
+    isExperimentView: pathname === '/experiment',
+    pathname,
+    sectionPath,
+  }
+}
+
+function getRoutePredictionSpec(sectionPath: SectionPath | null) {
+  if (!sectionPath) return predictionSpec
+
+  const sectionId = sectionRouteMap[sectionPath]
+  const sectionElementId = Object.entries(predictionSpec.elements).find(
+    ([, element]) =>
+      'props' in element &&
+      typeof element.props === 'object' &&
+      element.props !== null &&
+      'id' in element.props &&
+      element.props.id === sectionId,
+  )?.[0]
+
+  if (!sectionElementId) return predictionSpec
+
+  return {
+    ...predictionSpec,
+    elements: {
+      ...predictionSpec.elements,
+      experience: {
+        ...predictionSpec.elements.experience,
+        children: [sectionElementId],
+      },
+    },
+  }
 }
 
 function getMarkdownExcerpt(markdown: string) {
@@ -529,14 +657,14 @@ function getFixturePickLabel(
 }
 
 function App() {
-  const [activePrizeKey, setActivePrizeKey] = useState<TeamKey | null>(() =>
-    getPrizeTeamFromHash(window.location.hash),
-  )
-  const [isExperimentView, setIsExperimentView] = useState(
-    () => window.location.hash === '#experiment',
+  const [routeState, setRouteState] = useState<RouteState>(() =>
+    getCurrentRouteState(),
   )
   const [predictionState, setPredictionState] = useState<PredictionState>(
-    initialPredictionState,
+    () =>
+      routeState.activePrizeKey
+        ? { ...initialPredictionState, selectedTeamKey: routeState.activePrizeKey }
+        : initialPredictionState,
   )
   const [activeFixtureSlide, setActiveFixtureSlide] = useState(0)
   const [fixturePredictions, setFixturePredictions] = useState<
@@ -545,25 +673,57 @@ function App() {
   const store = usePredictionStore(predictionState, setPredictionState)
   const selectedTeamKey = predictionState.selectedTeamKey
   const selectedTeam = getTeam(selectedTeamKey)
-  const selectedShirt = shirtConcepts[selectedTeamKey]
-  const selectedPrize = prizeDetails[selectedTeamKey]
+  const activePrizeKey = routeState.activePrizeKey
+  const isExperimentView = routeState.isExperimentView
+  const routePredictionSpec = useMemo(
+    () => getRoutePredictionSpec(routeState.sectionPath),
+    [routeState.sectionPath],
+  )
 
   useEffect(() => {
-    const syncPrizeHash = () => {
-      const hash = window.location.hash
+    const syncRoute = () => setRouteState(getCurrentRouteState())
 
-      setActivePrizeKey(getPrizeTeamFromHash(hash))
-      setIsExperimentView(hash === '#experiment')
+    syncRoute()
+    window.addEventListener('popstate', syncRoute)
+    window.addEventListener('hashchange', syncRoute)
+
+    return () => {
+      window.removeEventListener('popstate', syncRoute)
+      window.removeEventListener('hashchange', syncRoute)
+    }
+  }, [])
+
+  useEffect(() => {
+    const navigateToInternalPage = (event: MouseEvent) => {
+      const target = event.target
+
+      if (!(target instanceof Element)) return
+
+      const anchor = target.closest<HTMLAnchorElement>('a[href^="/"]')
+
+      if (!anchor || anchor.target || anchor.hasAttribute('download')) return
+
+      const url = new URL(anchor.href)
+
+      if (url.origin !== window.location.origin) return
+
+      event.preventDefault()
+      window.history.pushState(null, '', `${url.pathname}${url.search}${url.hash}`)
+      setRouteState(getCurrentRouteState())
+      window.scrollTo({ top: 0 })
     }
 
-    syncPrizeHash()
-    window.addEventListener('hashchange', syncPrizeHash)
+    document.addEventListener('click', navigateToInternalPage)
 
-    return () => window.removeEventListener('hashchange', syncPrizeHash)
+    return () => {
+      document.removeEventListener('click', navigateToInternalPage)
+    }
   }, [])
 
   useEffect(() => {
     if (!activePrizeKey) return undefined
+
+    store.set('/selectedTeamKey', activePrizeKey)
 
     const frame = window.requestAnimationFrame(() => {
       document.getElementById('prize-detail')?.scrollIntoView({
@@ -572,7 +732,7 @@ function App() {
     })
 
     return () => window.cancelAnimationFrame(frame)
-  }, [activePrizeKey])
+  }, [activePrizeKey, store])
 
   const nextFixtureDay = useMemo(() => getSoonestUpcomingFixtureDay(), [])
   const sameDayFixtures = nextFixtureDay.fixtures
@@ -606,43 +766,43 @@ function App() {
   ).length
   const flowItems = [
     {
-      href: '#predictions',
+      href: '/fixtures',
       icon: <Target size={17} />,
       label: 'Predict',
       meta: `${lockedCount} locked`,
     },
     {
-      href: '#teams',
+      href: '/teams',
       icon: <CalendarDays size={17} />,
       label: 'Teams',
       meta: '48-team field',
     },
     {
-      href: '#draws',
+      href: '/draws',
       icon: <Dice5 size={17} />,
       label: 'Draw',
       meta: `${drawCount} complete`,
     },
     {
-      href: '#prizes',
+      href: '/prizes',
       icon: <Gift size={17} />,
       label: 'Prize',
       meta: 'Free shirt',
     },
     {
-      href: '#shirts',
+      href: '/shirts',
       icon: <Shirt size={17} />,
       label: 'Personalize',
       meta: selectedTeam.code,
     },
     {
-      href: '#rewards',
+      href: '/rewards',
       icon: <PackageCheck size={17} />,
       label: 'Fulfill',
       meta: `${predictionState.fulfillmentQueue.length} queued`,
     },
     {
-      href: '#operations',
+      href: '/operations',
       icon: <ShieldCheck size={17} />,
       label: 'Review',
       meta: `${reviewCount} sent`,
@@ -661,32 +821,95 @@ function App() {
   if (isExperimentView) {
     return (
       <main className="app-shell" style={themeVars}>
-        <header className="topbar">
-          <a className="brand" href="/">
-            <img
-              alt="Win World Cup 2026"
-              className="brand-logo"
-              height="82"
-              src={brandLogo}
-              width="82"
-            />
-          </a>
-          <nav className="nav-links" aria-label="Primary navigation">
-            <a href="#predictions">Fixtures</a>
-            <a href="#teams">Teams</a>
-            <a href="#prizes">Prizes</a>
-            <a href="#rewards">Rewards</a>
-            <a href="#operations">Operations</a>
-          </nav>
-          <button className="account-button" type="button">
-            <Ticket size={17} />
-            <span>
-              {lockedCount} locked · {drawCount} draws
-            </span>
-          </button>
-        </header>
-
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
         <ExperimentPage />
+        <SiteFooter />
+      </main>
+    )
+  }
+
+  if (activePrizeKey) {
+    return (
+      <main className="app-shell" style={themeVars}>
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
+        <PrizeDetailPage
+          onSelectTeam={(teamKey) => store.set('/selectedTeamKey', teamKey)}
+          teamKey={activePrizeKey}
+        />
+        <SiteFooter />
+      </main>
+    )
+  }
+
+  if (routeState.pathname === '/prizes') {
+    return (
+      <main className="app-shell" style={themeVars}>
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
+        <PrizeHomeSection
+          onSelectTeam={(teamKey) => store.set('/selectedTeamKey', teamKey)}
+          selectedTeamKey={selectedTeamKey}
+        />
+        <SiteFooter />
+      </main>
+    )
+  }
+
+  if (routeState.pathname === '/sponsors') {
+    return (
+      <main className="app-shell" style={themeVars}>
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
+        <SponsorSection />
+        <SiteFooter />
+      </main>
+    )
+  }
+
+  if (routeState.sectionPath) {
+    const routeCopy = pageTitleMap[routeState.sectionPath]
+
+    return (
+      <main className="app-shell" style={themeVars}>
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
+
+        <section className="route-page-hero" aria-labelledby="route-page-title">
+          <div className="section-heading">
+            <span className="icon-box">
+              <Sparkles size={18} />
+            </span>
+            <div>
+              <p className="section-kicker">{routeCopy.kicker}</p>
+              <h1 id="route-page-title">{routeCopy.title}</h1>
+              <p>{routeCopy.copy}</p>
+            </div>
+          </div>
+        </section>
+
+        <div className="workspace-shell route-workspace">
+          <aside className="flow-rail" aria-label="Prediction workflow">
+            <div className="flow-rail-header">
+              <span>{selectedTeam.code}</span>
+              <strong>Matchday Flow</strong>
+            </div>
+            <nav aria-label="Prediction workflow stages">
+              {flowItems.map((item) => (
+                <a href={item.href} key={item.label}>
+                  <span className="flow-icon">{item.icon}</span>
+                  <span>
+                    <strong>{item.label}</strong>
+                    <em>{item.meta}</em>
+                  </span>
+                </a>
+              ))}
+            </nav>
+          </aside>
+
+          <div className="workspace-main">
+            <JSONUIProvider registry={registry} store={store}>
+              <Renderer spec={routePredictionSpec} registry={registry} />
+            </JSONUIProvider>
+          </div>
+        </div>
+
         <SiteFooter />
       </main>
     )
@@ -694,31 +917,7 @@ function App() {
 
   return (
     <main className="app-shell" style={themeVars}>
-      <header className="topbar">
-        <a className="brand" href="/">
-          <img
-            alt="Win World Cup 2026"
-            className="brand-logo"
-            height="82"
-            src={brandLogo}
-            width="82"
-          />
-        </a>
-        <nav className="nav-links" aria-label="Primary navigation">
-          <a href="#predictions">Fixtures</a>
-          <a href="#teams">Teams</a>
-          <a href="#prizes">Prizes</a>
-          <a href="#sponsors">Sponsors</a>
-          <a href="#rewards">Rewards</a>
-          <a href="#operations">Operations</a>
-        </nav>
-        <button className="account-button" type="button">
-          <Ticket size={17} />
-          <span>
-            {lockedCount} locked · {drawCount} draws
-          </span>
-        </button>
-      </header>
+      <Topbar drawCount={drawCount} lockedCount={lockedCount} />
 
       <section className="hero-band" aria-labelledby="page-title">
         <div className="hero-copy">
@@ -729,16 +928,16 @@ function App() {
             supporter shirts, and move winners into shipping and review flows.
           </p>
           <div className="hero-actions">
-            <a className="primary-action" href="#predictions">
+            <a className="primary-action" href="/fixtures">
               <Target size={18} />
               <span>Make Picks</span>
               <ChevronRight size={17} />
             </a>
-            <a className="secondary-action" href="#prizes">
+            <a className="secondary-action" href="/prizes">
               <Gift size={18} />
               <span>Free Shirt Prize</span>
             </a>
-            <a className="secondary-action" href="#sponsors">
+            <a className="secondary-action" href="/sponsors">
               <Handshake size={18} />
               <span>Sponsor Packages</span>
             </a>
@@ -805,205 +1004,12 @@ function App() {
         </div>
       </section>
 
-      <section className="prize-home" id="prizes" aria-labelledby="prize-title">
-        <div className="prize-home-heading">
-          <div className="section-heading compact">
-            <span className="icon-box">
-              <Gift size={18} />
-            </span>
-            <div>
-              <p className="section-kicker">Prize Draw</p>
-              <h2 id="prize-title">Win The Team Shirt You Picked</h2>
-            </div>
-          </div>
-          <p>
-            Each qualified draw winner receives a free localized supporter shirt
-            for their selected team. These are independent fan designs with no
-            official tournament, federation, player, or sponsor branding.
-          </p>
-        </div>
+      <PrizeHomeSection
+        onSelectTeam={(teamKey) => store.set('/selectedTeamKey', teamKey)}
+        selectedTeamKey={selectedTeamKey}
+      />
 
-        <div className="featured-prize">
-          <div className="featured-prize-media">
-            <img
-              alt={`${selectedTeam.name} supporter shirt prize`}
-              src={prizeImages[selectedTeamKey]}
-            />
-          </div>
-          <div className="featured-prize-copy">
-            <p className="section-kicker">{selectedTeam.name} Prize</p>
-            <h3>{selectedShirt.conceptName}</h3>
-            <p>{selectedPrize.headline}</p>
-            <div className="prize-pill-row" aria-label="Selected prize colors">
-              {[selectedShirt.base, selectedShirt.graphic, selectedShirt.accent].map(
-                (color) => (
-                  <span key={color} style={{ background: color }} />
-                ),
-              )}
-            </div>
-            <ul className="featured-prize-list">
-              <li>
-                <Shirt size={17} />
-                <span>{selectedShirt.primaryCopy}</span>
-              </li>
-              <li>
-                <Palette size={17} />
-                <span>{selectedShirt.motif}</span>
-              </li>
-              <li>
-                <ShieldCheck size={17} />
-                <span>No official marks, crests, players, or sponsor logos.</span>
-              </li>
-            </ul>
-            <div className="prize-actions">
-              <a className="prize-action primary" href={`#prizes/${selectedTeamKey}`}>
-                <span>View Team Prize</span>
-                <ChevronRight size={17} />
-              </a>
-              <a className="prize-action secondary" href="#predictions">
-                <Target size={17} />
-                <span>Make Picks</span>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="prize-team-grid" aria-label="Team prize previews">
-          {teamThemes.map((team) => {
-            const shirt = shirtConcepts[team.key]
-
-            return (
-              <article className="prize-card" key={team.key}>
-                <div
-                  className="prize-card-media"
-                  style={
-                    {
-                      '--prize-primary': team.colors.primary,
-                      '--prize-secondary': team.colors.secondary,
-                      '--prize-accent': team.colors.accent,
-                    } as CSSProperties
-                  }
-                >
-                  <img
-                    alt={`${team.name} shirt prize preview`}
-                    loading="lazy"
-                    src={prizeImages[team.key]}
-                  />
-                </div>
-                <div className="prize-card-copy">
-                  <span>{team.code}</span>
-                  <h3>{team.name}</h3>
-                  <p>{shirt.conceptName}</p>
-                  <a
-                    className="prize-card-link"
-                    href={`#prizes/${team.key}`}
-                    onClick={() => store.set('/selectedTeamKey', team.key)}
-                  >
-                    <span>Prize Details</span>
-                    <ChevronRight size={16} />
-                  </a>
-                </div>
-              </article>
-            )
-          })}
-        </div>
-      </section>
-
-      <section
-        className="sponsor-band"
-        id="sponsors"
-        aria-labelledby="sponsor-title"
-      >
-        <div className="sponsor-heading">
-          <div className="section-heading compact">
-            <span className="icon-box">
-              <Handshake size={18} />
-            </span>
-            <div>
-              <p className="section-kicker">Sponsor Packages</p>
-              <h2 id="sponsor-title">Fund The Rewards Fans Remember</h2>
-            </div>
-          </div>
-          <p>
-            Sponsors fund match campaigns, winner product gifts, localized shirt
-            drops, and post-delivery review prompts. Packages are designed for
-            product sampling, media proof, and measurable fan engagement.
-          </p>
-        </div>
-
-        <div className="sponsor-tier-grid" aria-label="Sponsorship tiers">
-          {sponsorshipTiers.map((tier) => {
-            const TierIcon = tier.icon
-
-            return (
-              <article
-                className={`sponsor-tier ${tier.featured ? 'is-featured' : ''}`}
-                key={tier.name}
-              >
-                <header className="sponsor-tier-header">
-                  <span className="sponsor-tier-icon">
-                    <TierIcon size={19} />
-                  </span>
-                  <div>
-                    <p>{tier.signal}</p>
-                    <h3>{tier.name}</h3>
-                  </div>
-                </header>
-                <div className="sponsor-price-row">
-                  <strong>{tier.price}</strong>
-                  <span>{tier.spots}</span>
-                </div>
-                <p className="sponsor-summary">{tier.summary}</p>
-                <ul className="sponsor-feature-list">
-                  {tier.includes.map((item) => (
-                    <li key={item}>
-                      <CheckCircle2 size={16} />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="sponsor-creative">{tier.creative}</p>
-              </article>
-            )
-          })}
-        </div>
-
-        <div className="sponsor-addons">
-          <div>
-            <p className="section-kicker">Creative Add-ons</p>
-            <h3>More Ways To Build The Campaign</h3>
-            <p>
-              Add-ons keep the core sponsorship packages simple while giving
-              larger brands, agencies, and regional partners more room to shape
-              the activation.
-            </p>
-          </div>
-          <ul>
-            {sponsorshipAddOns.map((addOn) => (
-              <li key={addOn}>
-                <BadgeDollarSign size={17} />
-                <span>{addOn}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="sponsor-compliance-note">
-          <ShieldCheck size={18} />
-          <p>
-            Sponsor campaigns must stay separate from official tournament,
-            federation, player, crest, and mascot marks. Prize, review, and
-            fulfillment language should be reviewed before any live campaign.
-          </p>
-        </div>
-      </section>
-
-      {activePrizeKey ? (
-        <PrizeDetailPage
-          onSelectTeam={(teamKey) => store.set('/selectedTeamKey', teamKey)}
-          teamKey={activePrizeKey}
-        />
-      ) : null}
+      <SponsorSection />
 
       <div className="workspace-shell">
         <aside className="flow-rail" aria-label="Prediction workflow">
@@ -1219,6 +1225,253 @@ function App() {
   )
 }
 
+function PrizeHomeSection({
+  onSelectTeam,
+  selectedTeamKey,
+}: {
+  onSelectTeam: (teamKey: TeamKey) => void
+  selectedTeamKey: TeamKey
+}) {
+  const selectedTeam = getTeam(selectedTeamKey)
+  const selectedShirt = shirtConcepts[selectedTeamKey]
+  const selectedPrize = prizeDetails[selectedTeamKey]
+
+  return (
+    <section className="prize-home" id="prizes" aria-labelledby="prize-title">
+      <div className="prize-home-heading">
+        <div className="section-heading compact">
+          <span className="icon-box">
+            <Gift size={18} />
+          </span>
+          <div>
+            <p className="section-kicker">Prize Draw</p>
+            <h2 id="prize-title">Win The Team Shirt You Picked</h2>
+          </div>
+        </div>
+        <p>
+          Each qualified draw winner receives a free localized supporter shirt
+          for their selected team. These are independent fan designs with no
+          official tournament, federation, player, or sponsor branding.
+        </p>
+      </div>
+
+      <div className="featured-prize">
+        <div className="featured-prize-media">
+          <img
+            alt={`${selectedTeam.name} supporter shirt prize`}
+            src={prizeImages[selectedTeamKey]}
+          />
+        </div>
+        <div className="featured-prize-copy">
+          <p className="section-kicker">{selectedTeam.name} Prize</p>
+          <h3>{selectedShirt.conceptName}</h3>
+          <p>{selectedPrize.headline}</p>
+          <div className="prize-pill-row" aria-label="Selected prize colors">
+            {[selectedShirt.base, selectedShirt.graphic, selectedShirt.accent].map(
+              (color) => (
+                <span key={color} style={{ background: color }} />
+              ),
+            )}
+          </div>
+          <ul className="featured-prize-list">
+            <li>
+              <Shirt size={17} />
+              <span>{selectedShirt.primaryCopy}</span>
+            </li>
+            <li>
+              <Palette size={17} />
+              <span>{selectedShirt.motif}</span>
+            </li>
+            <li>
+              <ShieldCheck size={17} />
+              <span>No official marks, crests, players, or sponsor logos.</span>
+            </li>
+          </ul>
+          <div className="prize-actions">
+            <a className="prize-action primary" href={`/prizes/${selectedTeamKey}`}>
+              <span>View Team Prize</span>
+              <ChevronRight size={17} />
+            </a>
+            <a className="prize-action secondary" href="/fixtures">
+              <Target size={17} />
+              <span>Make Picks</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div className="prize-team-grid" aria-label="Team prize previews">
+        {teamThemes.map((team) => {
+          const shirt = shirtConcepts[team.key]
+
+          return (
+            <article className="prize-card" key={team.key}>
+              <div
+                className="prize-card-media"
+                style={
+                  {
+                    '--prize-primary': team.colors.primary,
+                    '--prize-secondary': team.colors.secondary,
+                    '--prize-accent': team.colors.accent,
+                  } as CSSProperties
+                }
+              >
+                <img
+                  alt={`${team.name} shirt prize preview`}
+                  loading="lazy"
+                  src={prizeImages[team.key]}
+                />
+              </div>
+              <div className="prize-card-copy">
+                <span>{team.code}</span>
+                <h3>{team.name}</h3>
+                <p>{shirt.conceptName}</p>
+                <a
+                  className="prize-card-link"
+                  href={`/prizes/${team.key}`}
+                  onClick={() => onSelectTeam(team.key)}
+                >
+                  <span>Prize Details</span>
+                  <ChevronRight size={16} />
+                </a>
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function SponsorSection() {
+  return (
+    <section
+      className="sponsor-band"
+      id="sponsors"
+      aria-labelledby="sponsor-title"
+    >
+      <div className="sponsor-heading">
+        <div className="section-heading compact">
+          <span className="icon-box">
+            <Handshake size={18} />
+          </span>
+          <div>
+            <p className="section-kicker">Sponsor Packages</p>
+            <h2 id="sponsor-title">Fund The Rewards Fans Remember</h2>
+          </div>
+        </div>
+        <p>
+          Sponsors fund match campaigns, winner product gifts, localized shirt
+          drops, and post-delivery review prompts. Packages are designed for
+          product sampling, media proof, and measurable fan engagement.
+        </p>
+      </div>
+
+      <div className="sponsor-tier-grid" aria-label="Sponsorship tiers">
+        {sponsorshipTiers.map((tier) => {
+          const TierIcon = tier.icon
+
+          return (
+            <article
+              className={`sponsor-tier ${tier.featured ? 'is-featured' : ''}`}
+              key={tier.name}
+            >
+              <header className="sponsor-tier-header">
+                <span className="sponsor-tier-icon">
+                  <TierIcon size={19} />
+                </span>
+                <div>
+                  <p>{tier.signal}</p>
+                  <h3>{tier.name}</h3>
+                </div>
+              </header>
+              <div className="sponsor-price-row">
+                <strong>{tier.price}</strong>
+                <span>{tier.spots}</span>
+              </div>
+              <p className="sponsor-summary">{tier.summary}</p>
+              <ul className="sponsor-feature-list">
+                {tier.includes.map((item) => (
+                  <li key={item}>
+                    <CheckCircle2 size={16} />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="sponsor-creative">{tier.creative}</p>
+            </article>
+          )
+        })}
+      </div>
+
+      <div className="sponsor-addons">
+        <div>
+          <p className="section-kicker">Creative Add-ons</p>
+          <h3>More Ways To Build The Campaign</h3>
+          <p>
+            Add-ons keep the core sponsorship packages simple while giving
+            larger brands, agencies, and regional partners more room to shape
+            the activation.
+          </p>
+        </div>
+        <ul>
+          {sponsorshipAddOns.map((addOn) => (
+            <li key={addOn}>
+              <BadgeDollarSign size={17} />
+              <span>{addOn}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="sponsor-compliance-note">
+        <ShieldCheck size={18} />
+        <p>
+          Sponsor campaigns must stay separate from official tournament,
+          federation, player, crest, and mascot marks. Prize, review, and
+          fulfillment language should be reviewed before any live campaign.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+function Topbar({
+  drawCount,
+  lockedCount,
+}: {
+  drawCount: number
+  lockedCount: number
+}) {
+  return (
+    <header className="topbar">
+      <a className="brand" href="/">
+        <img
+          alt="Win World Cup 2026"
+          className="brand-logo"
+          height="82"
+          src={brandLogo}
+          width="82"
+        />
+      </a>
+      <nav className="nav-links" aria-label="Primary navigation">
+        <a href="/fixtures">Fixtures</a>
+        <a href="/teams">Teams</a>
+        <a href="/prizes">Prizes</a>
+        <a href="/sponsors">Sponsors</a>
+        <a href="/rewards">Rewards</a>
+        <a href="/operations">Operations</a>
+      </nav>
+      <button className="account-button" type="button">
+        <Ticket size={17} />
+        <span>
+          {lockedCount} locked · {drawCount} draws
+        </span>
+      </button>
+    </header>
+  )
+}
+
 function ExperimentPage() {
   return (
     <section
@@ -1296,12 +1549,12 @@ function SiteFooter() {
         </span>
       </div>
       <nav aria-label="Footer navigation">
-        <a href="#experiment">Experiment</a>
-        <a href="#predictions">Fixtures</a>
-        <a href="#teams">Teams</a>
-        <a href="#prizes">Prizes</a>
-        <a href="#sponsors">Sponsors</a>
-        <a href="#operations">Operations</a>
+        <a href="/experiment">Experiment</a>
+        <a href="/fixtures">Fixtures</a>
+        <a href="/teams">Teams</a>
+        <a href="/prizes">Prizes</a>
+        <a href="/sponsors">Sponsors</a>
+        <a href="/operations">Operations</a>
       </nav>
     </footer>
   )
@@ -1333,7 +1586,7 @@ function PrizeDetailPage({
       aria-labelledby={`prize-detail-${team.key}`}
     >
       <div className="prize-detail-toolbar">
-        <a className="prize-back-link" href="#prizes">
+        <a className="prize-back-link" href="/prizes">
           <ArrowLeft size={17} />
           <span>All Prizes</span>
         </a>
@@ -1364,11 +1617,11 @@ function PrizeDetailPage({
             <span>{prize.drawCopy}</span>
           </div>
           <div className="prize-actions">
-            <a className="prize-action primary" href="#predictions">
+            <a className="prize-action primary" href="/fixtures">
               <Target size={17} />
               <span>Enter A Draw</span>
             </a>
-            <a className="prize-action secondary" href="#rewards">
+            <a className="prize-action secondary" href="/rewards">
               <PackageCheck size={17} />
               <span>Fulfillment Flow</span>
             </a>
