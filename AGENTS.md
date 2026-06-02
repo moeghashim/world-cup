@@ -190,6 +190,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Reduced the active header logo by 20%, from 98px to 78px, and lowered the logo/navigation header row from 120px to 100px.
 - Added a `/posthog` dashboard page with metric cards, prediction funnel steps, event taxonomy, setup checklist, PostHog link, header/footer navigation, and legacy `#posthog` redirect support.
 - Added a working rule to refresh the AI build disclosure token total and estimated cost on every commit, and updated the current estimate to `~2.9M` total tokens and `~$22`.
+- Made the `/posthog` route easier to find by labeling the header and footer links as "PostHog Dashboard" and refreshed the AI build estimate to `~3.0M` total tokens and `~$23`.
 
 ## Verification
 
@@ -239,6 +240,7 @@ Browser verification covered:
 - verifying the smaller 78px logo renders below the AI status bar with the updated 100px navigation row
 - verifying `/posthog` renders four metric cards, six funnel steps, five event groups, five setup items, no horizontal overflow, a working PostHog external link, and legacy `/#posthog` redirect behavior
 - verifying the AI build disclosure renders the refreshed `~2.9M` token total and `~$22` estimated cost with no browser console errors
+- verifying the header and footer both expose "PostHog Dashboard" links to `/posthog`, and the AI build disclosure renders the refreshed `~3.0M` token total and `~$23` estimated cost
 
 Latest screenshot:
 

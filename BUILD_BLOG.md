@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~2.9M`
-- estimated API-equivalent cost: `~$22`
+- estimated total tokens: `~3.0M`
+- estimated API-equivalent cost: `~$23`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -356,6 +356,7 @@ Browser checks have covered:
 - header logo reduced from 98px to 78px below the AI status bar
 - `/posthog` dashboard page with metric cards, funnel steps, event taxonomy, setup checklist, and legacy `#posthog` redirect
 - AI build disclosure estimate refreshed to `~2.9M` total tokens and `~$22` estimated API-equivalent cost
+- PostHog dashboard navigation made explicit in the header and footer
 
 Current visual artifact:
 
@@ -475,9 +476,13 @@ Added `/posthog` as the first PostHog dashboard surface for the product. The pag
 
 The dashboard links to the PostHog app, but it does not send events yet. That boundary is deliberate: the Projects.dev PostHog analytics resource exists, while SDK capture, privacy copy, session replay policy, and final event names still need approval before production tracking begins.
 
-### Current commit - Add token estimate maintenance rule
+### `141afb0` - Add token estimate maintenance rule
 
 Added a maintenance rule that every commit must refresh the public AI build disclosure token total and API-equivalent estimated cost. The current estimate was updated to `~2.9M` total tokens and `~$22` so this commit follows the rule immediately.
+
+### Current commit - Make PostHog dashboard visible
+
+Changed the header and footer navigation labels from generic analytics/PostHog wording to `PostHog Dashboard` so the dashboard route is visible at a glance. The current AI build disclosure estimate was refreshed to `~3.0M` total tokens and `~$23` for this commit.
 
 ## Next Build Steps
 

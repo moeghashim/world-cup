@@ -334,8 +334,8 @@ const sponsorshipAddOns = [
 ]
 
 const aiBuildMetrics = {
-  tokenTotal: '~2.9M',
-  estimatedCost: '~$22',
+  tokenTotal: '~3.0M',
+  estimatedCost: '~$23',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
@@ -1714,7 +1714,7 @@ function Topbar({
           <a href="/sponsors">Sponsors</a>
           <a href="/rewards">Rewards</a>
           <a href="/operations">Operations</a>
-          <a href="/posthog">Analytics</a>
+          <a href="/posthog">PostHog Dashboard</a>
         </nav>
         <button className="account-button" type="button">
           <Ticket size={17} />
@@ -2056,7 +2056,7 @@ function SiteFooter() {
         <a href="/prizes">Prizes</a>
         <a href="/sponsors">Sponsors</a>
         <a href="/operations">Operations</a>
-        <a href="/posthog">PostHog</a>
+        <a href="/posthog">PostHog Dashboard</a>
       </nav>
     </footer>
   )
