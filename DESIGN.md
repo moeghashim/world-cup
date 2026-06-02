@@ -30,6 +30,13 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Show audit metadata compactly so transparency does not overwhelm the primary winner reveal.
 - Respect reduced-motion preferences.
 
+## Shirt Design Assets
+
+- Keep generated shirt design files in `designs/` until a POD integration defines final artwork specs.
+- Treat current shirt files as visual direction and personalization assets, not approved manufacturing files.
+- Avoid official tournament, federation, player, sponsor, crest, trophy, and mascot marks in committed artwork.
+- Preserve separate country folders so future design revisions can be localized without changing app data structure.
+
 ## Component Quality Checklist
 
 - Match cards expose stage, teams, score inputs, winner pick, lock action, and sponsor drops.

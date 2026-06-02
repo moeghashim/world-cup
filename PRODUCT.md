@@ -33,6 +33,6 @@ World Cup Predictor is a match prediction and sponsor reward experience. A user 
 
 - Demo draws are seeded in local data.
 - Draw receipts, commitments, seeds, winners, and alternates are prototype records.
-- T-shirt previews are conceptual, not production print files.
+- T-shirt previews and committed design assets are conceptual, not production print files.
 - Provider recommendations are architectural notes, not live integrations.
 - No real prize fulfillment, payment, user identity, fraud checks, or legal rules are implemented yet.

@@ -163,6 +163,8 @@ Current T-shirt concepts cover:
 
 Each concept includes motif, print copy, alternate copy, colors, and a no-official-branding disclaimer.
 
+The repository now also includes a `designs/` asset library. It contains team concept images, generated shirt design mockups for Argentina, Brazil, France, Japan, Morocco, Spain, and the United States, and a refined concept board. These assets are useful for visual direction and future POD handoff, but they are not final print files yet.
+
 ## Print-On-Demand And Sponsor Package Research
 
 The print-on-demand research led to a practical split:
@@ -258,9 +260,13 @@ Added the Impeccable-inspired design workflow, `PRODUCT.md`, `DESIGN.md`, persis
 
 Added this file so the build can be turned into a public article over time. Also updated the project workflow so future commits update both `AGENTS.md` and this blog artifact.
 
-### Current commit - Build participant draw mechanism
+### `90949f6` - Build participant draw mechanism
 
 Added receipt-based draw application, participant outcomes, deterministic seeded winner and alternate ranking, audit metadata, animated draw presentation, and lifecycle status updates for fulfillment and review prompts.
+
+### Current commit - Add localized shirt design assets
+
+Committed the generated shirt concept and design image library under `designs/`, and documented that these files are visual direction assets rather than production POD artwork.
 
 ## Next Build Steps
 
