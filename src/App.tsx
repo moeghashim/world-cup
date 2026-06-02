@@ -662,7 +662,7 @@ function App() {
     return (
       <main className="app-shell" style={themeVars}>
         <header className="topbar">
-          <a className="brand" href="#predict">
+          <a className="brand" href="/">
             <img
               alt="Win World Cup 2026"
               className="brand-logo"
@@ -695,7 +695,7 @@ function App() {
   return (
     <main className="app-shell" style={themeVars}>
       <header className="topbar">
-        <a className="brand" href="#predict">
+        <a className="brand" href="/">
           <img
             alt="Win World Cup 2026"
             className="brand-logo"

@@ -371,9 +371,13 @@ Added `WEBSITE_FLOW.md` as a diagram-first explanation of how the website works,
 
 Changed the homepage supporter picker heading from "Choose Your Theme" to "Choose Your Team" so visitors read the action as a team choice while the theme behavior stays behind the scenes.
 
-### Current commit - Update Experiment build attribution
+### `99bc312` - Update Experiment build attribution
 
 Changed the Experiment view attribution to say the project is being built with [Codex](https://chatgpt.com/codex) Desktop App by OpenAI and [projects.dev](https://projects.dev/) by Stripe without writing a single line of code.
+
+### Current commit - Point logo to homepage root
+
+Changed the header logo link from an in-page section hash to `/` so clicking the logo always returns visitors to the homepage without leaving a `#` fragment in the URL.
 
 ## Next Build Steps
 

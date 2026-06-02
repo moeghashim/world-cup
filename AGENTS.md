@@ -144,6 +144,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Added `WEBSITE_FLOW.md` with Mermaid diagrams for the visitor journey, app architecture, draw mechanism, tool stack, and planned production integrations.
 - Updated the homepage supporter picker heading from "Choose Your Theme" to "Choose Your Team" so the public copy focuses on team choice rather than implementation theming.
 - Updated the Experiment view build attribution to link Codex and projects.dev and describe the no-code build process.
+- Updated the header logo link to navigate to `/` so it clears hash routes like `#experiment` and returns to the homepage without a fragment.
 
 ## Verification
 
@@ -182,6 +183,7 @@ Browser verification covered:
 - verifying `WEBSITE_FLOW.md` is imported into the Experiment documentation list
 - verifying the homepage supporter picker renders "Choose Your Team"
 - verifying the Experiment view renders the updated Codex and projects.dev attribution links
+- verifying the header logo link points to `/`
 
 Latest screenshot:
 
