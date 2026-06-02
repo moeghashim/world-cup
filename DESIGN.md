@@ -10,7 +10,7 @@ The interface should behave like a matchday operations surface with fan energy, 
 
 - Lead with the usable prediction experience.
 - Keep the hero cinematic, but let workflow and match cards dominate the product.
-- Use a persistent workflow rail on desktop: Predict, Draw, Personalize, Fulfill, Review.
+- Use a persistent workflow rail on desktop: Predict, Teams, Draw, Personalize, Fulfill, Review.
 - Use full-width bands and unframed workspace sections; reserve cards for repeated items, panels, and operational modules.
 - Keep repeated match, draw, reward, and provider modules visually consistent.
 
@@ -48,6 +48,7 @@ The interface should behave like a matchday operations surface with fan energy, 
 ## Component Quality Checklist
 
 - Match cards expose stage, teams, score inputs, winner pick, lock action, and sponsor drops.
+- Schedule panels expose source date, verification warning, all groups, all teams, full group-stage fixtures, and selected supporter-team fixtures.
 - Draw cards expose match, winner slots, participant receipt state, final result, eligible count, winners, alternates, and audit seed data.
 - Fulfillment panels expose queue count, review count, and match-level actions.
 - Shirt studio exposes concept name, print copy, motif, and no-official-branding disclaimer.
