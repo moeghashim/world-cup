@@ -34,6 +34,8 @@ dist-ssr
 CLAUDE.md
 skills-lock.json
 
+.vercel
+
 .projects/cache
 .projects/vault
 .projects/state.test.json
@@ -41,4 +43,3 @@ skills-lock.json
 .env
 .env.*
 !.env.example
-.vercel
