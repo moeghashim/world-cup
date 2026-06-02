@@ -165,6 +165,18 @@ Each concept includes motif, print copy, alternate copy, colors, and a no-offici
 
 The repository now also includes a `designs/` asset library. It contains team concept images, generated shirt design mockups for Argentina, Brazil, France, Japan, Morocco, Spain, and the United States, and a refined concept board. These assets are useful for visual direction and future POD handoff, but they are not final print files yet.
 
+## Logo Exploration
+
+The first logo pass for `winworldcup2026.com` explores three independent brand directions:
+
+- Orbit/cup: a circular football orbit with a generic winner cup.
+- Motion ball: a fast matchday prediction mark with a football and winner spark.
+- Shield/globe: a more structured contest identity with a globe grid and generic cup.
+
+The generated PNG board is saved as `designs/logos/logo-concept-board.png`. The usable source assets are SVG files in `designs/logos/` so the wordmark text stays exact and editable.
+
+This pass avoids official tournament symbols, federation marks, sponsor marks, mascot art, player likenesses, and official trophy silhouettes.
+
 ## Print-On-Demand And Sponsor Package Research
 
 The print-on-demand research led to a practical split:
@@ -264,9 +276,13 @@ Added this file so the build can be turned into a public article over time. Also
 
 Added receipt-based draw application, participant outcomes, deterministic seeded winner and alternate ranking, audit metadata, animated draw presentation, and lifecycle status updates for fulfillment and review prompts.
 
-### Current commit - Add localized shirt design assets
+### `f8e58c1` - Add localized shirt design assets
 
 Committed the generated shirt concept and design image library under `designs/`, and documented that these files are visual direction assets rather than production POD artwork.
+
+### Current commit - Add logo variations
+
+Added three SVG logo variations and a generated concept board for `winworldcup2026.com`, with documentation clarifying that the assets are independent brand explorations.
 
 ## Next Build Steps
 

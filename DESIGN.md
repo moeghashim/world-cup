@@ -37,6 +37,13 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Avoid official tournament, federation, player, sponsor, crest, trophy, and mascot marks in committed artwork.
 - Preserve separate country folders so future design revisions can be localized without changing app data structure.
 
+## Logo Exploration
+
+- Store logo explorations in `designs/logos/`.
+- Keep generated raster boards as concept references only.
+- Prefer SVG source files for usable logo variations so text remains exact and editable.
+- Current directions: orbit/cup, motion ball, and shield/globe for `winworldcup2026.com`.
+
 ## Component Quality Checklist
 
 - Match cards expose stage, teams, score inputs, winner pick, lock action, and sponsor drops.

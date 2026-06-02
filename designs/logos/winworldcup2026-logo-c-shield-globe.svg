@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Win World Cup 2026 logo variation C</title>
+  <desc id="desc">Independent football prediction logo with a shield, globe grid, generic winner cup, and Win World Cup 2026 wordmark.</desc>
+  <rect width="1200" height="760" fill="#fffdf5"/>
+  <g transform="translate(600 268)">
+    <path d="M0-210l178 58v164c0 116-77 184-178 226-101-42-178-110-178-226v-164z" fill="#ffffff" stroke="#102238" stroke-width="20" stroke-linejoin="round"/>
+    <path d="M-122-88c48-52 192-52 244 0M-132 8c58-30 206-30 264 0M-100 100c54 18 146 18 200 0" fill="none" stroke="#139b4b" stroke-width="13" stroke-linecap="round"/>
+    <path d="M-104-122c-18 68-18 179 0 246M0-142v284M104-122c18 68 18 179 0 246" fill="none" stroke="#139b4b" stroke-width="13" stroke-linecap="round"/>
+    <path d="M-148 74l128-12 20 80c-53-14-105-47-148-98z" fill="#139b4b"/>
+    <path d="M30 142l120-66c-26 55-78 93-150 124z" fill="#d3273e"/>
+    <g transform="translate(0 18)">
+      <path d="M-58-8h116v34c0 44-27 79-58 79S-58 70-58 26z" fill="#d6a63f" stroke="#9f730f" stroke-width="8"/>
+      <path d="M-25 124h50v34h50v22h-150v-22h50z" fill="#d6a63f"/>
+      <path d="M0 13l12 24 27 4-19 19 5 27L0 74l-24 13 5-27-19-19 27-4z" fill="#fffdf5"/>
+    </g>
+  </g>
+  <g text-anchor="middle" font-family="Inter, Arial, sans-serif">
+    <text x="600" y="544" fill="#102238" font-size="112" font-weight="950" letter-spacing="1">WIN</text>
+    <text x="600" y="624" fill="#102238" font-size="70" font-weight="900" letter-spacing="7">WORLD CUP</text>
+    <text x="600" y="696" fill="#139b4b" font-size="66" font-weight="900" letter-spacing="20">2026</text>
+    <text x="600" y="735" fill="#102238" font-size="28" font-weight="700" letter-spacing="6">winworldcup2026.com</text>
+  </g>
+</svg>

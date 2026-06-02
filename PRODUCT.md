@@ -2,7 +2,7 @@
 
 ## Product
 
-World Cup Predictor is a match prediction and sponsor reward experience. A user chooses a supporter team, predicts fixtures, locks picks, and can enter sponsor-funded match draws when their prediction is correct.
+World Cup Predictor is a match prediction and sponsor reward experience for `winworldcup2026.com`. A user chooses a supporter team, predicts fixtures, locks picks, and can enter sponsor-funded match draws when their prediction is correct.
 
 ## Primary Audience
 
@@ -34,5 +34,6 @@ World Cup Predictor is a match prediction and sponsor reward experience. A user 
 - Demo draws are seeded in local data.
 - Draw receipts, commitments, seeds, winners, and alternates are prototype records.
 - T-shirt previews and committed design assets are conceptual, not production print files.
+- Logo explorations are committed under `designs/logos/` and are not official tournament marks.
 - Provider recommendations are architectural notes, not live integrations.
 - No real prize fulfillment, payment, user identity, fraud checks, or legal rules are implemented yet.
