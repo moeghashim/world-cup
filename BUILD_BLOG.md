@@ -204,14 +204,14 @@ The active logo still needs final legal/IP review before launch, especially beca
 
 ## Experiment Page And Public Build Notes
 
-The site now includes a footer-linked `Experiment` section. It imports the project documentation files as raw markdown and renders them as readable panels inside the website:
+The site now includes a footer-linked `Experiment` view. It imports the project documentation files as raw markdown and renders them as readable panels inside the website:
 
 - `BUILD_BLOG.md`
 - `AGENTS.md`
 - `PRODUCT.md`
 - `DESIGN.md`
 
-This makes the process artifact part of the product experience, not just a repository file. The footer also identifies the site as an experiment from `10claws.com` and now notes that the project is being built with Codex Desktop App and `https://projects.dev/`.
+This makes the process artifact part of the product experience, not just a repository file. The Experiment view notes that the project is being built with Codex Desktop App and `https://projects.dev/`, while the default homepage stays focused on matches, prizes, and winners.
 
 `BUILD_BLOG.md` remains the file that is updated on every commit. It is the running public article for how the project is being built.
 
@@ -295,7 +295,7 @@ Browser checks have covered:
 - supporter schedule switching from Brazil to Japan
 - sticky-header anchor offset and compact fixture-card wrapping
 - attached logo rendering in the header after resizing the topbar logo slot, including the later 20% logo increase
-- footer Experiment link, imported markdown panels, 10claws.com attribution, and Codex Desktop App plus projects.dev build attribution
+- footer Experiment link, imported markdown panels, 10claws.com attribution, and homepage checks that keep Codex Desktop App plus projects.dev attribution out of the default match experience
 
 Current visual artifact:
 
@@ -347,9 +347,13 @@ Added a footer-linked Experiment section that renders the project documentation 
 
 Increased the active header logo from 68px to 82px, kept the square SVG metadata aligned, and raised the sticky topbar to 100px so the larger logo keeps appropriate spacing.
 
-### Current commit - Add Codex Desktop and projects.dev attribution
+### `4900917` - Add Codex Desktop and projects.dev attribution
 
 Added visible attribution in the Experiment section and footer that this project is being built with Codex Desktop App and `https://projects.dev/`, then updated the product, design, and build documentation to keep the public build article aligned.
+
+### Current commit - Keep homepage focused on matches and winners
+
+Moved the technical build attribution and documentation out of the default homepage flow. The footer still links to the Experiment view for build notes, but the homepage now stays centered on fixtures, predictions, prizes, and winner flows.
 
 ## Next Build Steps
 

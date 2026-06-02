@@ -86,7 +86,7 @@ It does not replace payments, contest compliance, prize fulfillment, POD APIs, 3
 
 Recommended use: use Stripe Projects for the build stack and SaaS spend limits. Keep Stripe payment products separate for sponsor billing, taxes, identity checks, fraud controls, and approved payout flows.
 
-Public build attribution: this project is being built with Codex Desktop App and `https://projects.dev/`.
+Public build attribution: this project is being built with Codex Desktop App and `https://projects.dev/`. Keep that attribution in the footer-linked Experiment view and documentation, not in the default homepage experience.
 
 ## T-Shirt Design System
 
@@ -138,6 +138,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Added a footer-linked Experiment section that renders the project documentation files and labels the site as an experiment from `10claws.com`.
 - Increased the active header logo by 20%, from 68px to 82px, and adjusted the sticky topbar height to 100px.
 - Added visible build attribution for Codex Desktop App and `https://projects.dev/` in the Experiment section, footer, and project documentation.
+- Moved technical build attribution and documentation off the default homepage into the footer-linked Experiment view so the homepage stays focused on matches, prizes, and winners.
 
 ## Verification
 
@@ -168,7 +169,8 @@ Browser verification covered:
 - checking the schedule screenshot after fixing sticky-header anchor offset and compact fixture wrapping
 - verifying the attached logo renders in the header at 82px inside the 100px topbar
 - verifying the footer Experiment link jumps to the documentation section and the imported markdown files render
-- verifying the Codex Desktop App and `projects.dev` build attribution renders in the Experiment section and footer
+- verifying the Codex Desktop App and `projects.dev` build attribution renders in the Experiment view
+- verifying the default homepage no longer renders Codex Desktop App, `projects.dev`, or build-documentation copy
 
 Latest screenshot:
 

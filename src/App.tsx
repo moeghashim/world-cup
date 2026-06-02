@@ -1,4 +1,4 @@
-import { type CSSProperties, useMemo, useRef, useState } from 'react'
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { Renderer, JSONUIProvider, type StateStore } from '@json-render/react'
 import {
   BookOpen,
@@ -172,12 +172,26 @@ function usePredictionStore(
 }
 
 function App() {
+  const [isExperimentView, setIsExperimentView] = useState(
+    () => window.location.hash === '#experiment',
+  )
   const [predictionState, setPredictionState] = useState<PredictionState>(
     initialPredictionState,
   )
   const store = usePredictionStore(predictionState, setPredictionState)
   const selectedTeamKey = predictionState.selectedTeamKey
   const selectedTeam = getTeam(selectedTeamKey)
+
+  useEffect(() => {
+    const syncExperimentHash = () => {
+      setIsExperimentView(window.location.hash === '#experiment')
+    }
+
+    syncExperimentHash()
+    window.addEventListener('hashchange', syncExperimentHash)
+
+    return () => window.removeEventListener('hashchange', syncExperimentHash)
+  }, [])
 
   const featuredMatch = useMemo(
     () =>
@@ -242,6 +256,39 @@ function App() {
     '--team-soft': selectedTeam.colors.soft,
     '--hero-image': `url(${heroImage})`,
   } as CSSProperties
+
+  if (isExperimentView) {
+    return (
+      <main className="app-shell" style={themeVars}>
+        <header className="topbar">
+          <a className="brand" href="#predict">
+            <img
+              alt="Win World Cup 2026"
+              className="brand-logo"
+              height="82"
+              src={brandLogo}
+              width="82"
+            />
+          </a>
+          <nav className="nav-links" aria-label="Primary navigation">
+            <a href="#predictions">Fixtures</a>
+            <a href="#teams">Teams</a>
+            <a href="#rewards">Rewards</a>
+            <a href="#operations">Operations</a>
+          </nav>
+          <button className="account-button" type="button">
+            <Ticket size={17} />
+            <span>
+              {lockedCount} locked · {drawCount} draws
+            </span>
+          </button>
+        </header>
+
+        <ExperimentPage />
+        <SiteFooter />
+      </main>
+    )
+  }
 
   return (
     <main className="app-shell" style={themeVars}>
@@ -421,90 +468,89 @@ function App() {
         </div>
       </div>
 
-      <section
-        className="experiment-page"
-        id="experiment"
-        aria-labelledby="experiment-title"
-      >
-        <div className="experiment-heading">
-          <span className="icon-box">
-            <FlaskConical size={18} />
-          </span>
-          <div>
-            <p className="section-kicker">Experiment</p>
-            <h2 id="experiment-title">How This Was Built</h2>
-            <p>
-              This section keeps the working docs visible in the product so the
-              build process can be reviewed alongside the match prediction
-              experience.
-            </p>
-            <p>
-              This project is being built with Codex Desktop App and{' '}
-              <a
-                href="https://projects.dev/"
-                rel="noreferrer"
-                target="_blank"
-              >
-                projects.dev
-                <ExternalLink size={13} />
-              </a>
-              .
-            </p>
-          </div>
-        </div>
+      <SiteFooter />
+    </main>
+  )
+}
 
-        <div className="experiment-doc-grid">
-          {experimentDocs.map((doc) => (
-            <article className="experiment-doc" key={doc.filename}>
-              <header>
-                <span>
-                  <FileText size={17} />
-                  {doc.filename}
-                </span>
-                <h3>{doc.title}</h3>
-                <p>{doc.purpose}</p>
-              </header>
-              <pre aria-label={`${doc.filename} excerpt`}>
-                {getMarkdownExcerpt(doc.body)}
-              </pre>
-              <details>
-                <summary>
-                  <BookOpen size={16} />
-                  <span>Read Full File</span>
-                </summary>
-                <pre>{doc.body}</pre>
-              </details>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <footer className="site-footer">
+function ExperimentPage() {
+  return (
+    <section
+      className="experiment-page"
+      id="experiment"
+      aria-labelledby="experiment-title"
+    >
+      <div className="experiment-heading">
+        <span className="icon-box">
+          <FlaskConical size={18} />
+        </span>
         <div>
-          <strong>Win World Cup 2026</strong>
-          <span>
-            An experiment from{' '}
-            <a href="https://10claws.com/" rel="noreferrer" target="_blank">
-              10claws.com
-              <ExternalLink size={13} />
-            </a>
-          </span>
-          <span className="build-attribution">
-            Built with Codex Desktop App and{' '}
+          <p className="section-kicker">Experiment</p>
+          <h2 id="experiment-title">How This Was Built</h2>
+          <p>
+            This section keeps the working docs visible in the product so the
+            build process can be reviewed alongside the match prediction
+            experience.
+          </p>
+          <p>
+            This project is being built with Codex Desktop App and{' '}
             <a href="https://projects.dev/" rel="noreferrer" target="_blank">
               projects.dev
               <ExternalLink size={13} />
             </a>
-          </span>
+            .
+          </p>
         </div>
-        <nav aria-label="Footer navigation">
-          <a href="#experiment">Experiment</a>
-          <a href="#predictions">Fixtures</a>
-          <a href="#teams">Teams</a>
-          <a href="#operations">Operations</a>
-        </nav>
-      </footer>
-    </main>
+      </div>
+
+      <div className="experiment-doc-grid">
+        {experimentDocs.map((doc) => (
+          <article className="experiment-doc" key={doc.filename}>
+            <header>
+              <span>
+                <FileText size={17} />
+                {doc.filename}
+              </span>
+              <h3>{doc.title}</h3>
+              <p>{doc.purpose}</p>
+            </header>
+            <pre aria-label={`${doc.filename} excerpt`}>
+              {getMarkdownExcerpt(doc.body)}
+            </pre>
+            <details>
+              <summary>
+                <BookOpen size={16} />
+                <span>Read Full File</span>
+              </summary>
+              <pre>{doc.body}</pre>
+            </details>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function SiteFooter() {
+  return (
+    <footer className="site-footer">
+      <div>
+        <strong>Win World Cup 2026</strong>
+        <span>
+          An experiment from{' '}
+          <a href="https://10claws.com/" rel="noreferrer" target="_blank">
+            10claws.com
+            <ExternalLink size={13} />
+          </a>
+        </span>
+      </div>
+      <nav aria-label="Footer navigation">
+        <a href="#experiment">Experiment</a>
+        <a href="#predictions">Fixtures</a>
+        <a href="#teams">Teams</a>
+        <a href="#operations">Operations</a>
+      </nav>
+    </footer>
   )
 }
 
