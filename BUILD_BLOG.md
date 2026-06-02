@@ -351,9 +351,13 @@ Increased the active header logo from 68px to 82px, kept the square SVG metadata
 
 Added visible attribution in the Experiment section and footer that this project is being built with Codex Desktop App and `https://projects.dev/`, then updated the product, design, and build documentation to keep the public build article aligned.
 
-### Current commit - Keep homepage focused on matches and winners
+### Current commit - Keep homepage focused on matches and prizes
 
 Moved the technical build attribution and documentation out of the default homepage flow. The footer still links to the Experiment view for build notes, but the homepage now stays centered on fixtures, predictions, prizes, and winner flows.
+
+Added a dedicated prize section to the homepage and per-team prize detail pages at hashes such as `#prizes/japan`. The prize UI uses the generated localized shirt mockups from `src/assets/prizes/`, shows print direction and package details for each team, and keeps the independent-fan-design safety boundary visible.
+
+Verification for this pass included `npm run lint`, `npm run build`, desktop browser checks for `#prizes` and `#prizes/japan`, and a mobile-width check confirming the prize grids/detail page have no horizontal overflow.
 
 ## Next Build Steps
 
