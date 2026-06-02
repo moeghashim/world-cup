@@ -198,7 +198,9 @@ The generated PNG board is saved as `designs/logos/logo-concept-board.png`. The 
 
 This pass avoids official tournament symbols, federation marks, sponsor marks, mascot art, player likenesses, and official trophy silhouettes.
 
-The selected direction is Variation B, the motion-ball mark. It is copied to `src/assets/winworldcup2026-logo.svg` and now appears in the top navigation as the active website logo.
+The selected direction later changed from Variation B to a user-provided attached SVG. That file is preserved as `designs/logos/worldcup-logo-attached.svg`, copied to `src/assets/winworldcup2026-logo.svg`, and now appears in the top navigation as the active website logo.
+
+The active logo still needs final legal/IP review before launch, especially because contest and tournament-adjacent branding can create avoidable trademark risk.
 
 ## Print-On-Demand And Sponsor Package Research
 
@@ -279,10 +281,11 @@ Browser checks have covered:
 - teams/schedule section with 12 group cards and 72 fixture rows
 - supporter schedule switching from Brazil to Japan
 - sticky-header anchor offset and compact fixture-card wrapping
+- attached logo rendering in the header after resizing the topbar logo slot
 
 Current visual artifact:
 
-`artifacts/worldcup-teams-schedule.png`
+`artifacts/worldcup-attached-logo.png`
 
 ## Commit Timeline
 
@@ -314,9 +317,13 @@ Added three SVG logo variations and a generated concept board for `winworldcup20
 
 Selected Variation B as the active website logo, copied it into `src/assets/`, and replaced the original temporary trophy icon in the header brand.
 
-### Current commit - Add tournament schedule snapshot
+### `3613fde` - Add tournament schedule snapshot
 
 Added a typed tournament schedule snapshot, a JSON-render schedule section, all teams grouped from A through L, 72 group-stage fixture rows, and selected-team schedule highlights tied to supporter mode.
+
+### Current commit - Use attached logo
+
+Replaced the active website logo with the user-provided attached SVG, preserved the source under `designs/logos/`, and verified the SVG and app build.
 
 ## Next Build Steps
 

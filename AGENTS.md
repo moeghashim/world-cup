@@ -98,7 +98,7 @@ Current concepts cover Brazil, Argentina, United States, France, England, Spain,
 
 Design assets are now stored under `designs/`. The folder includes concept images for the supported teams, generated shirt design mockups for Argentina, Brazil, France, Japan, Morocco, Spain, and the United States, plus a refined concept board. These are visual direction assets, not final POD print files.
 
-Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The current set includes three SVG variations: orbit/cup, motion ball, and shield/globe. Variation B, the motion-ball logo, is selected and copied into `src/assets/winworldcup2026-logo.svg` as the active website header logo. The generated PNG board is a concept reference; the SVG files are the editable usable assets.
+Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The current set includes three SVG variations: orbit/cup, motion ball, and shield/globe. The user-provided `worldcup-logo-attached.svg` is now selected and copied into `src/assets/winworldcup2026-logo.svg` as the active website header logo. The generated PNG board is a concept reference; the SVG files are the editable usable assets. The active logo still needs final legal/IP review before launch.
 
 ## Completed Work
 
@@ -130,6 +130,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Added three logo variations for `winworldcup2026.com` under `designs/logos/` and documented their usage boundary.
 - Selected Variation B as the active website logo and wired it into the top navigation brand.
 - Added a dated tournament snapshot section with all 48 teams, 12 groups, 72 group-stage fixtures, selected supporter-team schedule highlights, source metadata, and a FIFA verification link.
+- Replaced the active website logo with the user-provided attached SVG and preserved it under `designs/logos/worldcup-logo-attached.svg`.
 
 ## Verification
 
@@ -138,7 +139,7 @@ Latest successful commands:
 ```bash
 npm run lint
 npm run build
-xmllint --noout designs/logos/winworldcup2026-logo-a-orbit-cup.svg designs/logos/winworldcup2026-logo-b-motion-ball.svg designs/logos/winworldcup2026-logo-c-shield-globe.svg
+xmllint --noout designs/logos/winworldcup2026-logo-a-orbit-cup.svg designs/logos/winworldcup2026-logo-b-motion-ball.svg designs/logos/winworldcup2026-logo-c-shield-globe.svg designs/logos/worldcup-logo-attached.svg src/assets/winworldcup2026-logo.svg
 ```
 
 Browser verification covered:
@@ -159,10 +160,11 @@ Browser verification covered:
 - verifying the teams/schedule section renders 12 group cards and 72 group-stage fixture rows
 - verifying the supporter schedule updates from Brazil to Japan after switching supporter team
 - checking the schedule screenshot after fixing sticky-header anchor offset and compact fixture wrapping
+- verifying the attached logo renders in the header at 68px inside the 84px topbar
 
 Latest screenshot:
 
-`artifacts/worldcup-teams-schedule.png`
+`artifacts/worldcup-attached-logo.png`
 
 ## Next Tasks
 

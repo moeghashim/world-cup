@@ -35,7 +35,7 @@ World Cup Predictor is a match prediction and sponsor reward experience for `win
 - Demo draws are seeded in local data.
 - Draw receipts, commitments, seeds, winners, and alternates are prototype records.
 - T-shirt previews and committed design assets are conceptual, not production print files.
-- Logo explorations are committed under `designs/logos/` and are not official tournament marks. Variation B is the active website logo.
+- Logo explorations are committed under `designs/logos/`. The user-provided attached SVG is now the active website logo and still needs final legal/IP review before launch.
 - Tournament teams and group-stage fixtures are a dated source snapshot. They should be verified against official sources or replaced with a maintained data feed before real eligibility decisions.
 - Provider recommendations are architectural notes, not live integrations.
 - No real prize fulfillment, payment, user identity, fraud checks, or legal rules are implemented yet.
