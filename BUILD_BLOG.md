@@ -320,10 +320,11 @@ Browser checks have covered:
 - page-path routes for `/operations`, `/experiment`, `/prizes`, `/prizes/japan`, and `/sponsors`
 - legacy hash URL normalization from `/#experiment` and `/#operations` to page paths
 - header navigation between page paths while preserving app state
+- attached logo rendering at 98px inside the 120px topbar
 
 Current visual artifact:
 
-`artifacts/worldcup-logo-20-bigger.png`
+`artifacts/worldcup-logo-20-bigger-again.png`
 
 ## Commit Timeline
 
@@ -401,9 +402,13 @@ Changed the Experiment view attribution to say the project is being built with [
 
 Changed the header logo link from an in-page section hash to `/` so clicking the logo always returns visitors to the homepage without leaving a `#` fragment in the URL.
 
-### Current commit - Use page routes instead of hash navigation
+### `9384db7` - Use page routes instead of hash navigation
 
 Replaced public hash navigation with page-style paths for fixtures, teams, draws, prizes, sponsors, rewards, operations, and Experiment. Added focused route rendering for JSON-render sections, `/prizes`, `/prizes/:team`, `/sponsors`, and `/experiment`; preserved legacy hash URLs as redirects to clean paths; and added `vercel.json` so deployed direct page refreshes resolve correctly.
+
+### Current commit - Increase attached logo again
+
+Increased the active header logo by another 20%, from 82px to 98px, and raised the sticky topbar from 100px to 120px so the larger mark has matching spacing.
 
 ## Next Build Steps
 

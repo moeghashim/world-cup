@@ -1449,9 +1449,9 @@ function Topbar({
         <img
           alt="Win World Cup 2026"
           className="brand-logo"
-          height="82"
+          height="98"
           src={brandLogo}
-          width="82"
+          width="98"
         />
       </a>
       <nav className="nav-links" aria-label="Primary navigation">
