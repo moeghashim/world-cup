@@ -1,4 +1,11 @@
-import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  type CSSProperties,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Renderer, JSONUIProvider, type StateStore } from '@json-render/react'
 import {
   ArrowLeft,
@@ -38,9 +45,6 @@ import usaPrizeImage from './assets/prizes/usa-shirt.png'
 import './App.css'
 import agentsMd from '../AGENTS.md?raw'
 import buildBlogMd from '../BUILD_BLOG.md?raw'
-import designMd from '../DESIGN.md?raw'
-import productMd from '../PRODUCT.md?raw'
-import websiteFlowMd from '../WEBSITE_FLOW.md?raw'
 import {
   getTeam,
   shirtConcepts,
@@ -113,39 +117,6 @@ function setByPointer<T extends Record<string, unknown>>(
       : value,
   } as T
 }
-
-const experimentDocs = [
-  {
-    title: 'Build Blog',
-    filename: 'BUILD_BLOG.md',
-    purpose: 'Narrative article for how the project was built over time.',
-    body: buildBlogMd,
-  },
-  {
-    title: 'Agent Build Log',
-    filename: 'AGENTS.md',
-    purpose: 'Working agreement, architecture notes, completed work, and verification trail.',
-    body: agentsMd,
-  },
-  {
-    title: 'Product Context',
-    filename: 'PRODUCT.md',
-    purpose: 'Product flow, audience, principles, and MVP boundaries.',
-    body: productMd,
-  },
-  {
-    title: 'Website Flow',
-    filename: 'WEBSITE_FLOW.md',
-    purpose: 'Diagrams for the visitor journey, app architecture, draw flow, and tools used.',
-    body: websiteFlowMd,
-  },
-  {
-    title: 'Design Context',
-    filename: 'DESIGN.md',
-    purpose: 'Design direction, layout rules, theming guidance, and quality checklist.',
-    body: designMd,
-  },
-] as const
 
 const prizeImages: Record<TeamKey, string> = {
   brazil: brazilPrizeImage,
@@ -355,22 +326,201 @@ const sponsorshipAddOns = [
   'Sponsor dashboard export with campaign metrics',
 ]
 
-function getPrizeTeamFromHash(hash: string): TeamKey | null {
-  const slug = hash.match(/^#prizes\/([a-z]+)$/)?.[1]
+const aiBuildMetrics = {
+  tokenTotal: '~2.4M',
+  estimatedCost: '~$18',
+  costLabel: 'API-equivalent estimate',
+  note: 'Estimated from Codex build activity; not a billing receipt.',
+} as const
 
-  if (!slug) return null
+const technologyFlow = [
+  {
+    label: 'Build Agent',
+    title: 'Codex Desktop App',
+    detail:
+      'Coordinates the local workspace, edits the product, verifies behavior, and updates the build artifact.',
+    tools: ['OpenAI Codex', 'local app browser'],
+  },
+  {
+    label: 'Source Control',
+    title: 'GitHub',
+    detail:
+      'Stores commits, branches, pull requests, and the public review trail for each coherent build task.',
+    tools: ['Git', 'GitHub CLI', 'PRs'],
+  },
+  {
+    label: 'Deployment',
+    title: 'Vercel',
+    detail:
+      'Serves the Vite app and uses a rewrite so clean page routes resolve on direct refresh.',
+    tools: ['Vite build', 'vercel.json'],
+  },
+  {
+    label: 'Frontend Runtime',
+    title: 'React + TypeScript',
+    detail:
+      'Owns supporter team state, predictions, draw receipts, fulfillment status, and routed views.',
+    tools: ['React', 'TypeScript', 'CSS variables'],
+  },
+  {
+    label: 'Spec Layer',
+    title: 'JSON-render',
+    detail:
+      'Composes controlled prediction, schedule, draw, reward, and operations sections from a typed catalog.',
+    tools: ['@json-render/react', 'zod'],
+  },
+  {
+    label: 'Infrastructure Planning',
+    title: 'Stripe Projects',
+    detail:
+      'Tracks provider setup and future operational services without replacing contest or fulfillment rules.',
+    tools: ['projects.dev', 'Stripe CLI'],
+  },
+  {
+    label: 'Production Services',
+    title: 'Providers',
+    detail:
+      'Planned services for analytics, auth, database, observability, shirts, sponsor kits, and reviews.',
+    tools: ['PostHog', 'WorkOS', 'Neon', 'POD', '3PL'],
+  },
+] as const
 
-  return teamThemes.some((team) => team.key === slug)
-    ? (slug as TeamKey)
-    : null
+const sectionRouteMap = {
+  '/fixtures': 'predictions',
+  '/teams': 'teams',
+  '/draws': 'draws',
+  '/shirts': 'shirts',
+  '/rewards': 'rewards',
+  '/operations': 'operations',
+} as const
+
+const pageTitleMap = {
+  '/fixtures': {
+    kicker: 'Fixtures',
+    title: 'Pick, Score, Lock',
+    copy: 'Predict match scores, lock receipts, and enter sponsor-funded draws when the result is right.',
+  },
+  '/teams': {
+    kicker: 'Teams',
+    title: 'Teams And Schedule',
+    copy: 'Review all participating teams, groups, fixtures, kickoff times, and the selected supporter-team schedule.',
+  },
+  '/draws': {
+    kicker: 'Draws',
+    title: 'Match-Level Winner Draws',
+    copy: 'Run deterministic winner reveals with eligible receipts, alternates, participant outcomes, and audit metadata.',
+  },
+  '/shirts': {
+    kicker: 'Shirts',
+    title: 'Localized Shirt Studio',
+    copy: 'Preview independent supporter-shirt concepts that change with the team a visitor supports.',
+  },
+  '/rewards': {
+    kicker: 'Rewards',
+    title: 'Ship, Track, Review',
+    copy: 'Move winners through sponsor packages, localized shirts, fulfillment queues, and post-delivery review prompts.',
+  },
+  '/operations': {
+    kicker: 'Operations',
+    title: 'POD, 3PL, And Provider Plan',
+    copy: 'Review how shirt production, sponsor kits, infrastructure providers, and campaign operations fit together.',
+  },
+} as const
+
+type SectionPath = keyof typeof sectionRouteMap
+
+type RouteState = {
+  activePrizeKey: TeamKey | null
+  isExperimentView: boolean
+  pathname: string
+  sectionPath: SectionPath | null
 }
 
-function getMarkdownExcerpt(markdown: string) {
-  return markdown
-    .split('\n')
-    .filter((line) => line.trim().length > 0)
-    .slice(0, 7)
-    .join('\n')
+function normalizePathname(pathname: string) {
+  if (pathname === '/') return pathname
+
+  return pathname.replace(/\/+$/, '')
+}
+
+function isTeamKey(value: string): value is TeamKey {
+  return teamThemes.some((team) => team.key === value)
+}
+
+function getPrizeTeamFromPath(pathname: string): TeamKey | null {
+  const slug = normalizePathname(pathname).match(/^\/prizes\/([a-z]+)$/)?.[1]
+
+  return slug && isTeamKey(slug) ? slug : null
+}
+
+function getLegacyHashPath(hash: string) {
+  const hashPathMap: Record<string, string> = {
+    '#predictions': '/fixtures',
+    '#teams': '/teams',
+    '#draws': '/draws',
+    '#prizes': '/prizes',
+    '#shirts': '/shirts',
+    '#sponsors': '/sponsors',
+    '#rewards': '/rewards',
+    '#operations': '/operations',
+    '#experiment': '/experiment',
+  }
+
+  if (hashPathMap[hash]) return hashPathMap[hash]
+
+  const prizeSlug = hash.match(/^#prizes\/([a-z]+)$/)?.[1]
+
+  if (prizeSlug && isTeamKey(prizeSlug)) {
+    return `/prizes/${prizeSlug}`
+  }
+
+  return null
+}
+
+function getCurrentRouteState(): RouteState {
+  const legacyPath = getLegacyHashPath(window.location.hash)
+
+  if (legacyPath) {
+    window.history.replaceState(null, '', legacyPath)
+  }
+
+  const pathname = normalizePathname(window.location.pathname)
+  const activePrizeKey = getPrizeTeamFromPath(pathname)
+  const sectionPath =
+    pathname in sectionRouteMap ? (pathname as SectionPath) : null
+
+  return {
+    activePrizeKey,
+    isExperimentView: pathname === '/experiment',
+    pathname,
+    sectionPath,
+  }
+}
+
+function getRoutePredictionSpec(sectionPath: SectionPath | null) {
+  if (!sectionPath) return predictionSpec
+
+  const sectionId = sectionRouteMap[sectionPath]
+  const sectionElementId = Object.entries(predictionSpec.elements).find(
+    ([, element]) =>
+      'props' in element &&
+      typeof element.props === 'object' &&
+      element.props !== null &&
+      'id' in element.props &&
+      element.props.id === sectionId,
+  )?.[0]
+
+  if (!sectionElementId) return predictionSpec
+
+  return {
+    ...predictionSpec,
+    elements: {
+      ...predictionSpec.elements,
+      experience: {
+        ...predictionSpec.elements.experience,
+        children: [sectionElementId],
+      },
+    },
+  }
 }
 
 function usePredictionStore(
@@ -529,14 +679,14 @@ function getFixturePickLabel(
 }
 
 function App() {
-  const [activePrizeKey, setActivePrizeKey] = useState<TeamKey | null>(() =>
-    getPrizeTeamFromHash(window.location.hash),
-  )
-  const [isExperimentView, setIsExperimentView] = useState(
-    () => window.location.hash === '#experiment',
+  const [routeState, setRouteState] = useState<RouteState>(() =>
+    getCurrentRouteState(),
   )
   const [predictionState, setPredictionState] = useState<PredictionState>(
-    initialPredictionState,
+    () =>
+      routeState.activePrizeKey
+        ? { ...initialPredictionState, selectedTeamKey: routeState.activePrizeKey }
+        : initialPredictionState,
   )
   const [activeFixtureSlide, setActiveFixtureSlide] = useState(0)
   const [fixturePredictions, setFixturePredictions] = useState<
@@ -545,25 +695,57 @@ function App() {
   const store = usePredictionStore(predictionState, setPredictionState)
   const selectedTeamKey = predictionState.selectedTeamKey
   const selectedTeam = getTeam(selectedTeamKey)
-  const selectedShirt = shirtConcepts[selectedTeamKey]
-  const selectedPrize = prizeDetails[selectedTeamKey]
+  const activePrizeKey = routeState.activePrizeKey
+  const isExperimentView = routeState.isExperimentView
+  const routePredictionSpec = useMemo(
+    () => getRoutePredictionSpec(routeState.sectionPath),
+    [routeState.sectionPath],
+  )
 
   useEffect(() => {
-    const syncPrizeHash = () => {
-      const hash = window.location.hash
+    const syncRoute = () => setRouteState(getCurrentRouteState())
 
-      setActivePrizeKey(getPrizeTeamFromHash(hash))
-      setIsExperimentView(hash === '#experiment')
+    syncRoute()
+    window.addEventListener('popstate', syncRoute)
+    window.addEventListener('hashchange', syncRoute)
+
+    return () => {
+      window.removeEventListener('popstate', syncRoute)
+      window.removeEventListener('hashchange', syncRoute)
+    }
+  }, [])
+
+  useEffect(() => {
+    const navigateToInternalPage = (event: MouseEvent) => {
+      const target = event.target
+
+      if (!(target instanceof Element)) return
+
+      const anchor = target.closest<HTMLAnchorElement>('a[href^="/"]')
+
+      if (!anchor || anchor.target || anchor.hasAttribute('download')) return
+
+      const url = new URL(anchor.href)
+
+      if (url.origin !== window.location.origin) return
+
+      event.preventDefault()
+      window.history.pushState(null, '', `${url.pathname}${url.search}${url.hash}`)
+      setRouteState(getCurrentRouteState())
+      window.scrollTo({ top: 0 })
     }
 
-    syncPrizeHash()
-    window.addEventListener('hashchange', syncPrizeHash)
+    document.addEventListener('click', navigateToInternalPage)
 
-    return () => window.removeEventListener('hashchange', syncPrizeHash)
+    return () => {
+      document.removeEventListener('click', navigateToInternalPage)
+    }
   }, [])
 
   useEffect(() => {
     if (!activePrizeKey) return undefined
+
+    store.set('/selectedTeamKey', activePrizeKey)
 
     const frame = window.requestAnimationFrame(() => {
       document.getElementById('prize-detail')?.scrollIntoView({
@@ -572,7 +754,7 @@ function App() {
     })
 
     return () => window.cancelAnimationFrame(frame)
-  }, [activePrizeKey])
+  }, [activePrizeKey, store])
 
   const nextFixtureDay = useMemo(() => getSoonestUpcomingFixtureDay(), [])
   const sameDayFixtures = nextFixtureDay.fixtures
@@ -606,43 +788,43 @@ function App() {
   ).length
   const flowItems = [
     {
-      href: '#predictions',
+      href: '/fixtures',
       icon: <Target size={17} />,
       label: 'Predict',
       meta: `${lockedCount} locked`,
     },
     {
-      href: '#teams',
+      href: '/teams',
       icon: <CalendarDays size={17} />,
       label: 'Teams',
       meta: '48-team field',
     },
     {
-      href: '#draws',
+      href: '/draws',
       icon: <Dice5 size={17} />,
       label: 'Draw',
       meta: `${drawCount} complete`,
     },
     {
-      href: '#prizes',
+      href: '/prizes',
       icon: <Gift size={17} />,
       label: 'Prize',
       meta: 'Free shirt',
     },
     {
-      href: '#shirts',
+      href: '/shirts',
       icon: <Shirt size={17} />,
       label: 'Personalize',
       meta: selectedTeam.code,
     },
     {
-      href: '#rewards',
+      href: '/rewards',
       icon: <PackageCheck size={17} />,
       label: 'Fulfill',
       meta: `${predictionState.fulfillmentQueue.length} queued`,
     },
     {
-      href: '#operations',
+      href: '/operations',
       icon: <ShieldCheck size={17} />,
       label: 'Review',
       meta: `${reviewCount} sent`,
@@ -661,32 +843,95 @@ function App() {
   if (isExperimentView) {
     return (
       <main className="app-shell" style={themeVars}>
-        <header className="topbar">
-          <a className="brand" href="#predict">
-            <img
-              alt="Win World Cup 2026"
-              className="brand-logo"
-              height="82"
-              src={brandLogo}
-              width="82"
-            />
-          </a>
-          <nav className="nav-links" aria-label="Primary navigation">
-            <a href="#predictions">Fixtures</a>
-            <a href="#teams">Teams</a>
-            <a href="#prizes">Prizes</a>
-            <a href="#rewards">Rewards</a>
-            <a href="#operations">Operations</a>
-          </nav>
-          <button className="account-button" type="button">
-            <Ticket size={17} />
-            <span>
-              {lockedCount} locked · {drawCount} draws
-            </span>
-          </button>
-        </header>
-
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
         <ExperimentPage />
+        <SiteFooter />
+      </main>
+    )
+  }
+
+  if (activePrizeKey) {
+    return (
+      <main className="app-shell" style={themeVars}>
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
+        <PrizeDetailPage
+          onSelectTeam={(teamKey) => store.set('/selectedTeamKey', teamKey)}
+          teamKey={activePrizeKey}
+        />
+        <SiteFooter />
+      </main>
+    )
+  }
+
+  if (routeState.pathname === '/prizes') {
+    return (
+      <main className="app-shell" style={themeVars}>
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
+        <PrizeHomeSection
+          onSelectTeam={(teamKey) => store.set('/selectedTeamKey', teamKey)}
+          selectedTeamKey={selectedTeamKey}
+        />
+        <SiteFooter />
+      </main>
+    )
+  }
+
+  if (routeState.pathname === '/sponsors') {
+    return (
+      <main className="app-shell" style={themeVars}>
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
+        <SponsorSection />
+        <SiteFooter />
+      </main>
+    )
+  }
+
+  if (routeState.sectionPath) {
+    const routeCopy = pageTitleMap[routeState.sectionPath]
+
+    return (
+      <main className="app-shell" style={themeVars}>
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
+
+        <section className="route-page-hero" aria-labelledby="route-page-title">
+          <div className="section-heading">
+            <span className="icon-box">
+              <Sparkles size={18} />
+            </span>
+            <div>
+              <p className="section-kicker">{routeCopy.kicker}</p>
+              <h1 id="route-page-title">{routeCopy.title}</h1>
+              <p>{routeCopy.copy}</p>
+            </div>
+          </div>
+        </section>
+
+        <div className="workspace-shell route-workspace">
+          <aside className="flow-rail" aria-label="Prediction workflow">
+            <div className="flow-rail-header">
+              <span>{selectedTeam.code}</span>
+              <strong>Matchday Flow</strong>
+            </div>
+            <nav aria-label="Prediction workflow stages">
+              {flowItems.map((item) => (
+                <a href={item.href} key={item.label}>
+                  <span className="flow-icon">{item.icon}</span>
+                  <span>
+                    <strong>{item.label}</strong>
+                    <em>{item.meta}</em>
+                  </span>
+                </a>
+              ))}
+            </nav>
+          </aside>
+
+          <div className="workspace-main">
+            <JSONUIProvider registry={registry} store={store}>
+              <Renderer spec={routePredictionSpec} registry={registry} />
+            </JSONUIProvider>
+          </div>
+        </div>
+
         <SiteFooter />
       </main>
     )
@@ -694,31 +939,7 @@ function App() {
 
   return (
     <main className="app-shell" style={themeVars}>
-      <header className="topbar">
-        <a className="brand" href="#predict">
-          <img
-            alt="Win World Cup 2026"
-            className="brand-logo"
-            height="82"
-            src={brandLogo}
-            width="82"
-          />
-        </a>
-        <nav className="nav-links" aria-label="Primary navigation">
-          <a href="#predictions">Fixtures</a>
-          <a href="#teams">Teams</a>
-          <a href="#prizes">Prizes</a>
-          <a href="#sponsors">Sponsors</a>
-          <a href="#rewards">Rewards</a>
-          <a href="#operations">Operations</a>
-        </nav>
-        <button className="account-button" type="button">
-          <Ticket size={17} />
-          <span>
-            {lockedCount} locked · {drawCount} draws
-          </span>
-        </button>
-      </header>
+      <Topbar drawCount={drawCount} lockedCount={lockedCount} />
 
       <section className="hero-band" aria-labelledby="page-title">
         <div className="hero-copy">
@@ -729,16 +950,16 @@ function App() {
             supporter shirts, and move winners into shipping and review flows.
           </p>
           <div className="hero-actions">
-            <a className="primary-action" href="#predictions">
+            <a className="primary-action" href="/fixtures">
               <Target size={18} />
               <span>Make Picks</span>
               <ChevronRight size={17} />
             </a>
-            <a className="secondary-action" href="#prizes">
+            <a className="secondary-action" href="/prizes">
               <Gift size={18} />
               <span>Free Shirt Prize</span>
             </a>
-            <a className="secondary-action" href="#sponsors">
+            <a className="secondary-action" href="/sponsors">
               <Handshake size={18} />
               <span>Sponsor Packages</span>
             </a>
@@ -772,7 +993,7 @@ function App() {
           </span>
           <div>
             <p className="section-kicker">Supporter Team</p>
-            <h2 id="supporter-team">Choose Your Theme</h2>
+            <h2 id="supporter-team">Choose Your Team</h2>
           </div>
         </div>
         <div className="team-picker" role="list">
@@ -805,205 +1026,12 @@ function App() {
         </div>
       </section>
 
-      <section className="prize-home" id="prizes" aria-labelledby="prize-title">
-        <div className="prize-home-heading">
-          <div className="section-heading compact">
-            <span className="icon-box">
-              <Gift size={18} />
-            </span>
-            <div>
-              <p className="section-kicker">Prize Draw</p>
-              <h2 id="prize-title">Win The Team Shirt You Picked</h2>
-            </div>
-          </div>
-          <p>
-            Each qualified draw winner receives a free localized supporter shirt
-            for their selected team. These are independent fan designs with no
-            official tournament, federation, player, or sponsor branding.
-          </p>
-        </div>
+      <PrizeHomeSection
+        onSelectTeam={(teamKey) => store.set('/selectedTeamKey', teamKey)}
+        selectedTeamKey={selectedTeamKey}
+      />
 
-        <div className="featured-prize">
-          <div className="featured-prize-media">
-            <img
-              alt={`${selectedTeam.name} supporter shirt prize`}
-              src={prizeImages[selectedTeamKey]}
-            />
-          </div>
-          <div className="featured-prize-copy">
-            <p className="section-kicker">{selectedTeam.name} Prize</p>
-            <h3>{selectedShirt.conceptName}</h3>
-            <p>{selectedPrize.headline}</p>
-            <div className="prize-pill-row" aria-label="Selected prize colors">
-              {[selectedShirt.base, selectedShirt.graphic, selectedShirt.accent].map(
-                (color) => (
-                  <span key={color} style={{ background: color }} />
-                ),
-              )}
-            </div>
-            <ul className="featured-prize-list">
-              <li>
-                <Shirt size={17} />
-                <span>{selectedShirt.primaryCopy}</span>
-              </li>
-              <li>
-                <Palette size={17} />
-                <span>{selectedShirt.motif}</span>
-              </li>
-              <li>
-                <ShieldCheck size={17} />
-                <span>No official marks, crests, players, or sponsor logos.</span>
-              </li>
-            </ul>
-            <div className="prize-actions">
-              <a className="prize-action primary" href={`#prizes/${selectedTeamKey}`}>
-                <span>View Team Prize</span>
-                <ChevronRight size={17} />
-              </a>
-              <a className="prize-action secondary" href="#predictions">
-                <Target size={17} />
-                <span>Make Picks</span>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="prize-team-grid" aria-label="Team prize previews">
-          {teamThemes.map((team) => {
-            const shirt = shirtConcepts[team.key]
-
-            return (
-              <article className="prize-card" key={team.key}>
-                <div
-                  className="prize-card-media"
-                  style={
-                    {
-                      '--prize-primary': team.colors.primary,
-                      '--prize-secondary': team.colors.secondary,
-                      '--prize-accent': team.colors.accent,
-                    } as CSSProperties
-                  }
-                >
-                  <img
-                    alt={`${team.name} shirt prize preview`}
-                    loading="lazy"
-                    src={prizeImages[team.key]}
-                  />
-                </div>
-                <div className="prize-card-copy">
-                  <span>{team.code}</span>
-                  <h3>{team.name}</h3>
-                  <p>{shirt.conceptName}</p>
-                  <a
-                    className="prize-card-link"
-                    href={`#prizes/${team.key}`}
-                    onClick={() => store.set('/selectedTeamKey', team.key)}
-                  >
-                    <span>Prize Details</span>
-                    <ChevronRight size={16} />
-                  </a>
-                </div>
-              </article>
-            )
-          })}
-        </div>
-      </section>
-
-      <section
-        className="sponsor-band"
-        id="sponsors"
-        aria-labelledby="sponsor-title"
-      >
-        <div className="sponsor-heading">
-          <div className="section-heading compact">
-            <span className="icon-box">
-              <Handshake size={18} />
-            </span>
-            <div>
-              <p className="section-kicker">Sponsor Packages</p>
-              <h2 id="sponsor-title">Fund The Rewards Fans Remember</h2>
-            </div>
-          </div>
-          <p>
-            Sponsors fund match campaigns, winner product gifts, localized shirt
-            drops, and post-delivery review prompts. Packages are designed for
-            product sampling, media proof, and measurable fan engagement.
-          </p>
-        </div>
-
-        <div className="sponsor-tier-grid" aria-label="Sponsorship tiers">
-          {sponsorshipTiers.map((tier) => {
-            const TierIcon = tier.icon
-
-            return (
-              <article
-                className={`sponsor-tier ${tier.featured ? 'is-featured' : ''}`}
-                key={tier.name}
-              >
-                <header className="sponsor-tier-header">
-                  <span className="sponsor-tier-icon">
-                    <TierIcon size={19} />
-                  </span>
-                  <div>
-                    <p>{tier.signal}</p>
-                    <h3>{tier.name}</h3>
-                  </div>
-                </header>
-                <div className="sponsor-price-row">
-                  <strong>{tier.price}</strong>
-                  <span>{tier.spots}</span>
-                </div>
-                <p className="sponsor-summary">{tier.summary}</p>
-                <ul className="sponsor-feature-list">
-                  {tier.includes.map((item) => (
-                    <li key={item}>
-                      <CheckCircle2 size={16} />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="sponsor-creative">{tier.creative}</p>
-              </article>
-            )
-          })}
-        </div>
-
-        <div className="sponsor-addons">
-          <div>
-            <p className="section-kicker">Creative Add-ons</p>
-            <h3>More Ways To Build The Campaign</h3>
-            <p>
-              Add-ons keep the core sponsorship packages simple while giving
-              larger brands, agencies, and regional partners more room to shape
-              the activation.
-            </p>
-          </div>
-          <ul>
-            {sponsorshipAddOns.map((addOn) => (
-              <li key={addOn}>
-                <BadgeDollarSign size={17} />
-                <span>{addOn}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="sponsor-compliance-note">
-          <ShieldCheck size={18} />
-          <p>
-            Sponsor campaigns must stay separate from official tournament,
-            federation, player, crest, and mascot marks. Prize, review, and
-            fulfillment language should be reviewed before any live campaign.
-          </p>
-        </div>
-      </section>
-
-      {activePrizeKey ? (
-        <PrizeDetailPage
-          onSelectTeam={(teamKey) => store.set('/selectedTeamKey', teamKey)}
-          teamKey={activePrizeKey}
-        />
-      ) : null}
+      <SponsorSection />
 
       <div className="workspace-shell">
         <aside className="flow-rail" aria-label="Prediction workflow">
@@ -1219,6 +1247,490 @@ function App() {
   )
 }
 
+function PrizeHomeSection({
+  onSelectTeam,
+  selectedTeamKey,
+}: {
+  onSelectTeam: (teamKey: TeamKey) => void
+  selectedTeamKey: TeamKey
+}) {
+  const selectedTeam = getTeam(selectedTeamKey)
+  const selectedShirt = shirtConcepts[selectedTeamKey]
+  const selectedPrize = prizeDetails[selectedTeamKey]
+
+  return (
+    <section className="prize-home" id="prizes" aria-labelledby="prize-title">
+      <div className="prize-home-heading">
+        <div className="section-heading compact">
+          <span className="icon-box">
+            <Gift size={18} />
+          </span>
+          <div>
+            <p className="section-kicker">Prize Draw</p>
+            <h2 id="prize-title">Win The Team Shirt You Picked</h2>
+          </div>
+        </div>
+        <p>
+          Each qualified draw winner receives a free localized supporter shirt
+          for their selected team. These are independent fan designs with no
+          official tournament, federation, player, or sponsor branding.
+        </p>
+      </div>
+
+      <div className="featured-prize">
+        <div className="featured-prize-media">
+          <img
+            alt={`${selectedTeam.name} supporter shirt prize`}
+            src={prizeImages[selectedTeamKey]}
+          />
+        </div>
+        <div className="featured-prize-copy">
+          <p className="section-kicker">{selectedTeam.name} Prize</p>
+          <h3>{selectedShirt.conceptName}</h3>
+          <p>{selectedPrize.headline}</p>
+          <div className="prize-pill-row" aria-label="Selected prize colors">
+            {[selectedShirt.base, selectedShirt.graphic, selectedShirt.accent].map(
+              (color) => (
+                <span key={color} style={{ background: color }} />
+              ),
+            )}
+          </div>
+          <ul className="featured-prize-list">
+            <li>
+              <Shirt size={17} />
+              <span>{selectedShirt.primaryCopy}</span>
+            </li>
+            <li>
+              <Palette size={17} />
+              <span>{selectedShirt.motif}</span>
+            </li>
+            <li>
+              <ShieldCheck size={17} />
+              <span>No official marks, crests, players, or sponsor logos.</span>
+            </li>
+          </ul>
+          <div className="prize-actions">
+            <a className="prize-action primary" href={`/prizes/${selectedTeamKey}`}>
+              <span>View Team Prize</span>
+              <ChevronRight size={17} />
+            </a>
+            <a className="prize-action secondary" href="/fixtures">
+              <Target size={17} />
+              <span>Make Picks</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div className="prize-team-grid" aria-label="Team prize previews">
+        {teamThemes.map((team) => {
+          const shirt = shirtConcepts[team.key]
+
+          return (
+            <article className="prize-card" key={team.key}>
+              <div
+                className="prize-card-media"
+                style={
+                  {
+                    '--prize-primary': team.colors.primary,
+                    '--prize-secondary': team.colors.secondary,
+                    '--prize-accent': team.colors.accent,
+                  } as CSSProperties
+                }
+              >
+                <img
+                  alt={`${team.name} shirt prize preview`}
+                  loading="lazy"
+                  src={prizeImages[team.key]}
+                />
+              </div>
+              <div className="prize-card-copy">
+                <span>{team.code}</span>
+                <h3>{team.name}</h3>
+                <p>{shirt.conceptName}</p>
+                <a
+                  className="prize-card-link"
+                  href={`/prizes/${team.key}`}
+                  onClick={() => onSelectTeam(team.key)}
+                >
+                  <span>Prize Details</span>
+                  <ChevronRight size={16} />
+                </a>
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function SponsorSection() {
+  return (
+    <section
+      className="sponsor-band"
+      id="sponsors"
+      aria-labelledby="sponsor-title"
+    >
+      <div className="sponsor-heading">
+        <div className="section-heading compact">
+          <span className="icon-box">
+            <Handshake size={18} />
+          </span>
+          <div>
+            <p className="section-kicker">Sponsor Packages</p>
+            <h2 id="sponsor-title">Fund The Rewards Fans Remember</h2>
+          </div>
+        </div>
+        <p>
+          Sponsors fund match campaigns, winner product gifts, localized shirt
+          drops, and post-delivery review prompts. Packages are designed for
+          product sampling, media proof, and measurable fan engagement.
+        </p>
+      </div>
+
+      <div className="sponsor-tier-grid" aria-label="Sponsorship tiers">
+        {sponsorshipTiers.map((tier) => {
+          const TierIcon = tier.icon
+
+          return (
+            <article
+              className={`sponsor-tier ${tier.featured ? 'is-featured' : ''}`}
+              key={tier.name}
+            >
+              <header className="sponsor-tier-header">
+                <span className="sponsor-tier-icon">
+                  <TierIcon size={19} />
+                </span>
+                <div>
+                  <p>{tier.signal}</p>
+                  <h3>{tier.name}</h3>
+                </div>
+              </header>
+              <div className="sponsor-price-row">
+                <strong>{tier.price}</strong>
+                <span>{tier.spots}</span>
+              </div>
+              <p className="sponsor-summary">{tier.summary}</p>
+              <ul className="sponsor-feature-list">
+                {tier.includes.map((item) => (
+                  <li key={item}>
+                    <CheckCircle2 size={16} />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="sponsor-creative">{tier.creative}</p>
+            </article>
+          )
+        })}
+      </div>
+
+      <div className="sponsor-addons">
+        <div>
+          <p className="section-kicker">Creative Add-ons</p>
+          <h3>More Ways To Build The Campaign</h3>
+          <p>
+            Add-ons keep the core sponsorship packages simple while giving
+            larger brands, agencies, and regional partners more room to shape
+            the activation.
+          </p>
+        </div>
+        <ul>
+          {sponsorshipAddOns.map((addOn) => (
+            <li key={addOn}>
+              <BadgeDollarSign size={17} />
+              <span>{addOn}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="sponsor-compliance-note">
+        <ShieldCheck size={18} />
+        <p>
+          Sponsor campaigns must stay separate from official tournament,
+          federation, player, crest, and mascot marks. Prize, review, and
+          fulfillment language should be reviewed before any live campaign.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+function Topbar({
+  drawCount,
+  lockedCount,
+}: {
+  drawCount: number
+  lockedCount: number
+}) {
+  return (
+    <>
+      <header className="topbar">
+        <a className="brand" href="/">
+          <img
+            alt="Win World Cup 2026"
+            className="brand-logo"
+            height="98"
+            src={brandLogo}
+            width="98"
+          />
+        </a>
+        <nav className="nav-links" aria-label="Primary navigation">
+          <a href="/fixtures">Fixtures</a>
+          <a href="/teams">Teams</a>
+          <a href="/prizes">Prizes</a>
+          <a href="/sponsors">Sponsors</a>
+          <a href="/rewards">Rewards</a>
+          <a href="/operations">Operations</a>
+        </nav>
+        <button className="account-button" type="button">
+          <Ticket size={17} />
+          <span>
+            {lockedCount} locked · {drawCount} draws
+          </span>
+        </button>
+      </header>
+      <AIBuildBanner />
+    </>
+  )
+}
+
+function AIBuildBanner() {
+  return (
+    <aside className="ai-build-banner" aria-label="AI build disclosure">
+      <div>
+        <span className="ai-build-icon">
+          <Sparkles size={17} />
+        </span>
+        <strong>Built entirely by AI</strong>
+      </div>
+      <dl aria-label="Estimated AI usage">
+        <div>
+          <dt>Total tokens</dt>
+          <dd>{aiBuildMetrics.tokenTotal}</dd>
+        </div>
+        <div>
+          <dt>Estimated cost</dt>
+          <dd>{aiBuildMetrics.estimatedCost}</dd>
+        </div>
+      </dl>
+      <span>{aiBuildMetrics.costLabel}</span>
+      <em>{aiBuildMetrics.note}</em>
+    </aside>
+  )
+}
+
+function renderInlineMarkdown(text: string) {
+  const inlineNodes: ReactNode[] = []
+  const inlinePattern = /(\[[^\]]+\]\([^)]+\)|`[^`]+`)/g
+  let lastIndex = 0
+
+  text.replace(inlinePattern, (match, _capture, offset) => {
+    if (offset > lastIndex) {
+      inlineNodes.push(text.slice(lastIndex, offset))
+    }
+
+    if (match.startsWith('[')) {
+      const linkMatch = match.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
+
+      if (linkMatch) {
+        inlineNodes.push(
+          <a
+            href={linkMatch[2]}
+            key={`${match}-${offset}`}
+            rel="noreferrer"
+            target={linkMatch[2].startsWith('http') ? '_blank' : undefined}
+          >
+            {linkMatch[1]}
+          </a>,
+        )
+      }
+    } else {
+      inlineNodes.push(<code key={`${match}-${offset}`}>{match.slice(1, -1)}</code>)
+    }
+
+    lastIndex = offset + match.length
+    return match
+  })
+
+  if (lastIndex < text.length) {
+    inlineNodes.push(text.slice(lastIndex))
+  }
+
+  return inlineNodes.length ? inlineNodes : [text]
+}
+
+function renderMarkdownHeading(
+  level: number,
+  content: string,
+  key: string,
+) {
+  if (level === 1) return <h1 key={key}>{renderInlineMarkdown(content)}</h1>
+  if (level === 2) return <h2 key={key}>{renderInlineMarkdown(content)}</h2>
+  if (level === 3) return <h3 key={key}>{renderInlineMarkdown(content)}</h3>
+
+  return <h4 key={key}>{renderInlineMarkdown(content)}</h4>
+}
+
+function MarkdownArticle({ markdown }: { markdown: string }) {
+  const blocks: ReactNode[] = []
+  const lines = markdown.split('\n')
+  let index = 0
+  let blockIndex = 0
+
+  const isBlockStart = (line: string) =>
+    /^#{1,6}\s+/.test(line) ||
+    /^-\s+/.test(line) ||
+    /^\d+\.\s+/.test(line) ||
+    /^```/.test(line)
+
+  while (index < lines.length) {
+    const line = lines[index]
+
+    if (!line.trim()) {
+      index += 1
+      continue
+    }
+
+    if (line.startsWith('```')) {
+      const language = line.replace(/^```/, '').trim()
+      const codeLines: string[] = []
+      index += 1
+
+      while (index < lines.length && !lines[index].startsWith('```')) {
+        codeLines.push(lines[index])
+        index += 1
+      }
+
+      if (index < lines.length) index += 1
+
+      blocks.push(
+        <pre className="markdown-code" key={`code-${blockIndex}`}>
+          <code data-language={language || undefined}>{codeLines.join('\n')}</code>
+        </pre>,
+      )
+      blockIndex += 1
+      continue
+    }
+
+    const heading = line.match(/^(#{1,6})\s+(.+)$/)
+
+    if (heading) {
+      blocks.push(
+        renderMarkdownHeading(
+          Math.min(heading[1].length, 4),
+          heading[2],
+          `heading-${blockIndex}`,
+        ),
+      )
+      blockIndex += 1
+      index += 1
+      continue
+    }
+
+    if (/^-\s+/.test(line)) {
+      const items: string[] = []
+
+      while (index < lines.length && /^-\s+/.test(lines[index])) {
+        items.push(lines[index].replace(/^-\s+/, ''))
+        index += 1
+      }
+
+      blocks.push(
+        <ul key={`list-${blockIndex}`}>
+          {items.map((item) => (
+            <li key={item}>{renderInlineMarkdown(item)}</li>
+          ))}
+        </ul>,
+      )
+      blockIndex += 1
+      continue
+    }
+
+    if (/^\d+\.\s+/.test(line)) {
+      const items: string[] = []
+
+      while (index < lines.length && /^\d+\.\s+/.test(lines[index])) {
+        items.push(lines[index].replace(/^\d+\.\s+/, ''))
+        index += 1
+      }
+
+      blocks.push(
+        <ol key={`ordered-${blockIndex}`}>
+          {items.map((item) => (
+            <li key={item}>{renderInlineMarkdown(item)}</li>
+          ))}
+        </ol>,
+      )
+      blockIndex += 1
+      continue
+    }
+
+    const paragraphLines: string[] = []
+
+    while (
+      index < lines.length &&
+      lines[index].trim() &&
+      !isBlockStart(lines[index])
+    ) {
+      paragraphLines.push(lines[index].trim())
+      index += 1
+    }
+
+    blocks.push(
+      <p key={`paragraph-${blockIndex}`}>
+        {renderInlineMarkdown(paragraphLines.join(' '))}
+      </p>,
+    )
+    blockIndex += 1
+  }
+
+  return <div className="markdown-article">{blocks}</div>
+}
+
+function TechnologyFlowChart() {
+  return (
+    <section
+      className="technology-flow-card"
+      aria-labelledby="technology-flow-title"
+    >
+      <div className="technology-flow-heading">
+        <span className="icon-box">
+          <Sparkles size={18} />
+        </span>
+        <div>
+          <p className="section-kicker">Technology Flow</p>
+          <h3 id="technology-flow-title">How The App Is Built And Operated</h3>
+          <p>
+            This flowchart focuses on the tools and services around the app, not
+            the public website pages.
+          </p>
+        </div>
+      </div>
+
+      <div className="technology-flow-grid" role="list">
+        {technologyFlow.map((item, index) => (
+          <article className="technology-flow-node" key={item.title} role="listitem">
+            <span className="technology-flow-step">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <p>{item.label}</p>
+            <h4>{item.title}</h4>
+            <span>{item.detail}</span>
+            <div aria-label={`${item.title} tools`}>
+              {item.tools.map((tool) => (
+                <em key={tool}>{tool}</em>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function ExperimentPage() {
   return (
     <section
@@ -1232,47 +1744,64 @@ function ExperimentPage() {
         </span>
         <div>
           <p className="section-kicker">Experiment</p>
-          <h2 id="experiment-title">How This Was Built</h2>
+          <h2 id="experiment-title">Build Blog</h2>
           <p>
-            This section keeps the working docs visible in the product so the
-            build process can be reviewed alongside the match prediction
-            experience.
+            The Experiment page now keeps the public build article front and
+            center, with the agent log preserved as a markdown file below.
           </p>
           <p>
-            This project is being built with Codex Desktop App and{' '}
+            This project is being built with{' '}
+            <a href="https://chatgpt.com/codex" rel="noreferrer" target="_blank">
+              Codex
+              <ExternalLink size={13} />
+            </a>{' '}
+            Desktop App by OpenAI and{' '}
             <a href="https://projects.dev/" rel="noreferrer" target="_blank">
               projects.dev
               <ExternalLink size={13} />
-            </a>
-            .
+            </a>{' '}
+            by Stripe without writing a single line of code.
           </p>
         </div>
       </div>
 
-      <div className="experiment-doc-grid">
-        {experimentDocs.map((doc) => (
-          <article className="experiment-doc" key={doc.filename}>
-            <header>
-              <span>
-                <FileText size={17} />
-                {doc.filename}
-              </span>
-              <h3>{doc.title}</h3>
-              <p>{doc.purpose}</p>
-            </header>
-            <pre aria-label={`${doc.filename} excerpt`}>
-              {getMarkdownExcerpt(doc.body)}
-            </pre>
-            <details>
-              <summary>
-                <BookOpen size={16} />
-                <span>Read Full File</span>
-              </summary>
-              <pre>{doc.body}</pre>
-            </details>
-          </article>
-        ))}
-      </div>
+      <TechnologyFlowChart />
+
+      <article className="build-blog-card" aria-label="Build blog article">
+        <header className="build-blog-header">
+          <span>
+            <BookOpen size={18} />
+            BUILD_BLOG.md
+          </span>
+          <h3>Public Build Article</h3>
+          <p>
+            A readable HTML version of the project story, decisions,
+            verification trail, and next build steps.
+          </p>
+        </header>
+        <MarkdownArticle markdown={buildBlogMd} />
+      </article>
+
+      <section className="agent-log-card" aria-labelledby="agent-log-title">
+        <header>
+          <span>
+            <FileText size={18} />
+            AGENTS.md
+          </span>
+          <h3 id="agent-log-title">Agent Log Markdown File</h3>
+          <p>
+            The working agreement, architecture notes, task history, and
+            verification log stay available as the raw markdown source.
+          </p>
+        </header>
+        <details>
+          <summary>
+            <BookOpen size={16} />
+            <span>Open Agent Log</span>
+          </summary>
+          <pre>{agentsMd}</pre>
+        </details>
+      </section>
     </section>
   )
 }
@@ -1291,12 +1820,12 @@ function SiteFooter() {
         </span>
       </div>
       <nav aria-label="Footer navigation">
-        <a href="#experiment">Experiment</a>
-        <a href="#predictions">Fixtures</a>
-        <a href="#teams">Teams</a>
-        <a href="#prizes">Prizes</a>
-        <a href="#sponsors">Sponsors</a>
-        <a href="#operations">Operations</a>
+        <a href="/experiment">Experiment</a>
+        <a href="/fixtures">Fixtures</a>
+        <a href="/teams">Teams</a>
+        <a href="/prizes">Prizes</a>
+        <a href="/sponsors">Sponsors</a>
+        <a href="/operations">Operations</a>
       </nav>
     </footer>
   )
@@ -1328,7 +1857,7 @@ function PrizeDetailPage({
       aria-labelledby={`prize-detail-${team.key}`}
     >
       <div className="prize-detail-toolbar">
-        <a className="prize-back-link" href="#prizes">
+        <a className="prize-back-link" href="/prizes">
           <ArrowLeft size={17} />
           <span>All Prizes</span>
         </a>
@@ -1359,11 +1888,11 @@ function PrizeDetailPage({
             <span>{prize.drawCopy}</span>
           </div>
           <div className="prize-actions">
-            <a className="prize-action primary" href="#predictions">
+            <a className="prize-action primary" href="/fixtures">
               <Target size={17} />
               <span>Enter A Draw</span>
             </a>
-            <a className="prize-action secondary" href="#rewards">
+            <a className="prize-action secondary" href="/rewards">
               <PackageCheck size={17} />
               <span>Fulfillment Flow</span>
             </a>

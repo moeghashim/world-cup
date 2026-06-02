@@ -45,5 +45,6 @@ World Cup Predictor is a match prediction and sponsor reward experience for `win
 - Logo explorations are committed under `designs/logos/`. The user-provided attached SVG is now the active website logo and still needs final legal/IP review before launch.
 - Tournament teams and group-stage fixtures are a dated source snapshot. They should be verified against official sources or replaced with a maintained data feed before real eligibility decisions.
 - The footer-linked Experiment view exposes build documentation and names Codex Desktop App plus `https://projects.dev/` as part of the build stack; the default homepage stays focused on matches, prizes, and winners.
+- Public navigation uses page-style routes such as `/fixtures`, `/prizes/japan`, `/sponsors`, `/operations`, and `/experiment`, with legacy hash URLs normalized for backward compatibility.
 - Provider recommendations are architectural notes, not live integrations.
 - No real prize fulfillment, payment, user identity, fraud checks, or legal rules are implemented yet.

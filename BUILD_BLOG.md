@@ -212,9 +212,55 @@ The site now includes a footer-linked `Experiment` view. It imports the project 
 - `WEBSITE_FLOW.md`
 - `DESIGN.md`
 
-This makes the process artifact part of the product experience, not just a repository file. The Experiment view notes that the project is being built with Codex Desktop App and `https://projects.dev/`, while the default homepage stays focused on matches, prizes, and winners. The `WEBSITE_FLOW.md` artifact adds Mermaid diagrams for the visitor journey, app architecture, draw mechanism, and tools used.
+This makes the process artifact part of the product experience, not just a repository file. The Experiment view notes that the project is being built with [Codex](https://chatgpt.com/codex) Desktop App by OpenAI and [projects.dev](https://projects.dev/) by Stripe without writing a single line of code, while the default homepage stays focused on matches, prizes, and winners. The `WEBSITE_FLOW.md` artifact adds Mermaid diagrams for the visitor journey, app architecture, draw mechanism, and tools used.
 
 `BUILD_BLOG.md` remains the file that is updated on every commit. It is the running public article for how the project is being built.
+
+## From Hash Anchors To Page Routes
+
+The navigation moved from hash fragments such as `/#operations` and `/#prizes/japan` to page-style URLs:
+
+- `/fixtures`
+- `/teams`
+- `/draws`
+- `/prizes`
+- `/prizes/japan`
+- `/shirts`
+- `/sponsors`
+- `/rewards`
+- `/operations`
+- `/experiment`
+
+The React app still owns the interactive prediction state, but internal links now push real paths into browser history instead of changing `window.location.hash`. That keeps predictions and draw state alive while visitors move between pages. Direct page refreshes are supported by a Vercel rewrite in `vercel.json`, and legacy hash URLs are normalized to the new paths for backward compatibility.
+
+This gives the site cleaner public URLs and lets pages like `/operations`, `/experiment`, `/prizes`, `/prizes/:team`, and `/sponsors` render as focused views instead of appended homepage sections.
+
+## Experiment Page Redesign
+
+The Experiment page was simplified after the site moved to page routes. Instead of showing every project document as a card, it now has one primary artifact: the build blog itself.
+
+The page renders `BUILD_BLOG.md` as a structured HTML article with headings, paragraphs, lists, links, inline code, and code blocks. The agent log stays available as `AGENTS.md`, but it is kept as a raw markdown file in a collapsible panel rather than competing with the article.
+
+The old page/document flow diagram was replaced with a technology flowchart. That flow focuses on how the app is built and operated:
+
+- Codex Desktop App
+- GitHub
+- Vercel
+- React + TypeScript
+- JSON-render
+- Stripe Projects
+- planned providers such as PostHog, WorkOS, Neon, POD, and 3PL
+
+The point is to explain the build stack and production path, not to repeat the public page navigation.
+
+## AI Build Disclosure Banner
+
+The site now includes a notification banner directly under the main navigation. It says the project was built entirely by AI and shows a public usage estimate:
+
+- estimated total tokens: `~2.4M`
+- estimated API-equivalent cost: `~$18`
+
+The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
 ## Print-On-Demand And Sponsor Package Research
 
@@ -298,10 +344,16 @@ Browser checks have covered:
 - attached logo rendering in the header after resizing the topbar logo slot, including the later 20% logo increase
 - footer Experiment link, imported markdown panels, 10claws.com attribution, and homepage checks that keep Codex Desktop App plus projects.dev attribution out of the default match experience
 - Experiment documentation panel import for `WEBSITE_FLOW.md`
+- page-path routes for `/operations`, `/experiment`, `/prizes`, `/prizes/japan`, and `/sponsors`
+- legacy hash URL normalization from `/#experiment` and `/#operations` to page paths
+- header navigation between page paths while preserving app state
+- attached logo rendering at 98px inside the 120px topbar
+- Experiment page redesign with the Build Blog HTML article, AGENTS.md raw log, and technology flowchart
+- AI build disclosure banner with estimated total tokens and API-equivalent cost
 
 Current visual artifact:
 
-`artifacts/worldcup-logo-20-bigger.png`
+`artifacts/ai-build-banner.png`
 
 ## Commit Timeline
 
@@ -363,9 +415,37 @@ Verification for this pass included `npm run lint`, `npm run build`, desktop bro
 
 Added sponsor package pricing for Global Cup Partner, Matchday Featured Sponsor, and Fan Drop Sponsor campaigns, including winner review-video deliverables, product gift flow, add-ons, and compliance reminders.
 
-### Current commit - Add website flow diagrams
+### `f46f865` - Add website flow diagrams
 
 Added `WEBSITE_FLOW.md` as a diagram-first explanation of how the website works, including visitor journey, app architecture, draw flow, tools used, and planned production integrations. The file is imported into the footer-linked Experiment view so the build documentation can be read inside the app without adding technical copy to the homepage.
+
+### `eece039` - Rename supporter picker heading
+
+Changed the homepage supporter picker heading from "Choose Your Theme" to "Choose Your Team" so visitors read the action as a team choice while the theme behavior stays behind the scenes.
+
+### `99bc312` - Update Experiment build attribution
+
+Changed the Experiment view attribution to say the project is being built with [Codex](https://chatgpt.com/codex) Desktop App by OpenAI and [projects.dev](https://projects.dev/) by Stripe without writing a single line of code.
+
+### `0973091` - Point logo to homepage root
+
+Changed the header logo link from an in-page section hash to `/` so clicking the logo always returns visitors to the homepage without leaving a `#` fragment in the URL.
+
+### `9384db7` - Use page routes instead of hash navigation
+
+Replaced public hash navigation with page-style paths for fixtures, teams, draws, prizes, sponsors, rewards, operations, and Experiment. Added focused route rendering for JSON-render sections, `/prizes`, `/prizes/:team`, `/sponsors`, and `/experiment`; preserved legacy hash URLs as redirects to clean paths; and added `vercel.json` so deployed direct page refreshes resolve correctly.
+
+### `e6ebe78` - Increase attached logo again
+
+Increased the active header logo by another 20%, from 82px to 98px, and raised the sticky topbar from 100px to 120px so the larger mark has matching spacing.
+
+### `f1aef46` - Redesign Experiment build blog page
+
+Removed the old multi-document Experiment grid. The page now renders `BUILD_BLOG.md` as the primary HTML article, keeps `AGENTS.md` as the agent-log markdown file, and adds a technology flowchart covering Codex, GitHub, Vercel, React/TypeScript, JSON-render, Stripe Projects, and planned production providers.
+
+### Current commit - Add AI build disclosure banner
+
+Added a site-wide notification banner that says the project was built entirely by AI and displays estimated usage of `~2.4M` total tokens with an API-equivalent estimated cost of `~$18`.
 
 ## Next Build Steps
 

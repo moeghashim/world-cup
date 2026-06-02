@@ -33,7 +33,22 @@ The app uses React for the authoritative domain state:
 - fulfillment queue
 - review prompt status
 
-The app also exposes an `#experiment` section from the footer. That section imports `BUILD_BLOG.md`, `AGENTS.md`, `PRODUCT.md`, `WEBSITE_FLOW.md`, and `DESIGN.md` as raw markdown so the build process is visible inside the website experience.
+The app also exposes an `/experiment` page from the footer. That page imports `BUILD_BLOG.md`, `AGENTS.md`, `PRODUCT.md`, `WEBSITE_FLOW.md`, and `DESIGN.md` as raw markdown so the build process is visible inside the website experience.
+
+Public navigation now uses page-style paths instead of hash fragments:
+
+- `/fixtures`
+- `/teams`
+- `/draws`
+- `/prizes`
+- `/prizes/:team`
+- `/shirts`
+- `/sponsors`
+- `/rewards`
+- `/operations`
+- `/experiment`
+
+Legacy hash URLs such as `/#experiment`, `/#operations`, and `/#prizes/japan` are normalized to their page paths in the browser. `vercel.json` rewrites direct route requests back to the Vite app entry so deployed page refreshes resolve correctly.
 
 The JSON-render layer lives in `src/jsonRender/predictionCatalog.tsx`. It defines a domain catalog with components like `MatchBoard`, `DrawControl`, `ShirtStudio`, `FulfillmentPipeline`, and `ProviderPlan`. The JSON spec controls section composition while registered actions call deterministic state updates.
 
@@ -86,7 +101,7 @@ It does not replace payments, contest compliance, prize fulfillment, POD APIs, 3
 
 Recommended use: use Stripe Projects for the build stack and SaaS spend limits. Keep Stripe payment products separate for sponsor billing, taxes, identity checks, fraud controls, and approved payout flows.
 
-Public build attribution: this project is being built with Codex Desktop App and `https://projects.dev/`. Keep that attribution in the footer-linked Experiment view and documentation, not in the default homepage experience.
+Public build attribution: this project is being built with [Codex](https://chatgpt.com/codex) Desktop App by OpenAI and [projects.dev](https://projects.dev/) by Stripe without writing a single line of code. Keep that attribution in the footer-linked Experiment view and documentation, not in the default homepage experience.
 
 ## T-Shirt Design System
 
@@ -142,6 +157,13 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Added a homepage prize section and hash-addressable team prize detail pages using the generated localized shirt mockups.
 - Added sponsor package pricing and activation details for reward-funded campaigns.
 - Added `WEBSITE_FLOW.md` with Mermaid diagrams for the visitor journey, app architecture, draw mechanism, tool stack, and planned production integrations.
+- Updated the homepage supporter picker heading from "Choose Your Theme" to "Choose Your Team" so the public copy focuses on team choice rather than implementation theming.
+- Updated the Experiment view build attribution to link Codex and projects.dev and describe the no-code build process.
+- Updated the header logo link to navigate to `/` so it clears hash routes like `#experiment` and returns to the homepage without a fragment.
+- Replaced hash-fragment navigation with page-style URLs for fixtures, teams, prizes, sponsors, rewards, operations, and Experiment. Added focused route rendering for `/operations`, `/experiment`, `/prizes`, `/prizes/:team`, `/sponsors`, and the JSON-render section pages, plus a Vercel rewrite for direct route refreshes.
+- Increased the active header logo by another 20%, from 82px to 98px, and adjusted the sticky topbar height from 100px to 120px.
+- Redesigned `/experiment` to remove the old multi-document grid, render `BUILD_BLOG.md` as a polished HTML article, keep `AGENTS.md` as the raw agent-log markdown file, and add a technology flowchart for Codex, GitHub, Vercel, React/TypeScript, JSON-render, Stripe Projects, and planned providers.
+- Added a site-wide AI build disclosure banner that says the project was built entirely by AI and shows estimated usage of `~2.4M` total tokens with an API-equivalent estimated cost of `~$18`.
 
 ## Verification
 
@@ -178,10 +200,18 @@ Browser verification covered:
 - verifying `#prizes/japan` renders the team prize detail page and mobile layout without horizontal overflow
 - verifying sponsor package additions with lint and production build
 - verifying `WEBSITE_FLOW.md` is imported into the Experiment documentation list
+- verifying the homepage supporter picker renders "Choose Your Team"
+- verifying the Experiment view renders the updated Codex and projects.dev attribution links
+- verifying the header logo link points to `/`
+- verifying `/operations`, `/experiment`, `/prizes`, `/prizes/japan`, `/sponsors`, and legacy `/#operations` or `/#experiment` load without `#` fragments
+- verifying header navigation changes URLs client-side while preserving app state
+- verifying the attached logo renders at 98px inside the 120px topbar
+- verifying `/experiment` renders the build blog article, removes the old docs grid, keeps the agent log markdown file, and shows the technology flowchart nodes
+- verifying the AI build disclosure banner renders on the homepage with the estimated token total and cost
 
 Latest screenshot:
 
-`artifacts/worldcup-logo-20-bigger.png`
+`artifacts/ai-build-banner.png`
 
 ## Next Tasks
 
