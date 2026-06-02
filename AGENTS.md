@@ -19,7 +19,7 @@ This document is the project artifact for how the product is being built. Update
 - `@json-render/core` and `@json-render/react` for the spec-driven product surface.
 - `zod` for catalog props/action schemas.
 - `lucide-react` for interface icons.
-- Google Analytics gtag for page-view tracking, using `G-RFPJRPKYQR` by default with `VITE_GA_MEASUREMENT_ID` as the environment override.
+- Google Analytics gtag for page-view tracking, with the static homepage snippet using `G-RFPJRPKYQR` and `VITE_GA_MEASUREMENT_ID` reserved for the runtime fallback path.
 - Generated raster stadium hero copied to `src/assets/world-cup-hero.png`.
 
 ## Architecture Notes
@@ -53,7 +53,7 @@ Public navigation now uses page-style paths instead of hash fragments:
 
 Legacy hash URLs such as `/#experiment`, `/#operations`, and `/#prizes/japan` are normalized to their page paths in the browser. `vercel.json` rewrites direct route requests back to the Vite app entry so deployed page refreshes resolve correctly.
 
-Google Analytics is initialized from `src/analytics.ts`. The app loads `gtag.js` once and uses the standard GA4 `config` command. SPA route changes should be tracked by GA4 Enhanced Measurement when "Page changes based on browser history events" is enabled on the web data stream.
+Google Analytics is present as the canonical GA4 snippet in `index.html` so it is visible in the homepage HTML source. `src/analytics.ts` remains as a runtime fallback, but it now exits when the static snippet has already defined `window.gtag` so the app does not duplicate the initial GA config call. SPA route changes should be tracked by GA4 Enhanced Measurement when "Page changes based on browser history events" is enabled on the web data stream.
 
 The JSON-render layer lives in `src/jsonRender/predictionCatalog.tsx`. It defines a domain catalog with components like `MatchBoard`, `DrawControl`, `ShirtStudio`, `FulfillmentPipeline`, and `ProviderPlan`. The JSON spec controls section composition while registered actions call deterministic state updates.
 
@@ -193,6 +193,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Made the `/posthog` route easier to find by labeling the header and footer links as "PostHog Dashboard" and refreshed the AI build estimate to `~3.0M` total tokens and `~$23`.
 - Provisioned a new Projects.dev PostHog analytics project resource named `worldcup2026-analytics`, updated `/posthog` to show that resource instead of the earlier generic dashboard target, and refreshed the AI build estimate to `~3.1M` total tokens and `~$24`.
 - Removed the earlier `analytics` PostHog resource from the default Projects.dev environment so the website has a single active PostHog analytics resource, updated `/posthog` copy to say that explicitly, and refreshed the AI build estimate to `~3.2M` total tokens and `~$25`.
+- Moved the GA4 `G-RFPJRPKYQR` tag into the static `index.html` head, kept the runtime analytics initializer as a no-duplicate fallback, and refreshed the AI build estimate to `~3.3M` total tokens and `~$26`.
 
 ## Verification
 
@@ -248,6 +249,8 @@ Browser verification covered:
 - verifying Projects.dev status shows the earlier `analytics` PostHog resource has no environments while `worldcup2026-analytics` remains active in the default environment
 - verifying `/posthog` shows the single-active-resource copy, the refreshed `~3.2M` token total and `~$25` estimated cost, no horizontal overflow, and no browser console errors
 - verifying `npm ls posthog-js` is empty and tracked source has no PostHog init/capture calls or hardcoded project tokens
+- verifying `index.html` contains the static GA4 `G-RFPJRPKYQR` snippet and the runtime initializer exits when `window.gtag` already exists
+- verifying the served homepage HTML contains the pasted GA4 snippet and the browser DOM has exactly one `googletagmanager.com/gtag/js?id=G-RFPJRPKYQR` script with no console errors
 
 Latest screenshot:
 

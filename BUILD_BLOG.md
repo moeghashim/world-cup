@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~3.2M`
-- estimated API-equivalent cost: `~$25`
+- estimated total tokens: `~3.3M`
+- estimated API-equivalent cost: `~$26`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -363,6 +363,7 @@ Browser checks have covered:
 - dedicated `worldcup2026-analytics` PostHog resource card on `/posthog`, including env var names, refreshed `~3.1M` token and `~$24` cost estimate, no old dashboard URL, no horizontal overflow, and no console errors
 - Projects.dev cleanup that removed the earlier `analytics` PostHog resource from the default environment, leaving `worldcup2026-analytics` as the only active PostHog analytics resource for future site wiring
 - confirmation that `posthog-js` is not installed and tracked source has no PostHog init/capture calls or hardcoded project tokens
+- static GA4 `G-RFPJRPKYQR` snippet present in `index.html`, with the runtime analytics initializer kept only as a duplicate-safe fallback
 
 Current visual artifact:
 
@@ -496,11 +497,17 @@ Created a new Projects.dev PostHog analytics project resource named `worldcup202
 
 The `/posthog` page now names the exact resource, shows the Projects.dev-provisioned env var names without exposing secret values, and links to the PostHog account entry point instead of a misleading old dashboard URL. The current AI build disclosure estimate was refreshed to `~3.1M` total tokens and `~$24` for this commit.
 
-### Current commit - Keep one active PostHog target
+### `9b965f3` - Keep one active PostHog target
 
 Removed the earlier `analytics` PostHog resource from the default Projects.dev environment so future website tracking has one active PostHog analytics target: `worldcup2026-analytics`.
 
 No PostHog SDK or snippet is installed in the website yet, and no events are being sent from the app. This commit updates `/posthog` and the project documentation to make the single-target rule explicit. The current AI build disclosure estimate was refreshed to `~3.2M` total tokens and `~$25`.
+
+### Current commit - Put GA tag in homepage source
+
+Moved the GA4 tag for `G-RFPJRPKYQR` into the static `index.html` head so it is visible in the homepage HTML source instead of only being injected after React boots.
+
+The runtime analytics initializer remains in place as a fallback for environments that do not include the static snippet, but it now exits when `window.gtag` already exists. That keeps the homepage source explicit without creating duplicate GA scripts or duplicate initial config calls. The current AI build disclosure estimate was refreshed to `~3.3M` total tokens and `~$26`.
 
 ## Next Build Steps
 
