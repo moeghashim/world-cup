@@ -33,6 +33,8 @@ The app uses React for the authoritative domain state:
 - fulfillment queue
 - review prompt status
 
+The app also exposes an `#experiment` section from the footer. That section imports `BUILD_BLOG.md`, `AGENTS.md`, `PRODUCT.md`, and `DESIGN.md` as raw markdown so the build process is visible inside the website experience.
+
 The JSON-render layer lives in `src/jsonRender/predictionCatalog.tsx`. It defines a domain catalog with components like `MatchBoard`, `DrawControl`, `ShirtStudio`, `FulfillmentPipeline`, and `ProviderPlan`. The JSON spec controls section composition while registered actions call deterministic state updates.
 
 The data layer lives in `src/data/worldCup.ts` and includes:
@@ -84,6 +86,8 @@ It does not replace payments, contest compliance, prize fulfillment, POD APIs, 3
 
 Recommended use: use Stripe Projects for the build stack and SaaS spend limits. Keep Stripe payment products separate for sponsor billing, taxes, identity checks, fraud controls, and approved payout flows.
 
+Public build attribution: this project is being built with Codex Desktop App and `https://projects.dev/`. Keep that attribution in the footer-linked Experiment view and documentation, not in the default homepage experience.
+
 ## T-Shirt Design System
 
 Localized supporter shirt concepts are independent fan designs, not official jerseys. Each concept includes:
@@ -131,6 +135,10 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Selected Variation B as the active website logo and wired it into the top navigation brand.
 - Added a dated tournament snapshot section with all 48 teams, 12 groups, 72 group-stage fixtures, selected supporter-team schedule highlights, source metadata, and a FIFA verification link.
 - Replaced the active website logo with the user-provided attached SVG and preserved it under `designs/logos/worldcup-logo-attached.svg`.
+- Added a footer-linked Experiment section that renders the project documentation files and labels the site as an experiment from `10claws.com`.
+- Increased the active header logo by 20%, from 68px to 82px, and adjusted the sticky topbar height to 100px.
+- Added visible build attribution for Codex Desktop App and `https://projects.dev/` in the Experiment section, footer, and project documentation.
+- Moved technical build attribution and documentation off the default homepage into the footer-linked Experiment view so the homepage stays focused on matches, prizes, and winners.
 
 ## Verification
 
@@ -139,7 +147,6 @@ Latest successful commands:
 ```bash
 npm run lint
 npm run build
-xmllint --noout designs/logos/winworldcup2026-logo-a-orbit-cup.svg designs/logos/winworldcup2026-logo-b-motion-ball.svg designs/logos/winworldcup2026-logo-c-shield-globe.svg designs/logos/worldcup-logo-attached.svg src/assets/winworldcup2026-logo.svg
 ```
 
 Browser verification covered:
@@ -160,11 +167,14 @@ Browser verification covered:
 - verifying the teams/schedule section renders 12 group cards and 72 group-stage fixture rows
 - verifying the supporter schedule updates from Brazil to Japan after switching supporter team
 - checking the schedule screenshot after fixing sticky-header anchor offset and compact fixture wrapping
-- verifying the attached logo renders in the header at 68px inside the 84px topbar
+- verifying the attached logo renders in the header at 82px inside the 100px topbar
+- verifying the footer Experiment link jumps to the documentation section and the imported markdown files render
+- verifying the Codex Desktop App and `projects.dev` build attribution renders in the Experiment view
+- verifying the default homepage no longer renders Codex Desktop App, `projects.dev`, or build-documentation copy
 
 Latest screenshot:
 
-`artifacts/worldcup-attached-logo.png`
+`artifacts/worldcup-logo-20-bigger.png`
 
 ## Next Tasks
 

@@ -1,9 +1,13 @@
-import { type CSSProperties, useMemo, useRef, useState } from 'react'
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { Renderer, JSONUIProvider, type StateStore } from '@json-render/react'
 import {
+  BookOpen,
   CalendarDays,
   ChevronRight,
   Dice5,
+  ExternalLink,
+  FileText,
+  FlaskConical,
   Gift,
   PackageCheck,
   ShieldCheck,
@@ -15,6 +19,10 @@ import {
 import heroImage from './assets/world-cup-hero.png'
 import brandLogo from './assets/winworldcup2026-logo.svg'
 import './App.css'
+import agentsMd from '../AGENTS.md?raw'
+import buildBlogMd from '../BUILD_BLOG.md?raw'
+import designMd from '../DESIGN.md?raw'
+import productMd from '../PRODUCT.md?raw'
 import { getTeam, matches, teamThemes, type TeamKey } from './data/worldCup'
 import {
   initialPredictionState,
@@ -76,6 +84,41 @@ function setByPointer<T extends Record<string, unknown>>(
   } as T
 }
 
+const experimentDocs = [
+  {
+    title: 'Build Blog',
+    filename: 'BUILD_BLOG.md',
+    purpose: 'Narrative article for how the project was built over time.',
+    body: buildBlogMd,
+  },
+  {
+    title: 'Agent Build Log',
+    filename: 'AGENTS.md',
+    purpose: 'Working agreement, architecture notes, completed work, and verification trail.',
+    body: agentsMd,
+  },
+  {
+    title: 'Product Context',
+    filename: 'PRODUCT.md',
+    purpose: 'Product flow, audience, principles, and MVP boundaries.',
+    body: productMd,
+  },
+  {
+    title: 'Design Context',
+    filename: 'DESIGN.md',
+    purpose: 'Design direction, layout rules, theming guidance, and quality checklist.',
+    body: designMd,
+  },
+] as const
+
+function getMarkdownExcerpt(markdown: string) {
+  return markdown
+    .split('\n')
+    .filter((line) => line.trim().length > 0)
+    .slice(0, 7)
+    .join('\n')
+}
+
 function usePredictionStore(
   state: PredictionState,
   setState: React.Dispatch<React.SetStateAction<PredictionState>>,
@@ -129,12 +172,26 @@ function usePredictionStore(
 }
 
 function App() {
+  const [isExperimentView, setIsExperimentView] = useState(
+    () => window.location.hash === '#experiment',
+  )
   const [predictionState, setPredictionState] = useState<PredictionState>(
     initialPredictionState,
   )
   const store = usePredictionStore(predictionState, setPredictionState)
   const selectedTeamKey = predictionState.selectedTeamKey
   const selectedTeam = getTeam(selectedTeamKey)
+
+  useEffect(() => {
+    const syncExperimentHash = () => {
+      setIsExperimentView(window.location.hash === '#experiment')
+    }
+
+    syncExperimentHash()
+    window.addEventListener('hashchange', syncExperimentHash)
+
+    return () => window.removeEventListener('hashchange', syncExperimentHash)
+  }, [])
 
   const featuredMatch = useMemo(
     () =>
@@ -200,6 +257,39 @@ function App() {
     '--hero-image': `url(${heroImage})`,
   } as CSSProperties
 
+  if (isExperimentView) {
+    return (
+      <main className="app-shell" style={themeVars}>
+        <header className="topbar">
+          <a className="brand" href="#predict">
+            <img
+              alt="Win World Cup 2026"
+              className="brand-logo"
+              height="82"
+              src={brandLogo}
+              width="82"
+            />
+          </a>
+          <nav className="nav-links" aria-label="Primary navigation">
+            <a href="#predictions">Fixtures</a>
+            <a href="#teams">Teams</a>
+            <a href="#rewards">Rewards</a>
+            <a href="#operations">Operations</a>
+          </nav>
+          <button className="account-button" type="button">
+            <Ticket size={17} />
+            <span>
+              {lockedCount} locked · {drawCount} draws
+            </span>
+          </button>
+        </header>
+
+        <ExperimentPage />
+        <SiteFooter />
+      </main>
+    )
+  }
+
   return (
     <main className="app-shell" style={themeVars}>
       <header className="topbar">
@@ -207,9 +297,9 @@ function App() {
           <img
             alt="Win World Cup 2026"
             className="brand-logo"
-            height="52"
+            height="82"
             src={brandLogo}
-            width="196"
+            width="82"
           />
         </a>
         <nav className="nav-links" aria-label="Primary navigation">
@@ -377,7 +467,90 @@ function App() {
           </JSONUIProvider>
         </div>
       </div>
+
+      <SiteFooter />
     </main>
+  )
+}
+
+function ExperimentPage() {
+  return (
+    <section
+      className="experiment-page"
+      id="experiment"
+      aria-labelledby="experiment-title"
+    >
+      <div className="experiment-heading">
+        <span className="icon-box">
+          <FlaskConical size={18} />
+        </span>
+        <div>
+          <p className="section-kicker">Experiment</p>
+          <h2 id="experiment-title">How This Was Built</h2>
+          <p>
+            This section keeps the working docs visible in the product so the
+            build process can be reviewed alongside the match prediction
+            experience.
+          </p>
+          <p>
+            This project is being built with Codex Desktop App and{' '}
+            <a href="https://projects.dev/" rel="noreferrer" target="_blank">
+              projects.dev
+              <ExternalLink size={13} />
+            </a>
+            .
+          </p>
+        </div>
+      </div>
+
+      <div className="experiment-doc-grid">
+        {experimentDocs.map((doc) => (
+          <article className="experiment-doc" key={doc.filename}>
+            <header>
+              <span>
+                <FileText size={17} />
+                {doc.filename}
+              </span>
+              <h3>{doc.title}</h3>
+              <p>{doc.purpose}</p>
+            </header>
+            <pre aria-label={`${doc.filename} excerpt`}>
+              {getMarkdownExcerpt(doc.body)}
+            </pre>
+            <details>
+              <summary>
+                <BookOpen size={16} />
+                <span>Read Full File</span>
+              </summary>
+              <pre>{doc.body}</pre>
+            </details>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function SiteFooter() {
+  return (
+    <footer className="site-footer">
+      <div>
+        <strong>Win World Cup 2026</strong>
+        <span>
+          An experiment from{' '}
+          <a href="https://10claws.com/" rel="noreferrer" target="_blank">
+            10claws.com
+            <ExternalLink size={13} />
+          </a>
+        </span>
+      </div>
+      <nav aria-label="Footer navigation">
+        <a href="#experiment">Experiment</a>
+        <a href="#predictions">Fixtures</a>
+        <a href="#teams">Teams</a>
+        <a href="#operations">Operations</a>
+      </nav>
+    </footer>
   )
 }
 
