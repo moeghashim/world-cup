@@ -91,7 +91,7 @@ Current concepts cover Brazil, Argentina, United States, France, England, Spain,
 
 Design assets are now stored under `designs/`. The folder includes concept images for the supported teams, generated shirt design mockups for Argentina, Brazil, France, Japan, Morocco, Spain, and the United States, plus a refined concept board. These are visual direction assets, not final POD print files.
 
-Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The current set includes three SVG variations: orbit/cup, motion ball, and shield/globe. The generated PNG board is a concept reference; the SVG files are the editable usable assets.
+Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The current set includes three SVG variations: orbit/cup, motion ball, and shield/globe. Variation B, the motion-ball logo, is selected and copied into `src/assets/winworldcup2026-logo.svg` as the active website header logo. The generated PNG board is a concept reference; the SVG files are the editable usable assets.
 
 ## Completed Work
 
@@ -121,6 +121,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Updated `PRODUCT.md`, `DESIGN.md`, and `BUILD_BLOG.md` with the draw mechanism and presentation decisions.
 - Added generated localized shirt concept/design assets under `designs/` for the supporter personalization system.
 - Added three logo variations for `winworldcup2026.com` under `designs/logos/` and documented their usage boundary.
+- Selected Variation B as the active website logo and wired it into the top navigation brand.
 
 ## Verification
 

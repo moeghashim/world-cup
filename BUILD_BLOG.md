@@ -177,6 +177,8 @@ The generated PNG board is saved as `designs/logos/logo-concept-board.png`. The 
 
 This pass avoids official tournament symbols, federation marks, sponsor marks, mascot art, player likenesses, and official trophy silhouettes.
 
+The selected direction is Variation B, the motion-ball mark. It is copied to `src/assets/winworldcup2026-logo.svg` and now appears in the top navigation as the active website logo.
+
 ## Print-On-Demand And Sponsor Package Research
 
 The print-on-demand research led to a practical split:
@@ -283,6 +285,10 @@ Committed the generated shirt concept and design image library under `designs/`,
 ### Current commit - Add logo variations
 
 Added three SVG logo variations and a generated concept board for `winworldcup2026.com`, with documentation clarifying that the assets are independent brand explorations.
+
+### Current commit - Select motion-ball logo
+
+Selected Variation B as the active website logo, copied it into `src/assets/`, and replaced the original temporary trophy icon in the header brand.
 
 ## Next Build Steps
 

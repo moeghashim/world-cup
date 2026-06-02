@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="180" viewBox="0 0 680 180" role="img" aria-labelledby="title desc">
+  <title id="title">Win World Cup 2026</title>
+  <desc id="desc">Motion-ball logo lockup for winworldcup2026.com.</desc>
+  <g transform="translate(88 82)">
+    <path d="M-64 4h70" stroke="#102238" stroke-width="7" stroke-linecap="round"/>
+    <path d="M-58-18h80" stroke="#139b4b" stroke-width="7" stroke-linecap="round"/>
+    <path d="M-38-40h72" stroke="#d6a63f" stroke-width="7" stroke-linecap="round"/>
+    <path d="M-28 27h64" stroke="#139b4b" stroke-width="7" stroke-linecap="round"/>
+    <path d="M16-56c38-30 94-20 118 18" fill="none" stroke="#139b4b" stroke-width="7" stroke-linecap="round"/>
+    <path d="M132 4c-10 48-58 78-107 62" fill="none" stroke="#102238" stroke-width="7" stroke-linecap="round"/>
+    <g transform="translate(78 -2)">
+      <circle r="42" fill="#fffdf5" stroke="#102238" stroke-width="5"/>
+      <path d="M0-21l19 14-7 23h-24l-7-23z" fill="#102238"/>
+      <path d="M0-21v-18M19-7l18-6M12 16l12 16M-12 16l-12 16M-19-7l-18-6" stroke="#102238" stroke-width="4" stroke-linecap="round"/>
+      <path d="M-12 16h24M19-7L12 16M-19-7l7 23M0-21l-19 14M0-21l19 14" stroke="#102238" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <path d="M146-58l8 20 20 8-20 8-8 20-8-20-20-8 20-8z" fill="#d6a63f"/>
+  </g>
+  <g font-family="Inter, Arial, sans-serif">
+    <text x="222" y="74" fill="#139b4b" font-size="52" font-weight="950" letter-spacing="-1">WIN</text>
+    <text x="222" y="122" fill="#102238" font-size="35" font-weight="900" letter-spacing="2">WORLD CUP</text>
+    <text x="455" y="122" fill="#139b4b" font-size="34" font-weight="900" letter-spacing="8">2026</text>
+    <text x="224" y="153" fill="#102238" font-size="18" font-weight="750" letter-spacing="3">winworldcup2026.com</text>
+  </g>
+</svg>

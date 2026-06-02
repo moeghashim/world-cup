@@ -45,7 +45,6 @@
   gap: 10px;
 }
 
-.brand-mark,
 .icon-box,
 .reward-icon {
   align-items: center;
@@ -55,10 +54,12 @@
   justify-content: center;
 }
 
-.brand-mark {
-  border: 2px solid var(--team-secondary);
-  height: 34px;
-  width: 34px;
+.brand-logo {
+  display: block;
+  height: 52px;
+  max-width: min(240px, 52vw);
+  object-fit: contain;
+  width: auto;
 }
 
 .nav-links {

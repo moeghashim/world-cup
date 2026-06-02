@@ -9,10 +9,10 @@ import {
   Shirt,
   Target,
   Ticket,
-  Trophy,
   UsersRound,
 } from 'lucide-react'
 import heroImage from './assets/world-cup-hero.png'
+import brandLogo from './assets/winworldcup2026-logo.svg'
 import './App.css'
 import { getTeam, matches, teamThemes, type TeamKey } from './data/worldCup'
 import {
@@ -197,10 +197,13 @@ function App() {
     <main className="app-shell" style={themeVars}>
       <header className="topbar">
         <a className="brand" href="#predict">
-          <span className="brand-mark">
-            <Trophy size={18} strokeWidth={2.3} />
-          </span>
-          <span>World Cup Predictor</span>
+          <img
+            alt="Win World Cup 2026"
+            className="brand-logo"
+            height="52"
+            src={brandLogo}
+            width="196"
+          />
         </a>
         <nav className="nav-links" aria-label="Primary navigation">
           <a href="#predictions">Fixtures</a>
