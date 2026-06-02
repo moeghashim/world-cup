@@ -1239,12 +1239,17 @@ function ExperimentPage() {
             experience.
           </p>
           <p>
-            This project is being built with Codex Desktop App and{' '}
+            This project is being built with{' '}
+            <a href="https://chatgpt.com/codex" rel="noreferrer" target="_blank">
+              Codex
+              <ExternalLink size={13} />
+            </a>{' '}
+            Desktop App by OpenAI and{' '}
             <a href="https://projects.dev/" rel="noreferrer" target="_blank">
               projects.dev
               <ExternalLink size={13} />
-            </a>
-            .
+            </a>{' '}
+            by Stripe without writing a single line of code.
           </p>
         </div>
       </div>

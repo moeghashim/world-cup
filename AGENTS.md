@@ -86,7 +86,7 @@ It does not replace payments, contest compliance, prize fulfillment, POD APIs, 3
 
 Recommended use: use Stripe Projects for the build stack and SaaS spend limits. Keep Stripe payment products separate for sponsor billing, taxes, identity checks, fraud controls, and approved payout flows.
 
-Public build attribution: this project is being built with Codex Desktop App and `https://projects.dev/`. Keep that attribution in the footer-linked Experiment view and documentation, not in the default homepage experience.
+Public build attribution: this project is being built with [Codex](https://chatgpt.com/codex) Desktop App by OpenAI and [projects.dev](https://projects.dev/) by Stripe without writing a single line of code. Keep that attribution in the footer-linked Experiment view and documentation, not in the default homepage experience.
 
 ## T-Shirt Design System
 
@@ -143,6 +143,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Added sponsor package pricing and activation details for reward-funded campaigns.
 - Added `WEBSITE_FLOW.md` with Mermaid diagrams for the visitor journey, app architecture, draw mechanism, tool stack, and planned production integrations.
 - Updated the homepage supporter picker heading from "Choose Your Theme" to "Choose Your Team" so the public copy focuses on team choice rather than implementation theming.
+- Updated the Experiment view build attribution to link Codex and projects.dev and describe the no-code build process.
 
 ## Verification
 
@@ -180,6 +181,7 @@ Browser verification covered:
 - verifying sponsor package additions with lint and production build
 - verifying `WEBSITE_FLOW.md` is imported into the Experiment documentation list
 - verifying the homepage supporter picker renders "Choose Your Team"
+- verifying the Experiment view renders the updated Codex and projects.dev attribution links
 
 Latest screenshot:
 

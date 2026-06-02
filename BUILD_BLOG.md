@@ -212,7 +212,7 @@ The site now includes a footer-linked `Experiment` view. It imports the project 
 - `WEBSITE_FLOW.md`
 - `DESIGN.md`
 
-This makes the process artifact part of the product experience, not just a repository file. The Experiment view notes that the project is being built with Codex Desktop App and `https://projects.dev/`, while the default homepage stays focused on matches, prizes, and winners. The `WEBSITE_FLOW.md` artifact adds Mermaid diagrams for the visitor journey, app architecture, draw mechanism, and tools used.
+This makes the process artifact part of the product experience, not just a repository file. The Experiment view notes that the project is being built with [Codex](https://chatgpt.com/codex) Desktop App by OpenAI and [projects.dev](https://projects.dev/) by Stripe without writing a single line of code, while the default homepage stays focused on matches, prizes, and winners. The `WEBSITE_FLOW.md` artifact adds Mermaid diagrams for the visitor journey, app architecture, draw mechanism, and tools used.
 
 `BUILD_BLOG.md` remains the file that is updated on every commit. It is the running public article for how the project is being built.
 
@@ -367,9 +367,13 @@ Added sponsor package pricing for Global Cup Partner, Matchday Featured Sponsor,
 
 Added `WEBSITE_FLOW.md` as a diagram-first explanation of how the website works, including visitor journey, app architecture, draw flow, tools used, and planned production integrations. The file is imported into the footer-linked Experiment view so the build documentation can be read inside the app without adding technical copy to the homepage.
 
-### Current commit - Rename supporter picker heading
+### `eece039` - Rename supporter picker heading
 
 Changed the homepage supporter picker heading from "Choose Your Theme" to "Choose Your Team" so visitors read the action as a team choice while the theme behavior stays behind the scenes.
+
+### Current commit - Update Experiment build attribution
+
+Changed the Experiment view attribution to say the project is being built with [Codex](https://chatgpt.com/codex) Desktop App by OpenAI and [projects.dev](https://projects.dev/) by Stripe without writing a single line of code.
 
 ## Next Build Steps
 
