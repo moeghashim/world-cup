@@ -142,6 +142,7 @@ Logo explorations for `winworldcup2026.com` live in `designs/logos/`. The curren
 - Added a homepage prize section and hash-addressable team prize detail pages using the generated localized shirt mockups.
 - Added sponsor package pricing and activation details for reward-funded campaigns.
 - Added `WEBSITE_FLOW.md` with Mermaid diagrams for the visitor journey, app architecture, draw mechanism, tool stack, and planned production integrations.
+- Updated the homepage supporter picker heading from "Choose Your Theme" to "Choose Your Team" so the public copy focuses on team choice rather than implementation theming.
 
 ## Verification
 
@@ -178,6 +179,7 @@ Browser verification covered:
 - verifying `#prizes/japan` renders the team prize detail page and mobile layout without horizontal overflow
 - verifying sponsor package additions with lint and production build
 - verifying `WEBSITE_FLOW.md` is imported into the Experiment documentation list
+- verifying the homepage supporter picker renders "Choose Your Team"
 
 Latest screenshot:
 

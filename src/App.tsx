@@ -772,7 +772,7 @@ function App() {
           </span>
           <div>
             <p className="section-kicker">Supporter Team</p>
-            <h2 id="supporter-team">Choose Your Theme</h2>
+            <h2 id="supporter-team">Choose Your Team</h2>
           </div>
         </div>
         <div className="team-picker" role="list">

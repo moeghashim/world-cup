@@ -363,9 +363,13 @@ Verification for this pass included `npm run lint`, `npm run build`, desktop bro
 
 Added sponsor package pricing for Global Cup Partner, Matchday Featured Sponsor, and Fan Drop Sponsor campaigns, including winner review-video deliverables, product gift flow, add-ons, and compliance reminders.
 
-### Current commit - Add website flow diagrams
+### `f46f865` - Add website flow diagrams
 
 Added `WEBSITE_FLOW.md` as a diagram-first explanation of how the website works, including visitor journey, app architecture, draw flow, tools used, and planned production integrations. The file is imported into the footer-linked Experiment view so the build documentation can be read inside the app without adding technical copy to the homepage.
+
+### Current commit - Rename supporter picker heading
+
+Changed the homepage supporter picker heading from "Choose Your Theme" to "Choose Your Team" so visitors read the action as a team choice while the theme behavior stays behind the scenes.
 
 ## Next Build Steps
 
