@@ -9,6 +9,8 @@ The interface should behave like a matchday operations surface with fan energy, 
 ## Layout Rules
 
 - Lead with the usable prediction experience.
+- For the next homepage pass, replace the static hero with a prediction-first banner that keeps score controls, match selection, prize bundle, sponsor context, and entry capture inside the first viewport.
+- `HOMEPAGE_LIVE_BANNER_PRD.md` defines the motion and atmosphere layer for that first viewport: matchday pulse, score-change reactions, active fixture rail states, prize-panel reveals, and reduced-motion fallbacks.
 - Keep the hero cinematic, but let workflow and match cards dominate the product.
 - Use a persistent workflow rail on desktop: Predict, Teams, Draw, Personalize, Fulfill, Review.
 - Use clean page paths for primary sections instead of hash fragments, so visitors can open `/operations`, `/posthog`, `/prizes/japan`, and `/experiment` as standalone URLs.
@@ -67,3 +69,4 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Empty states should be product states, not implementation notes.
 - The top navigation and workflow rail should link to real page paths.
 - Run lint, build, and browser verification after visual changes.
+- Full address capture should be visually framed as draw/shipping eligibility, not checkout, and should avoid sending address data to analytics.
