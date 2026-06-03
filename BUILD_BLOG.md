@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~5.6M`
-- estimated API-equivalent cost: `~$49`
+- estimated total tokens: `~5.8M`
+- estimated API-equivalent cost: `~$51`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -598,13 +598,31 @@ The sponsor design pass originally applied the TrustMRR-inspired structure to th
 
 The sponsor banner strip above the package board remains in place and highlights Website Sponsor, Matchday Featured Sponsor, and Fan Drop Sponsor as compact listing rows with rank, icon, package price, availability, and summary. The implementation uses the advertiser-block layout pattern, not TrustMRR's branding, assets, advertiser names, or exact visual identity. The current AI build disclosure estimate was refreshed to `~5.4M` total tokens and `~$47`.
 
-### Current commit - Add shadcn foundation and all-page sponsor panels
+### Add shadcn foundation and all-page sponsor panels
 
 The website is now set up for an incremental shadcn/ui migration. The pass added Tailwind CSS v4, shadcn's Vite configuration, the `@/` import alias, generated source primitives for Button, Card, Badge, and Separator, and kept the generated components inside the repository so they can be adapted to the product instead of treated as a black-box UI dependency.
 
 The first migrated surface is the sponsor system. Sponsor ad blocks, the sponsor listing banners, and sponsor package cards now render through shadcn source primitives while preserving the existing World Cup reward visual direction. The sponsor rails were also promoted from a `/sponsors`-only frame into a reusable sponsored page frame. Homepage, prize pages, team pages, route pages, PostHog, Experiment, and the sponsors page now all show the advertiser panels: left/right rails on desktop and horizontal sponsor strips on mobile.
 
 Verification ran `npm run lint`, `npm run build`, and browser checks for `/`, `/sponsors`, `/teams/saudi-arabia`, and `/experiment`. The browser confirmed two sponsor rails, eight sponsor ad blocks, shadcn card primitives, no horizontal overflow at desktop, no horizontal overflow at 390px mobile after the grid min-width fix, and no fresh console errors beyond normal Vite/React development messages. The current AI build disclosure estimate was refreshed to `~5.6M` total tokens and `~$49`.
+
+### Compact sponsor rails and mobile marquee
+
+The sponsor frame was doing its job, but the desktop advertiser blocks were too large relative to the prediction surface. This pass reduces the sponsor columns and card dimensions so they behave more like peripheral ad inventory: desktop sponsor cards now sit around 130px wide at a 1440px viewport, with smaller icons, tighter copy, and less horizontal pressure on the match prediction content.
+
+The mobile treatment is now a moving sponsor banner instead of stacked rails. The left sponsor rail becomes a single auto-moving marquee above page content, the right/lower rail is hidden on small screens, and the sponsor cards are duplicated inside an aria-hidden track so the loop can move continuously without JavaScript. Reduced-motion users get animation disabled with the rail kept scrollable.
+
+Verification ran `npm run lint`, `npm run build`, and browser checks for `/` and `/sponsors` at 1440px and 390px. The browser confirmed compact static desktop rails, one visible moving mobile banner using `sponsor-mobile-marquee`, eight visible ad cards, hidden mobile right rail, no horizontal overflow, and the refreshed `~5.7M` total token / `~$50` estimated cost disclosure.
+
+### Current commit - Polish the public website design
+
+The website needed a visual design pass because the first screen was too boxy and heavy. This pass keeps the existing product model but improves the presentation layer: the app chrome is quieter, the top status bar is thinner, the nav links are rounded and less harsh, and the page background uses softer layered tones instead of flat beige.
+
+The homepage prediction arena is now framed as a premium match card with a rounded stadium image surface, softer glass panels, tighter hierarchy, and less aggressive black overlays. The hero headline is slightly smaller and better weighted, the prize stats no longer break words awkwardly, and the mobile headline/score controls are sized to fit the narrow viewport more naturally.
+
+The sponsor system also got visual polish. Desktop sponsor cards now use softer gradients and shadows, while the mobile marquee runs slower so the cards read as a moving banner instead of a clipped strip. The team picker cards were softened with rounded corners, subtle active-state lift, and a cleaner selected state.
+
+Verification ran `npm run lint`, `npm run build`, and browser checks for `/` and `/sponsors` at 1440px and 390px. The browser confirmed zero horizontal overflow, static desktop sponsor rails, active mobile marquee motion, visible `~5.8M` total token / `~$51` estimated cost disclosure, and no fresh console errors beyond normal Vite/React development messages.
 
 ## Next Build Steps
 

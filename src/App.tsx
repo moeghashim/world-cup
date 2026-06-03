@@ -448,8 +448,8 @@ const leftSponsorAdBlocks = sponsorAdBlocks.slice(0, 4)
 const rightSponsorAdBlocks = sponsorAdBlocks.slice(4)
 
 const aiBuildMetrics = {
-  tokenTotal: '~5.6M',
-  estimatedCost: '~$49',
+  tokenTotal: '~5.8M',
+  estimatedCost: '~$51',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
@@ -2489,23 +2489,20 @@ function SponsorAdRail({
   blocks: typeof leftSponsorAdBlocks | typeof rightSponsorAdBlocks
   side: 'left' | 'right'
 }) {
-  return (
-    <aside
-      className={`sponsor-ad-rail ${side}`}
-      aria-label={`${side} advertiser placements`}
-    >
+  const renderBlocks = (keyPrefix: string) => (
+    <>
       {blocks.map((block) => {
         const BlockIcon = block.icon
 
         return (
           <Card
             className={`sponsor-ad-block tone-${block.tone}`}
-            key={block.name}
+            key={`${keyPrefix}-${block.name}`}
             size="sm"
           >
             <CardContent className="sponsor-ad-content">
               <span className="sponsor-ad-icon">
-                <BlockIcon size={18} />
+                <BlockIcon size={16} />
               </span>
               <strong>{block.name}</strong>
               <p>{block.copy}</p>
@@ -2515,10 +2512,10 @@ function SponsorAdRail({
       })}
 
       {side === 'right' ? (
-        <Card className="sponsor-ad-block is-empty" size="sm">
+        <Card className="sponsor-ad-block is-empty" key={`${keyPrefix}-empty`} size="sm">
           <CardContent className="sponsor-ad-content">
             <span className="sponsor-ad-icon">
-              <Megaphone size={18} />
+              <Megaphone size={16} />
             </span>
             <strong>Advertise</strong>
             <Badge className="sponsor-ad-badge" variant="outline">
@@ -2527,6 +2524,20 @@ function SponsorAdRail({
           </CardContent>
         </Card>
       ) : null}
+    </>
+  )
+
+  return (
+    <aside
+      className={`sponsor-ad-rail ${side}`}
+      aria-label={`${side} advertiser placements`}
+    >
+      <div className="sponsor-ad-track">
+        {renderBlocks('primary')}
+        <div className="sponsor-ad-clone" aria-hidden="true">
+          {renderBlocks('clone')}
+        </div>
+      </div>
     </aside>
   )
 }
