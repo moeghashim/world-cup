@@ -214,6 +214,7 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 - Implemented the homepage Matchday Pulse live banner with first-viewport score prediction, active fixture rail, match status strip, fixture-colored energy, score pulse reactions, prize-panel reveal, sponsor/prize placeholder placement, entry drawer handoff, reduced-motion CSS, and refreshed the AI build estimate to `~4.1M` total tokens and `~$34`.
 - Implemented `HOMEPAGE_PREDICTION_BANNER_PRD.md` with a prediction-first homepage arena, upcoming match rail, live score controls, sponsor/prize bundle panel, joined and winner counts, full US entry modal, server-side Vercel endpoints, Neon schema artifact, explicit no-database fallback receipts, and refreshed the AI build estimate to `~4.4M` total tokens and `~$37`.
 - Added explicit prediction persistence commands: `npm run db:prediction-schema`, `npm run verify:api:fallback`, `npm run verify:api:persisted`, `npm run verify:api:vercel`, and `npm run dev:api`; applied the committed schema to Neon; configured encrypted `PRIMARY_DB_CONNECTION_STRING` entries for Vercel Preview and Production; verified a deployed protected Vercel preview write with smoke-test cleanup; confirmed Projects.dev exposes the redacted env var name for `primary-db`; and refreshed the AI build estimate to `~4.6M` total tokens and `~$39`.
+- Added an app-level language selector and i18n provider for English, Arabic, French, German, Spanish, Portuguese, Chinese, and Korean; localized the main public shell, homepage prediction arena, route copy, JSON-render section headers, prize/sponsor surfaces, receipt/modal text, footer, and score controls; added RTL handling for Arabic; and refreshed the AI build estimate to `~5.0M` total tokens and `~$43`.
 
 ## Verification
 
@@ -298,6 +299,8 @@ Browser verification covered:
 - verifying Vercel has encrypted `PRIMARY_DB_CONNECTION_STRING` values for Preview and Production
 - verifying `npx vercel deploy --prebuilt` creates a protected Vercel preview
 - verifying `npm run verify:api:vercel` uses Vercel CLI protected-deployment access, receives a deployed `201` Neon receipt, returns no address fields, verifies the row, and cleans up the smoke-test data
+- verifying `npm run lint` and `npm run build` pass after adding the multilingual website shell
+- verifying English, Arabic RTL, and Korean language switching on the homepage keeps the prediction controls readable with no fresh browser console errors
 
 Latest screenshot:
 
