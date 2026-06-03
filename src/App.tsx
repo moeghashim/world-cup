@@ -53,6 +53,21 @@ import './App.css'
 import agentsMd from '../AGENTS.md?raw'
 import buildBlogMd from '../BUILD_BLOG.md?raw'
 import {
+  getPrizeBundleForFixture,
+  type MatchPrizeBundle,
+} from './data/homepagePrizeBundles'
+import {
+  getFixtureKickoffMs,
+  getUpcomingHomepageFixtures,
+} from './data/homepageFixtures'
+import {
+  emptyPredictionEntryForm,
+  predictionEntryFormSchema,
+  usStateCodes,
+  type PredictionEntryForm,
+  type PredictionEntryPayload,
+} from './data/predictionEntry'
+import {
   getTeam,
   shirtConcepts,
   teamThemes,
@@ -62,7 +77,6 @@ import {
   formatFixtureDate,
   formatTimeET,
   getTournamentTeamCode,
-  worldCupFixtures,
   type TournamentFixture,
 } from './data/worldCupSchedule'
 import {
@@ -334,8 +348,8 @@ const sponsorshipAddOns = [
 ]
 
 const aiBuildMetrics = {
-  tokenTotal: '~3.9M',
-  estimatedCost: '~$32',
+  tokenTotal: '~4.4M',
+  estimatedCost: '~$37',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
@@ -678,38 +692,43 @@ type FixtureScorePrediction = {
   locked: boolean
 }
 
+type EntryFormErrors = Partial<Record<keyof PredictionEntryForm, string>>
+
+type PredictionReceipt = {
+  awayScore: number
+  awayTeam: string
+  createdAt: string
+  homeScore: number
+  homeTeam: string
+  joinedCount: number
+  matchNumber: number
+  participantEmail: string
+  persisted: boolean
+  persistenceMessage?: string
+  persistenceMode: string
+  predictedOutcome: string
+  prizeBundleTitle: string
+  receiptHash: string
+  receiptId: string
+}
+
+type PredictionEntryApiResponse = {
+  createdAt: string
+  error?: string
+  joinedCount: number
+  message?: string
+  participantEmail: string
+  persisted: boolean
+  persistenceMode: string
+  predictedOutcome: string
+  receiptHash: string
+  receiptId: string
+}
+
 const defaultFixtureScorePrediction: FixtureScorePrediction = {
   homeScore: 0,
   awayScore: 0,
   locked: false,
-}
-
-function getFixtureKickoffMs(fixture: TournamentFixture) {
-  return new Date(`${fixture.date}T${fixture.timeET}:00-04:00`).getTime()
-}
-
-function getSoonestUpcomingFixtureDay(now = new Date()) {
-  const sortedFixtures = [...worldCupFixtures].sort(
-    (first, second) => getFixtureKickoffMs(first) - getFixtureKickoffMs(second),
-  )
-  const nowMs = now.getTime()
-  const futureFixtures = sortedFixtures.filter(
-    (fixture) => getFixtureKickoffMs(fixture) >= nowMs,
-  )
-  const firstFixture =
-    futureFixtures[0] ?? sortedFixtures[sortedFixtures.length - 1]
-  const fixturePool = futureFixtures.length ? futureFixtures : sortedFixtures
-  const sameDayFixtures = fixturePool
-    .filter((fixture) => fixture.date === firstFixture.date)
-    .sort(
-      (first, second) =>
-        getFixtureKickoffMs(first) - getFixtureKickoffMs(second),
-    )
-
-  return {
-    date: firstFixture.date,
-    fixtures: sameDayFixtures,
-  }
 }
 
 function getFixturePrediction(
@@ -786,6 +805,39 @@ function getFixtureAnalyticsProperties(fixture: TournamentFixture) {
   }
 }
 
+function getHomepagePredictionAnalyticsProperties({
+  fixture,
+  prediction,
+  prizeBundle,
+  supporterTeamKey,
+}: {
+  fixture: TournamentFixture
+  prediction: FixtureScorePrediction
+  prizeBundle: MatchPrizeBundle
+  supporterTeamKey: TeamKey
+}) {
+  return {
+    ...getFixtureAnalyticsProperties(fixture),
+    predicted_away_score: prediction.awayScore,
+    predicted_home_score: prediction.homeScore,
+    predicted_outcome: getFixturePickLabel(fixture, prediction),
+    prize_bundle_id: prizeBundle.id,
+    sponsor_campaign_id: prizeBundle.sponsorCampaignId,
+    supporter_team: supporterTeamKey,
+  }
+}
+
+function getFieldErrors(error: ReturnType<typeof predictionEntryFormSchema.safeParse>) {
+  if (error.success) return {}
+
+  return Object.fromEntries(
+    Object.entries(error.error.flatten().fieldErrors).map(([field, messages]) => [
+      field,
+      messages?.[0],
+    ]),
+  ) as EntryFormErrors
+}
+
 function App() {
   const [routeState, setRouteState] = useState<RouteState>(() =>
     getCurrentRouteState(),
@@ -796,10 +848,7 @@ function App() {
         ? { ...initialPredictionState, selectedTeamKey: routeState.activePrizeKey }
         : initialPredictionState,
   )
-  const [activeFixtureSlide, setActiveFixtureSlide] = useState(0)
-  const [fixturePredictions, setFixturePredictions] = useState<
-    Record<number, FixtureScorePrediction>
-  >({})
+  const [homepageReceiptCount, setHomepageReceiptCount] = useState(0)
   const store = usePredictionStore(predictionState, setPredictionState)
   const selectedTeamKey = predictionState.selectedTeamKey
   const selectedTeam = getTeam(selectedTeamKey)
@@ -874,29 +923,8 @@ function App() {
     return () => window.cancelAnimationFrame(frame)
   }, [activePrizeKey, store])
 
-  const nextFixtureDay = useMemo(() => getSoonestUpcomingFixtureDay(), [])
-  const sameDayFixtures = nextFixtureDay.fixtures
-  const activeFixtureIndex =
-    sameDayFixtures.length > 0
-      ? ((activeFixtureSlide % sameDayFixtures.length) + sameDayFixtures.length) %
-        sameDayFixtures.length
-      : 0
-  const activeFixture = sameDayFixtures[activeFixtureIndex] ?? worldCupFixtures[0]
-  const activeFixturePrediction = getFixturePrediction(
-    fixturePredictions,
-    activeFixture.matchNumber,
-  )
-  const activeFixturePickLabel = getFixturePickLabel(
-    activeFixture,
-    activeFixturePrediction,
-  )
-  const sameDayHasSlider = sameDayFixtures.length > 1
-
-  const fixtureLockedCount = Object.values(fixturePredictions).filter(
-    (prediction) => prediction.locked,
-  ).length
   const lockedCount =
-    fixtureLockedCount +
+    homepageReceiptCount +
     Object.values(predictionState.predictions).filter(
       (prediction) => prediction.locked,
     ).length
@@ -1084,80 +1112,11 @@ function App() {
     <main className="app-shell" style={themeVars}>
       <Topbar drawCount={drawCount} lockedCount={lockedCount} />
 
-      <section className="hero-band" aria-labelledby="page-title">
-        <div className="hero-copy">
-          <p className="eyebrow">{selectedTeam.chant}</p>
-          <h1 id="page-title">{selectedTeam.name} Match Picks</h1>
-          <p className="hero-subtitle">
-            Predict the match, enter sponsor-funded draws, unlock localized
-            supporter shirts, and move winners into shipping and review flows.
-          </p>
-          <div className="hero-actions">
-            <a
-              className="primary-action"
-              href="/fixtures"
-              onClick={() =>
-                captureAnalyticsEvent('prediction_cta_clicked', {
-                  cta: 'make_picks',
-                  source: 'homepage_hero',
-                  supporter_team: selectedTeamKey,
-                })
-              }
-            >
-              <Target size={18} />
-              <span>Make Picks</span>
-              <ChevronRight size={17} />
-            </a>
-            <a
-              className="secondary-action"
-              href="/prizes"
-              onClick={() =>
-                captureAnalyticsEvent('prize_cta_clicked', {
-                  cta: 'free_shirt_prize',
-                  source: 'homepage_hero',
-                  supporter_team: selectedTeamKey,
-                })
-              }
-            >
-              <Gift size={18} />
-              <span>Free Shirt Prize</span>
-            </a>
-            <a
-              className="secondary-action"
-              href="/sponsors"
-              onClick={() =>
-                captureAnalyticsEvent('sponsor_cta_clicked', {
-                  cta: 'sponsor_packages',
-                  source: 'homepage_hero',
-                  supporter_team: selectedTeamKey,
-                })
-              }
-            >
-              <Handshake size={18} />
-              <span>Sponsor Packages</span>
-            </a>
-          </div>
-        </div>
-
-        <aside className="supporter-panel" aria-label="Selected team summary">
-          <div className="kit-preview" aria-hidden="true">
-            <span>{selectedTeam.code}</span>
-          </div>
-          <div>
-            <p className="panel-label">Supporter mode</p>
-            <h2>{selectedTeam.name}</h2>
-            <p>{selectedTeam.mood}</p>
-          </div>
-          <div className="stat-row">
-            {selectedTeam.supporterStats.map((stat) => (
-              <div className="mini-stat" key={stat.label}>
-                <span>{stat.label}</span>
-                <strong>{stat.value}</strong>
-              </div>
-            ))}
-          </div>
-        </aside>
-      </section>
+      <HeroPredictionArena
+        onReceiptCountChange={setHomepageReceiptCount}
+        selectedTeam={selectedTeam}
+        selectedTeamKey={selectedTeamKey}
+      />
 
       <section className="team-strip" aria-labelledby="supporter-team">
         <div className="section-heading compact">
@@ -1226,213 +1185,6 @@ function App() {
         </aside>
 
         <div className="workspace-main">
-          <section className="insight-band next-score-band" id="predict">
-            <div className="next-score-slider-card">
-              <div className="next-score-header">
-                <div>
-                  <p className="section-kicker">Soonest Upcoming Match</p>
-                  <h2>
-                    {activeFixture.home} vs {activeFixture.away}
-                  </h2>
-                  <p>
-                    Predict the exact score before kickoff. Browse the rest of
-                    the {formatFixtureDate(nextFixtureDay.date)} fixtures when
-                    more than one match is scheduled that day.
-                  </p>
-                </div>
-                <div className="match-slider-status">
-                  <span className="next-match-badge">
-                    Match {activeFixture.matchNumber}
-                  </span>
-                  {sameDayHasSlider ? (
-                    <div
-                      className="match-slider-controls"
-                      aria-label={`${formatFixtureDate(
-                        nextFixtureDay.date,
-                      )} match slider`}
-                    >
-                      <button
-                        aria-label="Previous match"
-                        className="match-slide-button"
-                        onClick={() =>
-                          setActiveFixtureSlide((current) => current - 1)
-                        }
-                        type="button"
-                      >
-                        <ArrowLeft size={16} />
-                      </button>
-                      <span>
-                        {activeFixtureIndex + 1} / {sameDayFixtures.length}
-                      </span>
-                      <button
-                        aria-label="Next match"
-                        className="match-slide-button"
-                        onClick={() =>
-                          setActiveFixtureSlide((current) => current + 1)
-                        }
-                        type="button"
-                      >
-                        <ChevronRight size={16} />
-                      </button>
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-
-              <div
-                className="next-score-board"
-                aria-label={`${activeFixture.home} ${activeFixturePrediction.homeScore}, ${activeFixture.away} ${activeFixturePrediction.awayScore}`}
-              >
-                <div className="next-score-team">
-                  <span>{getTournamentTeamCode(activeFixture.home)}</span>
-                  <strong>{activeFixturePrediction.homeScore}</strong>
-                </div>
-                <span className="next-score-separator">:</span>
-                <div className="next-score-team away">
-                  <span>{getTournamentTeamCode(activeFixture.away)}</span>
-                  <strong>{activeFixturePrediction.awayScore}</strong>
-                </div>
-              </div>
-
-              <div className="next-score-fields">
-                <ScoreField
-                  code={getTournamentTeamCode(activeFixture.home)}
-                  label={activeFixture.home}
-                  onChange={(score) => {
-                    setFixturePredictions((previous) =>
-                      updateFixtureScorePrediction(
-                        previous,
-                        activeFixture,
-                        'home',
-                        score,
-                      ),
-                    )
-                    captureAnalyticsEvent('score_changed', {
-                      ...getFixtureAnalyticsProperties(activeFixture),
-                      surface: 'homepage_fixture_scoreboard',
-                      side: 'home',
-                      score: clampScore(score),
-                      supporter_team: selectedTeamKey,
-                    })
-                  }}
-                  value={activeFixturePrediction.homeScore}
-                />
-                <ScoreField
-                  code={getTournamentTeamCode(activeFixture.away)}
-                  label={activeFixture.away}
-                  onChange={(score) => {
-                    setFixturePredictions((previous) =>
-                      updateFixtureScorePrediction(
-                        previous,
-                        activeFixture,
-                        'away',
-                        score,
-                      ),
-                    )
-                    captureAnalyticsEvent('score_changed', {
-                      ...getFixtureAnalyticsProperties(activeFixture),
-                      surface: 'homepage_fixture_scoreboard',
-                      side: 'away',
-                      score: clampScore(score),
-                      supporter_team: selectedTeamKey,
-                    })
-                  }}
-                  value={activeFixturePrediction.awayScore}
-                />
-              </div>
-
-              {sameDayHasSlider ? (
-                <div className="match-slide-dots" role="tablist">
-                  {sameDayFixtures.map((fixture, index) => (
-                    <button
-                      aria-label={`Show match ${fixture.matchNumber}: ${fixture.home} vs ${fixture.away}`}
-                      aria-pressed={index === activeFixtureIndex}
-                      className="match-slide-dot"
-                      key={fixture.matchNumber}
-                      onClick={() => setActiveFixtureSlide(index)}
-                      type="button"
-                    />
-                  ))}
-                </div>
-              ) : null}
-
-              <div className="next-score-actions">
-                <div>
-                  <span>Current pick</span>
-                  <strong>
-                    {activeFixturePickLabel} ·{' '}
-                    {activeFixturePrediction.homeScore}-
-                    {activeFixturePrediction.awayScore}
-                  </strong>
-                </div>
-                <button
-                  className={`next-lock-button ${
-                    activeFixturePrediction.locked ? 'is-locked' : ''
-                  }`}
-                  onClick={() => {
-                    if (activeFixturePrediction.locked) return
-
-                    setFixturePredictions((previous) =>
-                      lockFixturePrediction(previous, activeFixture),
-                    )
-                    captureAnalyticsEvent('prediction_locked', {
-                      ...getFixtureAnalyticsProperties(activeFixture),
-                      surface: 'homepage_fixture_scoreboard',
-                      predicted_winner: activeFixturePickLabel,
-                      predicted_home_score: activeFixturePrediction.homeScore,
-                      predicted_away_score: activeFixturePrediction.awayScore,
-                      supporter_team: selectedTeamKey,
-                    })
-                  }}
-                  type="button"
-                >
-                  <ShieldCheck size={17} />
-                  <span>
-                    {activeFixturePrediction.locked
-                      ? 'Score Locked'
-                      : 'Lock Score'}
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            <aside className="score-stakes-panel">
-              <div className="receipt-header">
-                <ShieldCheck size={20} />
-                <div>
-                  <p className="section-kicker">Match Stakes</p>
-                  <h2>Group {activeFixture.group}</h2>
-                </div>
-              </div>
-              <div className="receipt-list">
-                <div className="receipt-line">
-                  <span>Kickoff</span>
-                  <strong>
-                    {formatFixtureDate(activeFixture.date)} ·{' '}
-                    {formatTimeET(activeFixture.timeET)}
-                  </strong>
-                </div>
-                <div className="receipt-line">
-                  <span>Venue</span>
-                  <strong>{activeFixture.venue.name}</strong>
-                </div>
-                <div className="receipt-line">
-                  <span>City</span>
-                  <strong>
-                    {activeFixture.venue.city}, {activeFixture.venue.country}
-                  </strong>
-                </div>
-                <div className="receipt-line">
-                  <span>Match day</span>
-                  <strong>
-                    {sameDayFixtures.length}{' '}
-                    {sameDayFixtures.length === 1 ? 'match' : 'matches'}
-                  </strong>
-                </div>
-              </div>
-            </aside>
-          </section>
-
           <JSONUIProvider registry={registry} store={store}>
             <Renderer spec={predictionSpec} registry={registry} />
           </JSONUIProvider>
@@ -1441,6 +1193,890 @@ function App() {
 
       <SiteFooter />
     </main>
+  )
+}
+
+const scheduleTeamKeyByName: Partial<Record<string, TeamKey>> = {
+  Argentina: 'argentina',
+  Brazil: 'brazil',
+  England: 'england',
+  France: 'france',
+  Japan: 'japan',
+  Morocco: 'morocco',
+  Spain: 'spain',
+  USA: 'usa',
+}
+
+const fallbackFixtureColors = {
+  primary: '#31515a',
+  secondary: '#f0c66a',
+  accent: '#d95f43',
+  ink: '#111812',
+  soft: '#edf3ee',
+} as const
+
+function getFixtureVisualTeam(teamName: string) {
+  const teamKey = scheduleTeamKeyByName[teamName]
+
+  if (teamKey) return getTeam(teamKey)
+
+  return {
+    code: getTournamentTeamCode(teamName),
+    colors: fallbackFixtureColors,
+    name: teamName,
+  }
+}
+
+function getFixtureStatusLabel(fixture: TournamentFixture) {
+  const diffMs = getFixtureKickoffMs(fixture) - Date.now()
+
+  if (diffMs <= 0) return 'Awaiting result snapshot'
+
+  const dayMs = 24 * 60 * 60 * 1000
+  const hourMs = 60 * 60 * 1000
+
+  if (diffMs >= dayMs) {
+    const days = Math.ceil(diffMs / dayMs)
+
+    return `Kickoff in ${days} ${days === 1 ? 'day' : 'days'}`
+  }
+
+  const hours = Math.max(1, Math.ceil(diffMs / hourMs))
+
+  return `Kickoff in ${hours} ${hours === 1 ? 'hour' : 'hours'}`
+}
+
+function HeroPredictionArena({
+  onReceiptCountChange,
+  selectedTeam,
+  selectedTeamKey,
+}: {
+  onReceiptCountChange: (count: number) => void
+  selectedTeam: ReturnType<typeof getTeam>
+  selectedTeamKey: TeamKey
+}) {
+  const upcomingFixtures = useMemo(() => getUpcomingHomepageFixtures(8), [])
+  const [activeMatchNumber, setActiveMatchNumber] = useState(
+    () => upcomingFixtures[0]?.matchNumber ?? 1,
+  )
+  const [entryForm, setEntryForm] = useState<PredictionEntryForm>(
+    emptyPredictionEntryForm,
+  )
+  const [entryFormErrors, setEntryFormErrors] = useState<EntryFormErrors>({})
+  const [fixturePredictions, setFixturePredictions] = useState<
+    Record<number, FixtureScorePrediction>
+  >({})
+  const [isEntryOpen, setIsEntryOpen] = useState(false)
+  const [joinedCountOverrides, setJoinedCountOverrides] = useState<
+    Record<number, number>
+  >({})
+  const [receipts, setReceipts] = useState<Record<number, PredictionReceipt>>({})
+  const [submissionError, setSubmissionError] = useState<string | null>(null)
+  const [submissionStatus, setSubmissionStatus] = useState<
+    'idle' | 'submitting' | 'error'
+  >('idle')
+  const [scorePulseSide, setScorePulseSide] = useState<'away' | 'home' | null>(
+    null,
+  )
+  const pulseTimeoutRef = useRef<number | null>(null)
+
+  const activeFixture =
+    upcomingFixtures.find((fixture) => fixture.matchNumber === activeMatchNumber) ??
+    upcomingFixtures[0]
+  const activePrediction = useMemo(
+    () => getFixturePrediction(fixturePredictions, activeFixture.matchNumber),
+    [activeFixture.matchNumber, fixturePredictions],
+  )
+  const activePrizeBundle = useMemo(
+    () => getPrizeBundleForFixture(activeFixture),
+    [activeFixture],
+  )
+  const activeReceipt = receipts[activeFixture.matchNumber]
+  const activePickLabel = getFixturePickLabel(activeFixture, activePrediction)
+  const activeSponsorName = activePrizeBundle.sponsorName.includes('Placeholder')
+    ? 'Sponsor this match'
+    : activePrizeBundle.sponsorName
+  const activeJoinedCount =
+    activeReceipt?.joinedCount ??
+    joinedCountOverrides[activeFixture.matchNumber] ??
+    activePrizeBundle.joinedCountSeed
+  const homeVisualTeam = getFixtureVisualTeam(activeFixture.home)
+  const awayVisualTeam = getFixtureVisualTeam(activeFixture.away)
+  const arenaStyle = {
+    '--arena-home': homeVisualTeam.colors.primary,
+    '--arena-away': awayVisualTeam.colors.primary,
+    '--arena-home-soft': homeVisualTeam.colors.soft,
+    '--arena-away-soft': awayVisualTeam.colors.soft,
+    '--arena-accent': selectedTeam.colors.accent,
+    '--arena-secondary': selectedTeam.colors.secondary,
+  } as CSSProperties
+  const activeAnalyticsProperties = useMemo(
+    () =>
+      getHomepagePredictionAnalyticsProperties({
+        fixture: activeFixture,
+        prediction: activePrediction,
+        prizeBundle: activePrizeBundle,
+        supporterTeamKey: selectedTeamKey,
+      }),
+    [activeFixture, activePrediction, activePrizeBundle, selectedTeamKey],
+  )
+
+  useEffect(() => {
+    onReceiptCountChange(Object.keys(receipts).length)
+  }, [onReceiptCountChange, receipts])
+
+  useEffect(
+    () => () => {
+      if (pulseTimeoutRef.current) {
+        window.clearTimeout(pulseTimeoutRef.current)
+      }
+    },
+    [],
+  )
+
+  useEffect(() => {
+    captureAnalyticsEvent('prize_bundle_viewed', {
+      ...getFixtureAnalyticsProperties(activeFixture),
+      prize_bundle_id: activePrizeBundle.id,
+      sponsor_campaign_id: activePrizeBundle.sponsorCampaignId,
+      supporter_team: selectedTeamKey,
+      surface: 'homepage_prediction_hero',
+    })
+  }, [activeFixture, activePrizeBundle, selectedTeamKey])
+
+  const updateEntryFormField = <K extends keyof PredictionEntryForm>(
+    field: K,
+    value: PredictionEntryForm[K],
+  ) => {
+    setEntryForm((current) => ({ ...current, [field]: value }))
+    setEntryFormErrors((current) => ({ ...current, [field]: undefined }))
+  }
+
+  const selectFixture = (fixture: TournamentFixture) => {
+    if (fixture.matchNumber === activeFixture.matchNumber) return
+
+    const fixturePrediction = getFixturePrediction(
+      fixturePredictions,
+      fixture.matchNumber,
+    )
+    const prizeBundle = getPrizeBundleForFixture(fixture)
+
+    setActiveMatchNumber(fixture.matchNumber)
+    setSubmissionError(null)
+    setSubmissionStatus('idle')
+    captureAnalyticsEvent('homepage_match_selected', {
+      ...getHomepagePredictionAnalyticsProperties({
+        fixture,
+        prediction: fixturePrediction,
+        prizeBundle,
+        supporterTeamKey: selectedTeamKey,
+      }),
+      surface: 'homepage_prediction_rail',
+    })
+  }
+
+  const updateScore = (side: 'home' | 'away', score: number) => {
+    if (activeReceipt) return
+
+    const hadPrediction = Boolean(fixturePredictions[activeFixture.matchNumber])
+    const clampedScore = clampScore(score)
+    const nextPrediction = {
+      ...activePrediction,
+      [side === 'home' ? 'homeScore' : 'awayScore']: clampedScore,
+      locked: false,
+    }
+
+    setFixturePredictions((previous) =>
+      updateFixtureScorePrediction(previous, activeFixture, side, clampedScore),
+    )
+    setScorePulseSide(side)
+
+    if (pulseTimeoutRef.current) {
+      window.clearTimeout(pulseTimeoutRef.current)
+    }
+
+    pulseTimeoutRef.current = window.setTimeout(() => {
+      setScorePulseSide(null)
+    }, 420)
+
+    const analyticsProperties = getHomepagePredictionAnalyticsProperties({
+      fixture: activeFixture,
+      prediction: nextPrediction,
+      prizeBundle: activePrizeBundle,
+      supporterTeamKey: selectedTeamKey,
+    })
+
+    if (!hadPrediction) {
+      captureAnalyticsEvent('prediction_started', {
+        ...analyticsProperties,
+        surface: 'homepage_prediction_hero',
+      })
+    }
+
+    captureAnalyticsEvent('score_changed', {
+      ...analyticsProperties,
+      score: clampedScore,
+      side,
+      surface: 'homepage_prediction_hero',
+    })
+  }
+
+  const openEntryForm = () => {
+    if (activeReceipt) return
+
+    setEntryFormErrors({})
+    setSubmissionError(null)
+    setSubmissionStatus('idle')
+    setIsEntryOpen(true)
+    captureAnalyticsEvent('prediction_entry_opened', {
+      ...activeAnalyticsProperties,
+      surface: 'homepage_prediction_hero',
+    })
+  }
+
+  const submitEntry = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const formValidation = predictionEntryFormSchema.safeParse(entryForm)
+
+    if (!formValidation.success) {
+      setEntryFormErrors(getFieldErrors(formValidation))
+      setSubmissionError('Check the highlighted fields before submitting.')
+      setSubmissionStatus('error')
+      captureAnalyticsEvent('prediction_entry_failed', {
+        ...activeAnalyticsProperties,
+        failure_reason: 'client_validation',
+        surface: 'homepage_prediction_hero',
+      })
+      return
+    }
+
+    const submittedFixture = activeFixture
+    const submittedPrediction = activePrediction
+    const submittedBundle = activePrizeBundle
+    const submittedAnalyticsProperties = getHomepagePredictionAnalyticsProperties({
+      fixture: submittedFixture,
+      prediction: submittedPrediction,
+      prizeBundle: submittedBundle,
+      supporterTeamKey: selectedTeamKey,
+    })
+    const payload: PredictionEntryPayload = {
+      participant: formValidation.data,
+      prediction: {
+        awayScore: submittedPrediction.awayScore,
+        awayTeam: submittedFixture.away,
+        homeScore: submittedPrediction.homeScore,
+        homeTeam: submittedFixture.home,
+        matchId: `fixture-${submittedFixture.matchNumber}`,
+        matchNumber: submittedFixture.matchNumber,
+        predictedOutcome: getFixturePickLabel(
+          submittedFixture,
+          submittedPrediction,
+        ),
+        prizeBundleId: submittedBundle.id,
+        sponsorCampaignId: submittedBundle.sponsorCampaignId,
+        supporterTeamKey: selectedTeamKey,
+      },
+    }
+
+    setEntryFormErrors({})
+    setSubmissionError(null)
+    setSubmissionStatus('submitting')
+    captureAnalyticsEvent('prediction_entry_submitted', {
+      ...submittedAnalyticsProperties,
+      surface: 'homepage_prediction_hero',
+    })
+
+    try {
+      const response = await fetch('/api/prediction-entries', {
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      })
+      const responseBody = (await response
+        .json()
+        .catch(() => null)) as PredictionEntryApiResponse | null
+
+      if (!response.ok || !responseBody?.receiptHash) {
+        throw new Error(
+          responseBody?.error ??
+            'Prediction entry could not be saved. Please retry.',
+        )
+      }
+
+      setFixturePredictions((previous) =>
+        lockFixturePrediction(previous, submittedFixture),
+      )
+      setJoinedCountOverrides((current) => ({
+        ...current,
+        [submittedFixture.matchNumber]: responseBody.joinedCount,
+      }))
+      setReceipts((current) => ({
+        ...current,
+        [submittedFixture.matchNumber]: {
+          awayScore: submittedPrediction.awayScore,
+          awayTeam: submittedFixture.away,
+          createdAt: responseBody.createdAt,
+          homeScore: submittedPrediction.homeScore,
+          homeTeam: submittedFixture.home,
+          joinedCount: responseBody.joinedCount,
+          matchNumber: submittedFixture.matchNumber,
+          participantEmail: responseBody.participantEmail,
+          persisted: responseBody.persisted,
+          persistenceMessage: responseBody.message,
+          persistenceMode: responseBody.persistenceMode,
+          predictedOutcome: responseBody.predictedOutcome,
+          prizeBundleTitle: submittedBundle.title,
+          receiptHash: responseBody.receiptHash,
+          receiptId: responseBody.receiptId,
+        },
+      }))
+      setEntryForm(emptyPredictionEntryForm)
+      setIsEntryOpen(false)
+      setSubmissionStatus('idle')
+      captureAnalyticsEvent('prediction_locked', {
+        ...submittedAnalyticsProperties,
+        persisted: responseBody.persisted,
+        persistence_mode: responseBody.persistenceMode,
+        surface: 'homepage_prediction_hero',
+      })
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Prediction entry could not be saved. Please retry.'
+
+      setSubmissionError(message)
+      setSubmissionStatus('error')
+      captureAnalyticsEvent('prediction_entry_failed', {
+        ...submittedAnalyticsProperties,
+        failure_reason: 'server_submission',
+        surface: 'homepage_prediction_hero',
+      })
+    }
+  }
+
+  return (
+    <section
+      className="hero-prediction-arena"
+      style={arenaStyle}
+      aria-labelledby="page-title"
+      id="predict"
+    >
+      <div className="hero-prediction-grid">
+        <article className="hero-match-panel">
+          <header className="hero-match-header">
+            <div>
+              <p className="eyebrow">{selectedTeam.chant}</p>
+              <h1 id="page-title">
+                Predict {activeFixture.home} vs {activeFixture.away}
+              </h1>
+              <p>
+                Set the score, lock a draw entry, and see the sponsor-funded
+                prize bundle before leaving the first screen.
+              </p>
+            </div>
+            <div className="supporter-mini-panel" aria-label="Supporter mode">
+              <span>{selectedTeam.code}</span>
+              <strong>{selectedTeam.name}</strong>
+              <em>{selectedTeam.mood}</em>
+            </div>
+          </header>
+
+          <div className="hero-fixture-meta" aria-label="Selected match details">
+            <span>{getFixtureStatusLabel(activeFixture)}</span>
+            <span>Match {activeFixture.matchNumber}</span>
+            <span>Group {activeFixture.group}</span>
+            <span>
+              {formatFixtureDate(activeFixture.date)} ·{' '}
+              {formatTimeET(activeFixture.timeET)}
+            </span>
+            <span>
+              {activeFixture.venue.city}, {activeFixture.venue.country}
+            </span>
+          </div>
+
+          <div
+            className="next-score-board hero-score-board"
+            aria-label={`${activeFixture.home} ${activePrediction.homeScore}, ${activeFixture.away} ${activePrediction.awayScore}`}
+          >
+            <div
+              className={`next-score-team ${
+                scorePulseSide === 'home' ? 'is-pulsing' : ''
+              }`}
+            >
+              <span>{getTournamentTeamCode(activeFixture.home)}</span>
+              <strong>{activePrediction.homeScore}</strong>
+            </div>
+            <span className="next-score-separator">:</span>
+            <div
+              className={`next-score-team away ${
+                scorePulseSide === 'away' ? 'is-pulsing' : ''
+              }`}
+            >
+              <span>{getTournamentTeamCode(activeFixture.away)}</span>
+              <strong>{activePrediction.awayScore}</strong>
+            </div>
+          </div>
+
+          <div className="hero-outcome-row">
+            <div>
+              <span>Predicted outcome</span>
+              <strong>
+                {activePickLabel} · {activePrediction.homeScore}-
+                {activePrediction.awayScore}
+              </strong>
+            </div>
+            <button
+              className={`next-lock-button hero-lock-button ${
+                activeReceipt ? 'is-locked' : ''
+              }`}
+              disabled={Boolean(activeReceipt)}
+              onClick={openEntryForm}
+              type="button"
+            >
+              <ShieldCheck size={17} />
+              <span>{activeReceipt ? 'Entry Received' : 'Lock Prediction'}</span>
+            </button>
+          </div>
+
+          <div className="next-score-fields hero-score-fields">
+            <ScoreField
+              code={getTournamentTeamCode(activeFixture.home)}
+              disabled={Boolean(activeReceipt)}
+              label={activeFixture.home}
+              onChange={(score) => updateScore('home', score)}
+              value={activePrediction.homeScore}
+            />
+            <ScoreField
+              code={getTournamentTeamCode(activeFixture.away)}
+              disabled={Boolean(activeReceipt)}
+              label={activeFixture.away}
+              onChange={(score) => updateScore('away', score)}
+              value={activePrediction.awayScore}
+            />
+          </div>
+
+          {activeReceipt ? <PredictionReceiptPanel receipt={activeReceipt} /> : null}
+        </article>
+
+        <aside
+          className="hero-prize-panel"
+          key={activePrizeBundle.id}
+          aria-label="Prize bundle details"
+        >
+          <div className="receipt-header">
+            <Gift size={20} />
+            <div>
+              <p className="section-kicker">Sponsor Prize Bundle</p>
+              <h2>{activePrizeBundle.title}</h2>
+            </div>
+          </div>
+
+          <div className="hero-prize-stats">
+            <div>
+              <span>Winners</span>
+              <strong>{activePrizeBundle.winnerSlots}</strong>
+            </div>
+            <div>
+              <span>Joined</span>
+              <strong>{activeJoinedCount.toLocaleString()}</strong>
+            </div>
+            <div>
+              <span>Sponsor</span>
+              <strong>{activeSponsorName}</strong>
+            </div>
+          </div>
+
+          <ul className="hero-prize-list">
+            {activePrizeBundle.items.slice(0, 3).map((item) => (
+              <li key={`${item.type}-${item.label}`}>
+                <CheckCircle2 size={16} />
+                <span>{item.label}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="hero-prize-note">
+            <ShieldCheck size={17} />
+            <p>
+              {activePrizeBundle.entrantGiftNote} Independent fan rewards only;
+              no official team, tournament, federation, player, or sponsor marks
+              are used.
+            </p>
+          </div>
+        </aside>
+      </div>
+
+      <div className="hero-match-rail" aria-label="Upcoming match rail">
+        <div className="hero-rail-heading">
+          <div>
+            <p className="section-kicker">Upcoming Matches</p>
+            <h2>Browse Nearby Fixtures</h2>
+          </div>
+          <a className="prize-action secondary" href="/fixtures">
+            <CalendarDays size={17} />
+            <span>Full Fixtures</span>
+          </a>
+        </div>
+        <div className="hero-rail-list">
+          {upcomingFixtures.map((fixture) => {
+            const fixtureBundle = getPrizeBundleForFixture(fixture)
+            const fixtureReceipt = receipts[fixture.matchNumber]
+            const isActive = fixture.matchNumber === activeFixture.matchNumber
+
+            return (
+              <button
+                aria-pressed={isActive}
+                className="hero-rail-match"
+                key={fixture.matchNumber}
+                onClick={() => selectFixture(fixture)}
+                type="button"
+              >
+                <span>Match {fixture.matchNumber}</span>
+                <strong>
+                  {getTournamentTeamCode(fixture.home)} vs{' '}
+                  {getTournamentTeamCode(fixture.away)}
+                </strong>
+                <em>
+                  {formatFixtureDate(fixture.date)} · Group {fixture.group}
+                </em>
+                <small>
+                  {fixtureReceipt
+                    ? 'Receipt saved'
+                    : `${fixtureBundle.winnerSlots} winners · ${fixtureBundle.tag}`}
+                </small>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {isEntryOpen ? (
+        <PredictionEntryModal
+          entryForm={entryForm}
+          errors={entryFormErrors}
+          fixture={activeFixture}
+          onChange={updateEntryFormField}
+          onClose={() => {
+            if (submissionStatus === 'submitting') return
+            setIsEntryOpen(false)
+          }}
+          onSubmit={submitEntry}
+          prediction={activePrediction}
+          prizeBundle={activePrizeBundle}
+          submissionError={submissionError}
+          submissionStatus={submissionStatus}
+        />
+      ) : null}
+    </section>
+  )
+}
+
+function PredictionReceiptPanel({ receipt }: { receipt: PredictionReceipt }) {
+  return (
+    <aside className="hero-receipt-panel" aria-label="Prediction receipt">
+      <div className="receipt-header">
+        <Ticket size={18} />
+        <div>
+          <p className="section-kicker">Receipt</p>
+          <h2>Prediction Locked</h2>
+        </div>
+      </div>
+      <div className="receipt-list">
+        <div className="receipt-line">
+          <span>Match</span>
+          <strong>
+            {receipt.homeTeam} vs {receipt.awayTeam}
+          </strong>
+        </div>
+        <div className="receipt-line">
+          <span>Prediction</span>
+          <strong>
+            {receipt.predictedOutcome} · {receipt.homeScore}-{receipt.awayScore}
+          </strong>
+        </div>
+        <div className="receipt-line">
+          <span>Email</span>
+          <strong>{receipt.participantEmail}</strong>
+        </div>
+        <div className="receipt-line">
+          <span>Receipt hash</span>
+          <strong>{receipt.receiptHash}</strong>
+        </div>
+        <div className="receipt-line">
+          <span>Prize bundle</span>
+          <strong>{receipt.prizeBundleTitle}</strong>
+        </div>
+      </div>
+      <p>
+        Watch for draw updates at this email. Shipping address is stored
+        server-side for eligibility and sponsor gift review, and is not shown
+        here.
+      </p>
+      {!receipt.persisted ? (
+        <p className="receipt-warning">
+          {receipt.persistenceMessage ??
+            'This environment returned a non-persistent fallback receipt.'}
+        </p>
+      ) : null}
+    </aside>
+  )
+}
+
+type UpdateEntryFormField = <K extends keyof PredictionEntryForm>(
+  field: K,
+  value: PredictionEntryForm[K],
+) => void
+
+function PredictionEntryModal({
+  entryForm,
+  errors,
+  fixture,
+  onChange,
+  onClose,
+  onSubmit,
+  prediction,
+  prizeBundle,
+  submissionError,
+  submissionStatus,
+}: {
+  entryForm: PredictionEntryForm
+  errors: EntryFormErrors
+  fixture: TournamentFixture
+  onChange: UpdateEntryFormField
+  onClose: () => void
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void
+  prediction: FixtureScorePrediction
+  prizeBundle: MatchPrizeBundle
+  submissionError: string | null
+  submissionStatus: 'idle' | 'submitting' | 'error'
+}) {
+  const predictionLabel = getFixturePickLabel(fixture, prediction)
+  const isSubmitting = submissionStatus === 'submitting'
+
+  return (
+    <div className="entry-modal-backdrop">
+      <div
+        aria-labelledby="prediction-entry-title"
+        aria-modal="true"
+        className="entry-modal"
+        role="dialog"
+      >
+        <header className="entry-modal-header">
+          <div>
+            <p className="section-kicker">Draw Entry</p>
+            <h2 id="prediction-entry-title">Complete Your Prediction Entry</h2>
+            <p>
+              US shipping details are collected now because sponsors may choose
+              to send gifts to more entrants after eligibility review.
+            </p>
+          </div>
+          <button
+            aria-label="Close entry form"
+            disabled={isSubmitting}
+            onClick={onClose}
+            type="button"
+          >
+            Close
+          </button>
+        </header>
+
+        <form className="entry-form" onSubmit={onSubmit}>
+          <div className="entry-summary">
+            <span>Match {fixture.matchNumber}</span>
+            <strong>
+              {fixture.home} {prediction.homeScore} · {prediction.awayScore}{' '}
+              {fixture.away}
+            </strong>
+            <em>
+              Prediction: {predictionLabel} · {prizeBundle.winnerSlots} winner
+              slots · {prizeBundle.sponsorName}
+            </em>
+          </div>
+
+          <div className="entry-form-grid">
+            <EntryTextField
+              autoComplete="given-name"
+              error={errors.firstName}
+              id="entry-first-name"
+              label="First name"
+              onChange={(value) => onChange('firstName', value)}
+              value={entryForm.firstName}
+            />
+            <EntryTextField
+              autoComplete="family-name"
+              error={errors.lastName}
+              id="entry-last-name"
+              label="Last name"
+              onChange={(value) => onChange('lastName', value)}
+              value={entryForm.lastName}
+            />
+            <EntryTextField
+              autoComplete="email"
+              error={errors.email}
+              id="entry-email"
+              label="Email"
+              onChange={(value) => onChange('email', value)}
+              type="email"
+              value={entryForm.email}
+            />
+            <EntryTextField
+              autoComplete="tel"
+              error={errors.phone}
+              id="entry-phone"
+              label="Phone"
+              onChange={(value) => onChange('phone', value)}
+              type="tel"
+              value={entryForm.phone}
+            />
+            <EntryTextField
+              autoComplete="address-line1"
+              error={errors.addressLine1}
+              id="entry-address-line1"
+              label="Address line 1"
+              onChange={(value) => onChange('addressLine1', value)}
+              value={entryForm.addressLine1}
+            />
+            <EntryTextField
+              autoComplete="address-line2"
+              error={errors.addressLine2}
+              id="entry-address-line2"
+              label="Address line 2"
+              onChange={(value) => onChange('addressLine2', value)}
+              required={false}
+              value={entryForm.addressLine2 ?? ''}
+            />
+            <EntryTextField
+              autoComplete="address-level2"
+              error={errors.city}
+              id="entry-city"
+              label="City"
+              onChange={(value) => onChange('city', value)}
+              value={entryForm.city}
+            />
+            <label className={`entry-field ${errors.state ? 'has-error' : ''}`}>
+              <span>State</span>
+              <select
+                autoComplete="address-level1"
+                onChange={(event) =>
+                  onChange('state', event.target.value as PredictionEntryForm['state'])
+                }
+                value={entryForm.state}
+              >
+                {usStateCodes.map((stateCode) => (
+                  <option key={stateCode} value={stateCode}>
+                    {stateCode}
+                  </option>
+                ))}
+              </select>
+              {errors.state ? <em>{errors.state}</em> : null}
+            </label>
+            <EntryTextField
+              autoComplete="postal-code"
+              error={errors.postalCode}
+              id="entry-postal-code"
+              label="ZIP code"
+              onChange={(value) => onChange('postalCode', value)}
+              value={entryForm.postalCode}
+            />
+          </div>
+
+          <div className="entry-consent-list">
+            <label className={errors.rulesAccepted ? 'has-error' : ''}>
+              <input
+                checked={entryForm.rulesAccepted}
+                onChange={(event) =>
+                  onChange('rulesAccepted', event.target.checked)
+                }
+                type="checkbox"
+              />
+              <span>
+                <strong>I am eligible and accept the rules/privacy terms.</strong>
+                This MVP is US-only and requires sponsor-safe prize review before
+                any real campaign.
+              </span>
+            </label>
+            {errors.rulesAccepted ? <em>{errors.rulesAccepted}</em> : null}
+            <label>
+              <input
+                checked={entryForm.marketingConsent}
+                onChange={(event) =>
+                  onChange('marketingConsent', event.target.checked)
+                }
+                type="checkbox"
+              />
+              <span>
+                <strong>Send optional sponsor and draw updates.</strong>
+                Consent is optional and does not affect entry eligibility.
+              </span>
+            </label>
+          </div>
+
+          {submissionError ? (
+            <p className="entry-submit-error" role="alert">
+              {submissionError}
+            </p>
+          ) : null}
+
+          <div className="entry-modal-actions">
+            <button disabled={isSubmitting} onClick={onClose} type="button">
+              Cancel
+            </button>
+            <button disabled={isSubmitting} type="submit">
+              {isSubmitting ? (
+                <>
+                  <Activity size={17} />
+                  <span>Submitting</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck size={17} />
+                  <span>Submit Entry</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function EntryTextField({
+  autoComplete,
+  error,
+  id,
+  label,
+  onChange,
+  required = true,
+  type = 'text',
+  value,
+}: {
+  autoComplete: string
+  error?: string
+  id: string
+  label: string
+  onChange: (value: string) => void
+  required?: boolean
+  type?: 'email' | 'tel' | 'text'
+  value: string
+}) {
+  return (
+    <label className={`entry-field ${error ? 'has-error' : ''}`} htmlFor={id}>
+      <span>{label}</span>
+      <input
+        autoComplete={autoComplete}
+        id={id}
+        onChange={(event) => onChange(event.target.value)}
+        required={required}
+        type={type}
+        value={value}
+      />
+      {error ? <em>{error}</em> : null}
+    </label>
   )
 }
 
@@ -2307,11 +2943,13 @@ function PrizeDetailPage({
 
 function ScoreField({
   code,
+  disabled = false,
   label,
   onChange,
   value,
 }: {
   code: string
+  disabled?: boolean
   label: string
   onChange: (score: number) => void
   value: number
@@ -2329,7 +2967,7 @@ function ScoreField({
       <div className="score-field-control">
         <button
           aria-label={`Decrease ${label} score`}
-          disabled={value <= 0}
+          disabled={disabled || value <= 0}
           onClick={() => onChange(value - 1)}
           type="button"
         >
@@ -2341,13 +2979,14 @@ function ScoreField({
           inputMode="numeric"
           max={9}
           min={0}
+          disabled={disabled}
           onChange={(event) => onChange(Number(event.target.value))}
           type="number"
           value={value}
         />
         <button
           aria-label={`Increase ${label} score`}
-          disabled={value >= 9}
+          disabled={disabled || value >= 9}
           onClick={() => onChange(value + 1)}
           type="button"
         >
