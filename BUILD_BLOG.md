@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~3.7M`
-- estimated API-equivalent cost: `~$30`
+- estimated total tokens: `~3.8M`
+- estimated API-equivalent cost: `~$31`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -367,6 +367,7 @@ Browser checks have covered:
 - env-gated `posthog-js` setup with `/ingest` proxying, prediction/draw/reward event call sites, `.env.example`, `POSTHOG_SETUP.md`, and no-key browser verification
 - Projects.dev status showing `WorldCup` as the only active PostHog analytics resource in the default environment, with the older PostHog resources detached from site wiring
 - PR check recovery: DCO sign-offs were added to the branch commits, and the Vercel deployment failure was traced to an invalid `skipTrailingSlashRedirect` property in `vercel.json`
+- homepage prediction banner PRD with full-address entry capture, sponsor/prize bundle placement, upcoming match rail, Neon-backed persistence requirements, and Wegnener implementation handoff
 
 Current visual artifact:
 
@@ -534,11 +535,17 @@ Created a new Projects.dev PostHog analytics project resource named `WorldCup`, 
 
 The `/posthog` page, setup checklist, `POSTHOG_SETUP.md`, `PRODUCT.md`, `WEBSITE_FLOW.md`, and `AGENTS.md` now point to `WorldCup`. The documentation also calls out the new Projects.dev env names: `WORLDCUP_API_KEY`, `WORLDCUP_HOST`, and `WORLDCUP_PERSONAL_API_KEY`. The browser-facing app still remains inert until the safe public key is mapped into `VITE_POSTHOG_KEY` and the app is restarted or rebuilt. The current AI build disclosure estimate was refreshed to `~3.6M` total tokens and `~$29`.
 
-### Current commit - Fix PR checks
+### `8e68742` - Fix PR checks
 
 The PR check panel showed DCO failing and Vercel failing. DCO failed because the PR commits did not include `Signed-off-by` trailers, so the branch was rebased with sign-offs added to the three commits.
 
 The Vercel failure was not a TypeScript, Vite, or asset-build failure. `npm run build` and `vercel build` both passed. A prebuilt Vercel deploy exposed the actual issue: `vercel.json` used `skipTrailingSlashRedirect`, which is not accepted as a Vercel project configuration property here. Removing that property kept the SPA and `/ingest` rewrite behavior intact and allowed the prebuilt Vercel deployment path to proceed. The current AI build disclosure estimate was refreshed to `~3.7M` total tokens and `~$30`.
+
+### Current commit - Create homepage prediction banner PRD
+
+Created `HOMEPAGE_PREDICTION_BANNER_PRD.md` for the prediction-first homepage redesign. The PRD replaces the static hero with a first-viewport match prediction arena, defines an upcoming match rail, adds sponsor and prize-bundle placement inside the hero, and makes full US address capture part of locking a prediction.
+
+The key product decision is explicit: collect full address early because sponsors may choose to send gifts to all entrants, not only winners. The PRD documents the privacy implications, US-only scope, server-side storage requirement, and the Neon `primary-db` persistence path through `PRIMARY_DB_CONNECTION_STRING`. It also assigns implementation to Wegnener so the redesign can proceed in parallel while the broader product planning continues. The current AI build disclosure estimate was refreshed to `~3.8M` total tokens and `~$31`.
 
 ## Next Build Steps
 

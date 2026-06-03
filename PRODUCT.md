@@ -15,12 +15,13 @@ World Cup Predictor is a match prediction and sponsor reward experience for `win
 1. Choose a supporter team.
 2. Review that team's group-stage schedule and the full tournament field.
 3. Predict match winner and scoreline.
-4. Lock prediction to create a draw entry receipt.
-5. Match result closes.
-6. Correct predictions enter a match-level draw with public audit metadata.
-7. Participants see whether their ticket won, became an alternate, or was not selected.
-8. Winners receive a localized supporter T-shirt and sponsor product package.
-9. Winners are prompted to review sponsor products after delivery.
+4. Enter name, email, phone, and full US shipping address when locking the prediction, because sponsors may choose to send gifts to all entrants.
+5. Lock prediction to create a draw entry receipt.
+6. Match result closes.
+7. Correct predictions enter a match-level draw with public audit metadata.
+8. Participants see whether their ticket won, became an alternate, or was not selected.
+9. Winners receive a localized supporter T-shirt and sponsor product package.
+10. Winners are prompted to review sponsor products after delivery.
 
 ## Product Principles
 
@@ -50,3 +51,4 @@ World Cup Predictor is a match prediction and sponsor reward experience for `win
 - `/posthog` is now the dashboard contract for product analytics. `posthog-js` is installed and event call sites are wired, but PostHog capture stays inert until `VITE_POSTHOG_KEY` is set and the app is restarted or rebuilt.
 - Provider recommendations are architectural notes, not live integrations except for the current Google Analytics page-view setup and the Projects.dev-linked `WorldCup` PostHog resource, which is the only active PostHog analytics resource in the default environment.
 - No real prize fulfillment, payment, user identity, fraud checks, or legal rules are implemented yet.
+- `HOMEPAGE_PREDICTION_BANNER_PRD.md` defines the next homepage redesign: make the first viewport an interactive prediction banner, collect full US address at entry time, and persist entries through server-side Neon-backed APIs before treating captured entries as real campaign data.

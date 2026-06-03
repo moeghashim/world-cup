@@ -201,6 +201,7 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 - Installed `posthog-js`, added env-gated initialization, first-party `/ingest` proxying for Vite and Vercel, prediction/draw/reward event capture, `.env.example`, `POSTHOG_SETUP.md`, and refreshed the AI build estimate to `~3.5M` total tokens and `~$28`.
 - Created a new Projects.dev PostHog analytics project resource named `WorldCup`, removed `worldcup2026-analytics` from the default environment so only `WorldCup` is active for site wiring, updated the `/posthog` dashboard contract and setup docs to use `WorldCup`, and refreshed the AI build estimate to `~3.6M` total tokens and `~$29`.
 - Fixed the PR check failures by rebasing the branch with DCO sign-offs, removing the invalid `skipTrailingSlashRedirect` property from `vercel.json`, confirming Vercel can build/deploy the prebuilt output, and refreshing the AI build estimate to `~3.7M` total tokens and `~$30`.
+- Added `HOMEPAGE_PREDICTION_BANNER_PRD.md` for the prediction-first homepage redesign, captured the product decision to collect full US address at prediction entry time, documented Neon `primary-db` as the persistence target, assigned implementation to Wegnener, and refreshed the AI build estimate to `~3.8M` total tokens and `~$31`.
 
 ## Verification
 
@@ -262,6 +263,7 @@ Browser verification covered:
 - verifying PostHog no-key behavior: homepage renders the refreshed `~3.5M` token total and `~$28` estimated cost, `posthog-js` is installed, no `phc_` key appears in the DOM, no `/ingest` script is present, team selection still works, and there are no browser console errors
 - verifying Projects.dev status shows `WorldCup` as the only PostHog analytics resource in the default environment, while `analytics` and `worldcup2026-analytics` remain detached from the default environment
 - verifying DCO passes after signed-off PR commits, `vercel build` completes, and `vercel deploy --prebuilt` rejects the old invalid config then succeeds after removing `skipTrailingSlashRedirect`
+- verifying Projects.dev status shows Neon `primary-db` exists and exposes the redacted `PRIMARY_DB_CONNECTION_STRING` env var for future server-side prediction entry persistence
 
 Latest screenshot:
 
