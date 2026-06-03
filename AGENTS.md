@@ -215,6 +215,7 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 - Implemented `HOMEPAGE_PREDICTION_BANNER_PRD.md` with a prediction-first homepage arena, upcoming match rail, live score controls, sponsor/prize bundle panel, joined and winner counts, full US entry modal, server-side Vercel endpoints, Neon schema artifact, explicit no-database fallback receipts, and refreshed the AI build estimate to `~4.4M` total tokens and `~$37`.
 - Added explicit prediction persistence commands: `npm run db:prediction-schema`, `npm run verify:api:fallback`, `npm run verify:api:persisted`, `npm run verify:api:vercel`, and `npm run dev:api`; applied the committed schema to Neon; configured encrypted `PRIMARY_DB_CONNECTION_STRING` entries for Vercel Preview and Production; verified a deployed protected Vercel preview write with smoke-test cleanup; confirmed Projects.dev exposes the redacted env var name for `primary-db`; and refreshed the AI build estimate to `~4.6M` total tokens and `~$39`.
 - Added an app-level language selector and i18n provider for English, Arabic, French, German, Spanish, Portuguese, Chinese, and Korean; localized the main public shell, homepage prediction arena, route copy, JSON-render section headers, prize/sponsor surfaces, receipt/modal text, footer, and score controls; added RTL handling for Arabic; and refreshed the AI build estimate to `~5.0M` total tokens and `~$43`.
+- Added a `$25,000` Website Sponsor package with 4 spots, redesigned the sponsor package section as a compact marketplace-style board inspired by `https://trustmrr.com/` for desktop and mobile, localized the new sponsor tier and board labels, documented the design boundary, and refreshed the AI build estimate to `~5.1M` total tokens and `~$44`.
 
 ## Verification
 
@@ -301,6 +302,7 @@ Browser verification covered:
 - verifying `npm run verify:api:vercel` uses Vercel CLI protected-deployment access, receives a deployed `201` Neon receipt, returns no address fields, verifies the row, and cleans up the smoke-test data
 - verifying `npm run lint` and `npm run build` pass after adding the multilingual website shell
 - verifying English, Arabic RTL, and Spanish language switching on the homepage keeps the prediction controls readable, Spanish persists across reload, Arabic sets `dir="rtl"`, there is no horizontal overflow, and there are no fresh browser console errors
+- verifying `/sponsors` renders four marketplace-style package listings with Website Sponsor at `$25,000`, shows the refreshed `~5.1M` token and `~$44` AI build disclosure, localizes the sponsor board in Spanish, stacks packages cleanly at 390px mobile width, has no horizontal overflow, and reports no fresh browser console errors after reload
 
 Latest screenshot:
 

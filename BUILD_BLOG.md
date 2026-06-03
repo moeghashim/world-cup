@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~5.0M`
-- estimated API-equivalent cost: `~$43`
+- estimated total tokens: `~5.1M`
+- estimated API-equivalent cost: `~$44`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -566,13 +566,21 @@ Added `npm run dev:api` and a Vite `/api` proxy so local Vite development can su
 
 Configured encrypted `PRIMARY_DB_CONNECTION_STRING` entries for Vercel Preview and Production, deployed a prebuilt preview, and added `npm run verify:api:vercel` for protected preview validation through `vercel curl`. The preview API returned a `201` Neon receipt, verified the persisted row by receipt hash, returned no address fields, and cleaned up the smoke-test row. The current AI build disclosure estimate was refreshed to `~4.6M` total tokens and `~$39`.
 
-### Current commit - Add multilingual website shell
+### Add multilingual website shell
 
 Added an app-level i18n provider with English, Arabic, French, German, Spanish, Portuguese, Chinese, and Korean language options. The top navigation now includes a compact language selector, the app shell sets `lang` and `dir` from the selected language, and RTL layout handling keeps scores, team codes, badges, and form controls readable.
 
 Localized the primary homepage, route hero copy, JSON-render section headers, prize pages, sponsor package copy, prediction receipt, entry modal, footer, score-control labels, and AI build disclosure. Language changes are captured as analytics events without exposing prediction entry address data. The current AI build disclosure estimate was refreshed to `~5.0M` total tokens and `~$43`.
 
 Verification ran `npm run lint`, `npm run build`, and browser smoke checks for English, Arabic RTL, and Spanish language switching on the homepage. Spanish persisted across reload, Arabic set `dir="rtl"`, there was no horizontal overflow, and there were no fresh browser console errors.
+
+### Current commit - Add website sponsor package
+
+Added a Website Sponsor package at `$25,000` with 4 available spots. This tier sits between the Global Cup Partner and Matchday Featured Sponsor offers. It is meant for brands that want always-on website visibility before choosing specific match campaigns: homepage placement, prediction banner presence, prize discovery placement, sponsor story content, winner review prompts, and a website performance recap.
+
+The sponsorship section was redesigned as a compact sponsor marketplace board inspired by the layout rhythm of `https://trustmrr.com/`: a top metric strip, ranked package listings, dense package details, and a responsive mobile stack. The implementation borrows the information architecture pattern, not the TrustMRR branding, assets, or exact visual identity. The new package and board labels were added to the multilingual catalog. The current AI build disclosure estimate was refreshed to `~5.1M` total tokens and `~$44`.
+
+Verification ran `npm run lint`, `npm run build`, and browser checks on `/sponsors`. The desktop check confirmed four package columns with Website Sponsor at `$25,000`, the Spanish smoke check confirmed localized sponsor-board labels, the mobile 390px check confirmed stacked sponsor listings with no horizontal overflow, and a fresh browser reload reported no console errors.
 
 ## Next Build Steps
 

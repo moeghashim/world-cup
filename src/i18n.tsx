@@ -236,6 +236,15 @@ const messages = {
     'sponsor.title': 'Fund The Rewards Fans Remember',
     'sponsor.copy':
       'Sponsors fund match campaigns, winner product gifts, localized shirt drops, and post-delivery review prompts. Packages are designed for product sampling, media proof, and measurable fan engagement.',
+    'sponsor.boardAria': 'Sponsorship package marketplace',
+    'sponsor.board.packages': 'Packages',
+    'sponsor.board.entryPoint': 'Entry point',
+    'sponsor.board.homepage': 'Homepage',
+    'sponsor.board.winnerSlots': 'Winner slots',
+    'sponsor.board.proof': 'Proof',
+    'sponsor.board.reviews': 'Reviews',
+    'sponsor.packageLabel': 'Package',
+    'sponsor.availabilityLabel': 'Availability',
     'sponsor.tiersAria': 'Sponsorship tiers',
     'sponsor.addonsKicker': 'Creative Add-ons',
     'sponsor.addonsTitle': 'More Ways To Build The Campaign',
@@ -260,6 +269,23 @@ const messages = {
       'Featured sponsor story block with brand-safe product education, offer links, and campaign recap reporting.',
     'sponsor.tier.global.include.5':
       'Priority category lockout review so direct competitors are not placed in the same top-tier sponsor position.',
+    'sponsor.tier.website.name': 'Website Sponsor',
+    'sponsor.tier.website.signal': 'Homepage and site-wide visibility',
+    'sponsor.tier.website.spots': '4 spots',
+    'sponsor.tier.website.summary':
+      'A premium website package for brands that want always-on visibility across the homepage, prediction banner, prize pages, and sponsor discovery paths.',
+    'sponsor.tier.website.creative':
+      'Best for brands that want persistent website reach before choosing specific match campaigns: apps, CPG, travel, creator tools, local services, and fan-commerce launches.',
+    'sponsor.tier.website.include.1':
+      'Featured website placement in the homepage sponsor board, top prediction flow, and prize discovery surfaces.',
+    'sponsor.tier.website.include.2':
+      'Sponsor badge attached to selected homepage match cards and prize bundle previews without using official team marks.',
+    'sponsor.tier.website.include.3':
+      'Dedicated sponsor story panel with product education, offer links, and campaign-safe creative copy.',
+    'sponsor.tier.website.include.4':
+      'Five winner product review prompts or short-form quote captures after delivery.',
+    'sponsor.tier.website.include.5':
+      'Website performance recap covering views, prediction starts, entry volume, prize clicks, and review completion.',
     'sponsor.tier.matchday.name': 'Matchday Featured Sponsor',
     'sponsor.tier.matchday.signal': 'Featured match or regional campaign',
     'sponsor.tier.matchday.spots': '10 spots',
@@ -477,6 +503,15 @@ const messages = {
     'sponsor.title': 'موّل المكافآت التي يتذكرها المشجعون',
     'sponsor.copy':
       'يمول الرعاة حملات المباريات وهدايا المنتجات للفائزين وإصدارات القمصان المحلية وطلبات المراجعة بعد التسليم. صممت الحزم لأخذ عينات المنتجات وإثبات الوسائط وقياس تفاعل المشجعين.',
+    'sponsor.boardAria': 'سوق حزم الرعاية',
+    'sponsor.board.packages': 'الحزم',
+    'sponsor.board.entryPoint': 'نقطة الدخول',
+    'sponsor.board.homepage': 'الصفحة الرئيسية',
+    'sponsor.board.winnerSlots': 'أماكن الفائزين',
+    'sponsor.board.proof': 'الإثبات',
+    'sponsor.board.reviews': 'المراجعات',
+    'sponsor.packageLabel': 'الحزمة',
+    'sponsor.availabilityLabel': 'التوفر',
     'sponsor.tiersAria': 'مستويات الرعاية',
     'sponsor.addonsKicker': 'إضافات إبداعية',
     'sponsor.addonsTitle': 'طرق أكثر لبناء الحملة',
@@ -501,6 +536,23 @@ const messages = {
       'قسم قصة راع مميز مع تعليم آمن للعلامة وروابط عروض وتقارير ملخص الحملة.',
     'sponsor.tier.global.include.5':
       'مراجعة أولوية لقفل الفئة حتى لا يوضع المنافسون المباشرون في نفس موضع الراعي الأعلى.',
+    'sponsor.tier.website.name': 'راع الموقع',
+    'sponsor.tier.website.signal': 'ظهور في الصفحة الرئيسية وكل الموقع',
+    'sponsor.tier.website.spots': '4 أماكن',
+    'sponsor.tier.website.summary':
+      'حزمة موقع مميزة للعلامات التي تريد حضورا مستمرا عبر الصفحة الرئيسية وبانر التوقع وصفحات الجوائز ومسارات اكتشاف الرعاة.',
+    'sponsor.tier.website.creative':
+      'مناسبة للعلامات التي تريد وصولا دائما في الموقع قبل اختيار حملات مباريات محددة: التطبيقات والمنتجات الاستهلاكية والسفر وأدوات المبدعين والخدمات المحلية وتجارة المشجعين.',
+    'sponsor.tier.website.include.1':
+      'موضع مميز في لوحة رعاة الصفحة الرئيسية وتدفق التوقع الأعلى ومساحات اكتشاف الجوائز.',
+    'sponsor.tier.website.include.2':
+      'شارة راع مرفقة ببطاقات مباريات الصفحة الرئيسية المختارة ومعاينات حزم الجوائز دون استخدام علامات رسمية للفرق.',
+    'sponsor.tier.website.include.3':
+      'لوحة قصة راع مخصصة مع تعليم المنتج وروابط العروض ونص إبداعي آمن للحملة.',
+    'sponsor.tier.website.include.4':
+      'خمسة طلبات مراجعة للفائزين أو اقتباسات قصيرة بعد التسليم.',
+    'sponsor.tier.website.include.5':
+      'ملخص أداء الموقع يغطي المشاهدات وبدايات التوقع وحجم المشاركات ونقرات الجوائز وإكمال المراجعات.',
     'sponsor.tier.matchday.name': 'راع مميز ليوم المباراة',
     'sponsor.tier.matchday.signal': 'مباراة مميزة أو حملة إقليمية',
     'sponsor.tier.matchday.spots': '10 أماكن',
@@ -721,6 +773,15 @@ const messages = {
     'sponsor.title': 'Financez les récompenses mémorables',
     'sponsor.copy':
       'Les sponsors financent les campagnes de match, cadeaux produit, drops de t-shirts localisés et demandes d’avis après livraison. Les packages servent l’échantillonnage, la preuve média et l’engagement mesurable.',
+    'sponsor.boardAria': 'Marketplace des packages sponsor',
+    'sponsor.board.packages': 'Packages',
+    'sponsor.board.entryPoint': 'Point d’entrée',
+    'sponsor.board.homepage': 'Accueil',
+    'sponsor.board.winnerSlots': 'Places gagnants',
+    'sponsor.board.proof': 'Preuve',
+    'sponsor.board.reviews': 'Avis',
+    'sponsor.packageLabel': 'Package',
+    'sponsor.availabilityLabel': 'Disponibilité',
     'sponsor.tiersAria': 'Niveaux de sponsoring',
     'sponsor.addonsKicker': 'Options créatives',
     'sponsor.addonsTitle': 'Plus de façons de construire la campagne',
@@ -745,6 +806,23 @@ const messages = {
       'Bloc histoire sponsor avec pédagogie de marque sûre, liens d’offre et reporting de campagne.',
     'sponsor.tier.global.include.5':
       'Revue prioritaire d’exclusivité de catégorie pour éviter les concurrents directs sur le même niveau.',
+    'sponsor.tier.website.name': 'Sponsor du site',
+    'sponsor.tier.website.signal': 'Visibilité accueil et site entier',
+    'sponsor.tier.website.spots': '4 places',
+    'sponsor.tier.website.summary':
+      'Un package site premium pour les marques qui veulent une visibilité continue sur l’accueil, le bandeau de prédiction, les pages prix et les parcours de découverte sponsor.',
+    'sponsor.tier.website.creative':
+      'Idéal pour les marques qui veulent une portée web persistante avant de choisir des campagnes de match: apps, CPG, voyage, outils créateurs, services locaux et commerce fan.',
+    'sponsor.tier.website.include.1':
+      'Placement web visible dans le tableau sponsor de l’accueil, le flux de prédiction principal et les surfaces de découverte des prix.',
+    'sponsor.tier.website.include.2':
+      'Badge sponsor attaché à certaines cartes match d’accueil et aperçus de bundles sans marques officielles d’équipe.',
+    'sponsor.tier.website.include.3':
+      'Panneau histoire sponsor dédié avec pédagogie produit, liens d’offre et texte de campagne sûr.',
+    'sponsor.tier.website.include.4':
+      'Cinq prompts d’avis gagnants ou captures de citations courtes après livraison.',
+    'sponsor.tier.website.include.5':
+      'Récap performance site couvrant vues, débuts de prédiction, volume d’entrées, clics prix et avis terminés.',
     'sponsor.tier.matchday.name': 'Sponsor vedette matchday',
     'sponsor.tier.matchday.signal': 'Match vedette ou campagne régionale',
     'sponsor.tier.matchday.spots': '10 places',
@@ -964,6 +1042,15 @@ const messages = {
     'sponsor.title': 'Finanziere Rewards, die Fans behalten',
     'sponsor.copy':
       'Sponsoren finanzieren Match-Kampagnen, Gewinnergeschenke, lokale Shirt-Drops und Review-Prompts nach Lieferung. Die Pakete sind für Produktsampling, Media-Proof und messbares Fan-Engagement ausgelegt.',
+    'sponsor.boardAria': 'Marketplace für Sponsoring-Pakete',
+    'sponsor.board.packages': 'Pakete',
+    'sponsor.board.entryPoint': 'Einstieg',
+    'sponsor.board.homepage': 'Homepage',
+    'sponsor.board.winnerSlots': 'Gewinnerplätze',
+    'sponsor.board.proof': 'Proof',
+    'sponsor.board.reviews': 'Reviews',
+    'sponsor.packageLabel': 'Paket',
+    'sponsor.availabilityLabel': 'Verfügbarkeit',
     'sponsor.tiersAria': 'Sponsoring-Stufen',
     'sponsor.addonsKicker': 'Kreative Add-ons',
     'sponsor.addonsTitle': 'Mehr Wege zur Kampagne',
@@ -988,6 +1075,23 @@ const messages = {
       'Sponsor-Storyblock mit markensicherer Produktbildung, Angebotslinks und Kampagnenreporting.',
     'sponsor.tier.global.include.5':
       'Priorisierte Kategorieprüfung, damit direkte Wettbewerber nicht im selben Top-Sponsorplatz erscheinen.',
+    'sponsor.tier.website.name': 'Website Sponsor',
+    'sponsor.tier.website.signal': 'Sichtbarkeit auf Homepage und Website',
+    'sponsor.tier.website.spots': '4 Plätze',
+    'sponsor.tier.website.summary':
+      'Ein Premium-Website-Paket für Marken, die dauerhaft auf Homepage, Prediction-Banner, Preisseiten und Sponsor-Discovery präsent sein wollen.',
+    'sponsor.tier.website.creative':
+      'Ideal für Marken, die anhaltende Website-Reichweite wünschen, bevor sie konkrete Matchkampagnen wählen: Apps, CPG, Reise, Creator-Tools, lokale Services und Fan-Commerce.',
+    'sponsor.tier.website.include.1':
+      'Featured Website-Platzierung im Sponsorboard der Homepage, im oberen Prediction-Flow und auf Prize-Discovery-Flächen.',
+    'sponsor.tier.website.include.2':
+      'Sponsor-Badge auf ausgewählten Homepage-Matchkarten und Prize-Bundle-Previews ohne offizielle Teammarken.',
+    'sponsor.tier.website.include.3':
+      'Eigener Sponsor-Storybereich mit Produktbildung, Angebotslinks und kampagnensicherem Copy.',
+    'sponsor.tier.website.include.4':
+      'Fünf Gewinner-Reviewprompts oder kurze Zitat-Captures nach Lieferung.',
+    'sponsor.tier.website.include.5':
+      'Website-Performance-Recap zu Views, Prediction-Starts, Entry-Volumen, Prize-Klicks und Review-Abschluss.',
     'sponsor.tier.matchday.name': 'Matchday Featured Sponsor',
     'sponsor.tier.matchday.signal': 'Featured Match oder regionale Kampagne',
     'sponsor.tier.matchday.spots': '10 Plätze',
@@ -1207,6 +1311,15 @@ const messages = {
     'sponsor.title': 'Financia recompensas que los fans recuerdan',
     'sponsor.copy':
       'Los patrocinadores financian campañas de partido, regalos para ganadores, drops de camisetas localizadas y solicitudes de reseña tras la entrega. Los paquetes sirven para muestreo, prueba de medios y engagement medible.',
+    'sponsor.boardAria': 'Mercado de paquetes de patrocinio',
+    'sponsor.board.packages': 'Paquetes',
+    'sponsor.board.entryPoint': 'Punto de entrada',
+    'sponsor.board.homepage': 'Homepage',
+    'sponsor.board.winnerSlots': 'Cupos ganadores',
+    'sponsor.board.proof': 'Prueba',
+    'sponsor.board.reviews': 'Reseñas',
+    'sponsor.packageLabel': 'Paquete',
+    'sponsor.availabilityLabel': 'Disponibilidad',
     'sponsor.tiersAria': 'Niveles de patrocinio',
     'sponsor.addonsKicker': 'Extras creativos',
     'sponsor.addonsTitle': 'Más formas de construir la campaña',
@@ -1231,6 +1344,23 @@ const messages = {
       'Bloque de historia del patrocinador con educación de producto segura, enlaces y reporte.',
     'sponsor.tier.global.include.5':
       'Revisión prioritaria de exclusividad de categoría para evitar competidores directos en la misma posición.',
+    'sponsor.tier.website.name': 'Patrocinador del sitio',
+    'sponsor.tier.website.signal': 'Visibilidad en homepage y todo el sitio',
+    'sponsor.tier.website.spots': '4 lugares',
+    'sponsor.tier.website.summary':
+      'Paquete premium de sitio para marcas que quieren visibilidad constante en homepage, banner de predicción, páginas de premios y rutas de descubrimiento de patrocinadores.',
+    'sponsor.tier.website.creative':
+      'Ideal para marcas que quieren alcance persistente antes de elegir campañas de partido específicas: apps, CPG, viajes, herramientas para creadores, servicios locales y fan-commerce.',
+    'sponsor.tier.website.include.1':
+      'Ubicación destacada en el tablero de patrocinadores de homepage, flujo principal de predicción y superficies de descubrimiento de premios.',
+    'sponsor.tier.website.include.2':
+      'Badge de patrocinador en tarjetas de partido seleccionadas y vistas de paquetes sin marcas oficiales de equipos.',
+    'sponsor.tier.website.include.3':
+      'Panel dedicado de historia del patrocinador con educación de producto, enlaces y copy seguro para campaña.',
+    'sponsor.tier.website.include.4':
+      'Cinco prompts de reseña de ganadores o capturas de citas cortas tras la entrega.',
+    'sponsor.tier.website.include.5':
+      'Resumen de rendimiento del sitio con vistas, inicios de predicción, volumen de entradas, clics en premios y reseñas completadas.',
     'sponsor.tier.matchday.name': 'Patrocinador destacado de partido',
     'sponsor.tier.matchday.signal': 'Partido destacado o campaña regional',
     'sponsor.tier.matchday.spots': '10 lugares',
@@ -1450,6 +1580,15 @@ const messages = {
     'sponsor.title': 'Financie recompensas que fãs lembram',
     'sponsor.copy':
       'Patrocinadores financiam campanhas de jogo, presentes para vencedores, drops de camisetas localizadas e pedidos de avaliação pós-entrega. Os pacotes são feitos para amostragem, prova de mídia e engajamento mensurável.',
+    'sponsor.boardAria': 'Marketplace de pacotes de patrocínio',
+    'sponsor.board.packages': 'Pacotes',
+    'sponsor.board.entryPoint': 'Ponto de entrada',
+    'sponsor.board.homepage': 'Homepage',
+    'sponsor.board.winnerSlots': 'Vagas vencedoras',
+    'sponsor.board.proof': 'Prova',
+    'sponsor.board.reviews': 'Avaliações',
+    'sponsor.packageLabel': 'Pacote',
+    'sponsor.availabilityLabel': 'Disponibilidade',
     'sponsor.tiersAria': 'Níveis de patrocínio',
     'sponsor.addonsKicker': 'Extras criativos',
     'sponsor.addonsTitle': 'Mais formas de montar a campanha',
@@ -1474,6 +1613,23 @@ const messages = {
       'Bloco de história do patrocinador com educação segura da marca, links e relatório.',
     'sponsor.tier.global.include.5':
       'Revisão prioritária de bloqueio de categoria para evitar concorrentes diretos na mesma posição.',
+    'sponsor.tier.website.name': 'Patrocinador do site',
+    'sponsor.tier.website.signal': 'Visibilidade na homepage e no site',
+    'sponsor.tier.website.spots': '4 vagas',
+    'sponsor.tier.website.summary':
+      'Pacote premium de site para marcas que querem visibilidade contínua na homepage, banner de previsão, páginas de prêmio e caminhos de descoberta de patrocinadores.',
+    'sponsor.tier.website.creative':
+      'Ideal para marcas que querem alcance persistente antes de escolher campanhas de jogo específicas: apps, CPG, viagem, ferramentas de criadores, serviços locais e fan-commerce.',
+    'sponsor.tier.website.include.1':
+      'Posicionamento destacado no board de patrocinadores da homepage, fluxo principal de previsão e superfícies de descoberta de prêmios.',
+    'sponsor.tier.website.include.2':
+      'Badge de patrocinador em cards de jogo selecionados e prévias de pacotes sem marcas oficiais de times.',
+    'sponsor.tier.website.include.3':
+      'Painel dedicado de história do patrocinador com educação de produto, links de oferta e texto seguro para campanha.',
+    'sponsor.tier.website.include.4':
+      'Cinco prompts de avaliação de vencedores ou capturas de citações curtas após entrega.',
+    'sponsor.tier.website.include.5':
+      'Resumo de performance do site com visualizações, inícios de previsão, volume de entradas, cliques em prêmios e avaliações concluídas.',
     'sponsor.tier.matchday.name': 'Patrocinador destaque de jogo',
     'sponsor.tier.matchday.signal': 'Jogo destaque ou campanha regional',
     'sponsor.tier.matchday.spots': '10 vagas',
@@ -1688,6 +1844,15 @@ const messages = {
     'sponsor.title': '资助球迷会记住的奖励',
     'sponsor.copy':
       '赞助商资助比赛活动、获奖者产品礼物、本地化 T 恤投放和送达后评价提示。套餐用于产品试用、媒体证明和可衡量的球迷互动。',
+    'sponsor.boardAria': '赞助套餐市场',
+    'sponsor.board.packages': '套餐',
+    'sponsor.board.entryPoint': '入口',
+    'sponsor.board.homepage': '首页',
+    'sponsor.board.winnerSlots': '获奖名额',
+    'sponsor.board.proof': '证明',
+    'sponsor.board.reviews': '评价',
+    'sponsor.packageLabel': '套餐',
+    'sponsor.availabilityLabel': '可用名额',
     'sponsor.tiersAria': '赞助等级',
     'sponsor.addonsKicker': '创意附加项',
     'sponsor.addonsTitle': '更多活动构建方式',
@@ -1712,6 +1877,23 @@ const messages = {
       '带品牌安全产品教育、优惠链接和活动复盘报告的赞助商故事区块。',
     'sponsor.tier.global.include.5':
       '优先品类排他审核，避免直接竞争者出现在同一顶级赞助位置。',
+    'sponsor.tier.website.name': '网站赞助商',
+    'sponsor.tier.website.signal': '首页和全站曝光',
+    'sponsor.tier.website.spots': '4 个名额',
+    'sponsor.tier.website.summary':
+      '高级网站套餐，适合希望在首页、预测横幅、奖品页面和赞助商发现路径中持续曝光的品牌。',
+    'sponsor.tier.website.creative':
+      '适合在选择具体比赛活动前希望获得持续网站触达的品牌：应用、消费品、旅行、创作者工具、本地服务和球迷电商。',
+    'sponsor.tier.website.include.1':
+      '在首页赞助商板块、顶部预测流程和奖品发现区域获得特色网站位置。',
+    'sponsor.tier.website.include.2':
+      '赞助商徽章附加到精选首页比赛卡和奖品包预览，不使用官方球队标志。',
+    'sponsor.tier.website.include.3':
+      '专属赞助商故事面板，包含产品教育、优惠链接和活动安全文案。',
+    'sponsor.tier.website.include.4':
+      '送达后收集五条获奖者评价提示或短引用。',
+    'sponsor.tier.website.include.5':
+      '网站表现复盘，覆盖浏览量、预测开始、入口量、奖品点击和评价完成。',
     'sponsor.tier.matchday.name': '比赛日特色赞助商',
     'sponsor.tier.matchday.signal': '特色比赛或区域活动',
     'sponsor.tier.matchday.spots': '10 个名额',
@@ -1927,6 +2109,15 @@ const messages = {
     'sponsor.title': '팬이 기억할 리워드를 후원하세요',
     'sponsor.copy':
       '스폰서는 경기 캠페인, 당첨자 제품 선물, 현지화 셔츠 드롭, 배송 후 리뷰 요청을 후원합니다. 패키지는 샘플링, 미디어 증거, 측정 가능한 팬 참여를 위해 설계되었습니다.',
+    'sponsor.boardAria': '스폰서십 패키지 마켓플레이스',
+    'sponsor.board.packages': '패키지',
+    'sponsor.board.entryPoint': '진입점',
+    'sponsor.board.homepage': '홈페이지',
+    'sponsor.board.winnerSlots': '당첨 슬롯',
+    'sponsor.board.proof': '증거',
+    'sponsor.board.reviews': '리뷰',
+    'sponsor.packageLabel': '패키지',
+    'sponsor.availabilityLabel': '가능 수량',
     'sponsor.tiersAria': '스폰서십 등급',
     'sponsor.addonsKicker': '크리에이티브 추가 옵션',
     'sponsor.addonsTitle': '캠페인을 만드는 더 많은 방법',
@@ -1951,6 +2142,23 @@ const messages = {
       '브랜드 안전 제품 교육, 오퍼 링크, 캠페인 리포트를 포함한 스폰서 스토리 블록.',
     'sponsor.tier.global.include.5':
       '직접 경쟁사가 같은 최상위 위치에 배치되지 않도록 하는 우선 카테고리 검토.',
+    'sponsor.tier.website.name': '웹사이트 스폰서',
+    'sponsor.tier.website.signal': '홈페이지 및 사이트 전체 노출',
+    'sponsor.tier.website.spots': '4자리',
+    'sponsor.tier.website.summary':
+      '홈페이지, 예측 배너, 상품 페이지, 스폰서 발견 경로 전반에서 상시 노출을 원하는 브랜드를 위한 프리미엄 웹사이트 패키지입니다.',
+    'sponsor.tier.website.creative':
+      '특정 경기 캠페인을 선택하기 전 지속적인 웹사이트 도달을 원하는 브랜드에 적합합니다: 앱, CPG, 여행, 크리에이터 도구, 지역 서비스, 팬 커머스.',
+    'sponsor.tier.website.include.1':
+      '홈페이지 스폰서 보드, 상단 예측 흐름, 상품 발견 영역의 추천 웹사이트 배치.',
+    'sponsor.tier.website.include.2':
+      '공식 팀 마크를 사용하지 않고 선택한 홈페이지 경기 카드와 상품 패키지 미리보기에 스폰서 배지 부착.',
+    'sponsor.tier.website.include.3':
+      '제품 교육, 오퍼 링크, 캠페인 안전 문구를 담은 전용 스폰서 스토리 패널.',
+    'sponsor.tier.website.include.4':
+      '배송 후 당첨자 리뷰 프롬프트 또는 짧은 인용 캡처 5개.',
+    'sponsor.tier.website.include.5':
+      '조회수, 예측 시작, 엔트리 규모, 상품 클릭, 리뷰 완료를 포함한 웹사이트 성과 요약.',
     'sponsor.tier.matchday.name': '매치데이 추천 스폰서',
     'sponsor.tier.matchday.signal': '추천 경기 또는 지역 캠페인',
     'sponsor.tier.matchday.spots': '10자리',
