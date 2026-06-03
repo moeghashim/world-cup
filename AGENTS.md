@@ -121,9 +121,9 @@ Implementation position: use GA4 only for page-view tracking in the prototype. K
 
 References: https://posthog.com/docs/product-analytics/dashboards and https://posthog.com/docs/libraries/js
 
-The Projects.dev state includes a completed PostHog account link, the earlier `analytics` resource, and the new `worldcup2026-analytics` analytics project resource created specifically for `winworldcup2026.com`. The earlier `analytics` resource is removed from the default Projects.dev environment so future site wiring should use only `worldcup2026-analytics`. The in-app `/posthog` page is now the dashboard contract for the real PostHog implementation: acquisition, prediction conversion, draw reveal, prize claim, sponsor review, and fulfillment metrics.
+The Projects.dev state includes a completed PostHog account link, the earlier `analytics` and `worldcup2026-analytics` resources, and the new `WorldCup` analytics project resource created specifically for `winworldcup2026.com`. The earlier resources are removed from the default Projects.dev environment so future site wiring should use only `WorldCup`. The in-app `/posthog` page is now the dashboard contract for the real PostHog implementation: acquisition, prediction conversion, draw reveal, prize claim, sponsor review, and fulfillment metrics.
 
-Implementation position: keep personal API keys server-side only. PostHog capture initializes only when `VITE_POSTHOG_KEY` is present, with optional `VITE_POSTHOG_HOST` defaulting to `https://us.posthog.com`. The app uses `/ingest` as a first-party proxy to `https://us.i.posthog.com` and `https://us-assets.i.posthog.com`. Keep `WORLDCUP2026_ANALYTICS_PERSONAL_API_KEY` server-side only. PostHog Live has not been verified yet because the public Vite key has not been set in this workspace during verification.
+Implementation position: keep personal API keys server-side only. PostHog capture initializes only when `VITE_POSTHOG_KEY` is present, with optional `VITE_POSTHOG_HOST` defaulting to `https://us.posthog.com`. The app uses `/ingest` as a first-party proxy to `https://us.i.posthog.com` and `https://us-assets.i.posthog.com`. Map `WORLDCUP_API_KEY` and `WORLDCUP_HOST` into the browser-safe Vite variables, and keep `WORLDCUP_PERSONAL_API_KEY` server-side only. PostHog Live has not been verified yet because the public Vite key has not been set in this workspace during verification.
 
 ## T-Shirt Design System
 
@@ -199,6 +199,7 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 - Moved the GA4 `G-RFPJRPKYQR` tag into the static `index.html` head, kept the runtime analytics initializer as a no-duplicate fallback, and refreshed the AI build estimate to `~3.3M` total tokens and `~$26`.
 - Converted the runtime hero and prize shirt assets from large PNGs to display-sized JPEGs, removed the old runtime PNG copies, and refreshed the AI build estimate to `~3.4M` total tokens and `~$27`.
 - Installed `posthog-js`, added env-gated initialization, first-party `/ingest` proxying for Vite and Vercel, prediction/draw/reward event capture, `.env.example`, `POSTHOG_SETUP.md`, and refreshed the AI build estimate to `~3.5M` total tokens and `~$28`.
+- Created a new Projects.dev PostHog analytics project resource named `WorldCup`, removed `worldcup2026-analytics` from the default environment so only `WorldCup` is active for site wiring, updated the `/posthog` dashboard contract and setup docs to use `WorldCup`, and refreshed the AI build estimate to `~3.6M` total tokens and `~$29`.
 
 ## Verification
 
@@ -258,6 +259,7 @@ Browser verification covered:
 - verifying the served homepage HTML contains the pasted GA4 snippet and the browser DOM has exactly one `googletagmanager.com/gtag/js?id=G-RFPJRPKYQR` script with no console errors
 - verifying the optimized homepage hero and prize shirt runtime images resolve to `.jpg`, the refreshed `~3.4M` token total and `~$27` estimated cost render in the AI build disclosure, `/prizes/japan` loads the optimized shirt image, there is no horizontal overflow, and there are no browser console errors
 - verifying PostHog no-key behavior: homepage renders the refreshed `~3.5M` token total and `~$28` estimated cost, `posthog-js` is installed, no `phc_` key appears in the DOM, no `/ingest` script is present, team selection still works, and there are no browser console errors
+- verifying Projects.dev status shows `WorldCup` as the only PostHog analytics resource in the default environment, while `analytics` and `worldcup2026-analytics` remain detached from the default environment
 
 Latest screenshot:
 

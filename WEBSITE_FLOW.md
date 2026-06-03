@@ -128,7 +128,7 @@ sequenceDiagram
 | Build documentation | `AGENTS.md`, `BUILD_BLOG.md`, `PRODUCT.md`, `DESIGN.md`, `WEBSITE_FLOW.md` | Track product decisions, design rules, architecture, tools, and build history. |
 | Build agent | Codex Desktop App | Collaboratively edits code, verifies the app, documents the process, commits, pushes, and opens PRs. |
 | Infrastructure planning | `https://projects.dev/` / Stripe Projects | Tracks planned infrastructure provisioning for database, auth, analytics, hosting, observability, and spend controls. |
-| Analytics | Google Analytics GA4, PostHog, `gtag.js`, `posthog-js`, `/ingest` proxy | Loads the GA4 tag with measurement ID `G-RFPJRPKYQR` from the static homepage head; initializes PostHog only when `VITE_POSTHOG_KEY` exists; `/posthog` defines the product analytics dashboard contract for the Projects.dev PostHog resource `worldcup2026-analytics`, the only active PostHog analytics resource in the default environment. |
+| Analytics | Google Analytics GA4, PostHog, `gtag.js`, `posthog-js`, `/ingest` proxy | Loads the GA4 tag with measurement ID `G-RFPJRPKYQR` from the static homepage head; initializes PostHog only when `VITE_POSTHOG_KEY` exists; `/posthog` defines the product analytics dashboard contract for the Projects.dev PostHog resource `WorldCup`, the only active PostHog analytics resource in the default environment. |
 | Source control | Git, GitHub, GitHub CLI | Manage commits, branches, pushes, and pull requests. |
 | Verification | `npm run lint`, `npm run build`, browser checks | Confirm code quality, production build success, and key rendered states. |
 | Deployment routing | `vercel.json` rewrite | Let direct page refreshes such as `/operations` and `/experiment` resolve to the Vite app entry. |

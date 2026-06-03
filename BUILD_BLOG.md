@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~3.5M`
-- estimated API-equivalent cost: `~$28`
+- estimated total tokens: `~3.6M`
+- estimated API-equivalent cost: `~$29`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -288,7 +288,7 @@ Current external project status from the sub-agent:
 - AgentMail API service exists as `agent-email`.
 - Cloudflare free Workers plan is provisioned, but hosting is not wired through it.
 - Sentry monitoring service exists as `monitoring`, but the frontend SDK is not wired yet.
-- PostHog account is linked through Projects.dev, with `worldcup2026-analytics` provisioned as the dedicated analytics project resource for this website. The earlier `analytics` resource remains provisioned but is removed from the default environment so the site has one active PostHog analytics target. The SDK is installed and event call sites are wired, but capture stays inert until `VITE_POSTHOG_KEY` is set and the app is restarted or rebuilt.
+- PostHog account is linked through Projects.dev, with `WorldCup` provisioned as the dedicated analytics project resource for this website. The earlier `analytics` and `worldcup2026-analytics` resources remain provisioned but are removed from the default environment so the site has one active PostHog analytics target. The SDK is installed and event call sites are wired, but capture stays inert until `VITE_POSTHOG_KEY` is set and the app is restarted or rebuilt.
 - Vercel is blocked by Vercel-side signup verification.
 - Spend limits are not configured yet.
 
@@ -365,6 +365,7 @@ Browser checks have covered:
 - pre-install confirmation that `posthog-js` was not installed and tracked source had no PostHog init/capture calls or hardcoded project tokens
 - static GA4 `G-RFPJRPKYQR` snippet present in `index.html`, with the runtime analytics initializer kept only as a duplicate-safe fallback
 - env-gated `posthog-js` setup with `/ingest` proxying, prediction/draw/reward event call sites, `.env.example`, `POSTHOG_SETUP.md`, and no-key browser verification
+- Projects.dev status showing `WorldCup` as the only active PostHog analytics resource in the default environment, with the older PostHog resources detached from site wiring
 
 Current visual artifact:
 
@@ -518,13 +519,19 @@ The cleanup reduces the production image payload substantially without changing 
 
 Verification ran `npm run lint`, `npm run build`, and browser checks for the homepage and `/prizes/japan`. The browser confirmed the `.jpg` hero and prize assets load, the AI build disclosure shows `~3.4M` total tokens and `~$27`, there is no horizontal overflow, and there are no console errors.
 
-### Current commit - Add env-gated PostHog analytics
+### `aaa43cd` - Add env-gated PostHog analytics
 
 Adapted the PostHog setup prompt to this Vite React app. The store-specific funnel became a World Cup prediction funnel: page view, prediction start, locked receipt, draw entry, draw reveal, and fulfillment queue.
 
 The app now installs `posthog-js`, initializes it only when `VITE_POSTHOG_KEY` is set, sends through a first-party `/ingest` proxy, and keeps person profiles to `identified_only`. Custom events are wired at real call sites for supporter selection, prize views, score changes, prediction locks, draw reveals, fulfillment queueing, review prompts, and homepage CTAs.
 
 Added `.env.example` and `POSTHOG_SETUP.md` with the dashboard plan, event taxonomy, proxy behavior, and verification steps. Live PostHog Activity is intentionally not claimed yet because no public PostHog key was set during verification. The no-key path was verified as inert, and the current AI build disclosure estimate was refreshed to `~3.5M` total tokens and `~$28`.
+
+### Current commit - Create WorldCup PostHog project
+
+Created a new Projects.dev PostHog analytics project resource named `WorldCup`, following the naming requirement for any real dashboard work. The old `worldcup2026-analytics` resource is now detached from the default Projects.dev environment so the active website analytics target is only `WorldCup`.
+
+The `/posthog` page, setup checklist, `POSTHOG_SETUP.md`, `PRODUCT.md`, `WEBSITE_FLOW.md`, and `AGENTS.md` now point to `WorldCup`. The documentation also calls out the new Projects.dev env names: `WORLDCUP_API_KEY`, `WORLDCUP_HOST`, and `WORLDCUP_PERSONAL_API_KEY`. The browser-facing app still remains inert until the safe public key is mapped into `VITE_POSTHOG_KEY` and the app is restarted or rebuilt. The current AI build disclosure estimate was refreshed to `~3.6M` total tokens and `~$29`.
 
 ## Next Build Steps
 

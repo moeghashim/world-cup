@@ -5,8 +5,8 @@
 - Target: `winworldcup2026.com` World Cup Predictor app.
 - Framework: Vite + React + TypeScript.
 - Region: US.
-- Active Projects.dev resource: `worldcup2026-analytics`.
-- Dashboard to build in PostHog: `Win World Cup 2026 - Prediction Performance`.
+- Active Projects.dev/PostHog project resource: `WorldCup`.
+- Dashboard to build in PostHog: `WorldCup - Prediction Performance`.
 
 The store prompt maps to this product as a prediction and reward funnel, not an e-commerce cart funnel.
 
@@ -20,6 +20,8 @@ VITE_POSTHOG_HOST=https://us.posthog.com
 ```
 
 `VITE_POSTHOG_KEY` is required for capture. Without it, the app is fully inert for PostHog: no initialization, no capture calls, and no console errors. The personal API key must stay server-side and must not be committed.
+
+Projects.dev created the PostHog resource as `WorldCup`, with redacted credentials exposed through the resource env names `WORLDCUP_API_KEY`, `WORLDCUP_HOST`, and `WORLDCUP_PERSONAL_API_KEY`. Map only the browser-safe project API key and host into the Vite public variables above. Keep the personal API key server-side.
 
 After changing `VITE_*` values, restart the dev server or trigger a fresh production build because Vite reads public env at build time.
 
@@ -79,8 +81,8 @@ Core funnel:
 If the PostHog MCP is connected, create the dashboard programmatically. Otherwise create it manually in PostHog:
 
 1. Open PostHog: `https://us.posthog.com/`
-2. Select the `worldcup2026-analytics` project.
-3. Create dashboard: `Win World Cup 2026 - Prediction Performance`.
+2. Select the `WorldCup` project.
+3. Create dashboard: `WorldCup - Prediction Performance`.
 4. Use a 30-day window.
 5. Add an internal/test-user filter when test identities are available.
 
@@ -117,6 +119,6 @@ With `VITE_POSTHOG_KEY` set, restart the dev server and verify:
    - lock a prediction
    - run a draw
    - queue fulfillment
-5. Confirm events appear in PostHog Activity Live for `worldcup2026-analytics`.
+5. Confirm events appear in PostHog Activity Live for `WorldCup`.
 
 For production, add `VITE_POSTHOG_KEY` to the host production environment, trigger a fresh deploy, and repeat the `/ingest` and Activity Live verification on the live domain.

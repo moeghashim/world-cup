@@ -334,18 +334,18 @@ const sponsorshipAddOns = [
 ]
 
 const aiBuildMetrics = {
-  tokenTotal: '~3.5M',
-  estimatedCost: '~$28',
+  tokenTotal: '~3.6M',
+  estimatedCost: '~$29',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
 
 const posthogDashboardUrl = 'https://us.posthog.com'
-const posthogResourceName = 'worldcup2026-analytics'
+const posthogResourceName = 'WorldCup'
 const posthogEnvVars = [
-  'WORLDCUP2026_ANALYTICS_API_KEY',
-  'WORLDCUP2026_ANALYTICS_HOST',
-  'WORLDCUP2026_ANALYTICS_PERSONAL_API_KEY',
+  'WORLDCUP_API_KEY',
+  'WORLDCUP_HOST',
+  'WORLDCUP_PERSONAL_API_KEY',
 ] as const
 
 const posthogDashboardMetrics = [
@@ -417,10 +417,10 @@ const posthogEventPlan = [
 ] as const
 
 const posthogSetupItems = [
-  'Use the new Projects.dev PostHog analytics project resource named worldcup2026-analytics.',
-  'Set VITE_POSTHOG_KEY and optional VITE_POSTHOG_HOST, then restart or rebuild because Vite public env is build-time read.',
+  'Use the new Projects.dev PostHog analytics project resource named WorldCup.',
+  'Map WORLDCUP_API_KEY and optional WORLDCUP_HOST into VITE_POSTHOG_KEY and VITE_POSTHOG_HOST, then restart or rebuild because Vite public env is build-time read.',
   'PostHog initializes only when VITE_POSTHOG_KEY exists and sends through the first-party /ingest proxy.',
-  'Create a real PostHog dashboard with prediction funnel, route traffic, sponsor conversions, fulfillment queue, and review completion tiles.',
+  'Create the real dashboard inside the WorldCup PostHog project with prediction funnel, route traffic, sponsor conversions, fulfillment queue, and review completion tiles.',
   'Keep session replay off until privacy copy and consent rules are approved.',
 ] as const
 
@@ -1766,8 +1766,9 @@ function PostHogDashboardPage() {
           <p>
             The new PostHog project resource is present in the Projects.dev
             state as <code>{posthogResourceName}</code>. The dashboard is ready
-            as a tracking contract, but real product events should wait until
-            the SDK, privacy copy, and production event names are approved.
+            as a tracking contract, but real product events still require the
+            public Vite key mapping, a fresh restart or deploy, privacy copy,
+            and final production event-name approval.
           </p>
         </div>
         <div className="posthog-resource-panel" aria-label="PostHog resource">
