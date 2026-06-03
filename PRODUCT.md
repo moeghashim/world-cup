@@ -46,7 +46,7 @@ World Cup Predictor is a match prediction and sponsor reward experience for `win
 - Tournament teams and group-stage fixtures are a dated source snapshot. They should be verified against official sources or replaced with a maintained data feed before real eligibility decisions.
 - The footer-linked Experiment view exposes build documentation and names Codex Desktop App plus `https://projects.dev/` as part of the build stack; the default homepage stays focused on matches, prizes, and winners.
 - Public navigation uses page-style routes such as `/fixtures`, `/prizes/japan`, `/sponsors`, `/operations`, and `/experiment`, with legacy hash URLs normalized for backward compatibility.
-- Google Analytics is live only for page-view tracking through the GA4 stream `G-RFPJRPKYQR`. Deeper prediction, draw, fulfillment, and review funnel events are not implemented yet.
-- `/posthog` is now the dashboard contract for product analytics, but PostHog SDK capture and real dashboard tiles are not enabled yet.
-- Provider recommendations are architectural notes, not live integrations except for the current Google Analytics page-view setup and the Projects.dev-linked `worldcup2026-analytics` PostHog resource, which is the only active PostHog analytics resource in the default environment.
+- Google Analytics is live for page-view tracking through the GA4 stream `G-RFPJRPKYQR`, with selected custom funnel events also emitted through the shared analytics helper.
+- `/posthog` is now the dashboard contract for product analytics. `posthog-js` is installed and event call sites are wired, but PostHog capture stays inert until `VITE_POSTHOG_KEY` is set and the app is restarted or rebuilt.
+- Provider recommendations are architectural notes, not live integrations except for the current Google Analytics page-view setup and the Projects.dev-linked `WorldCup` PostHog resource, which is the only active PostHog analytics resource in the default environment.
 - No real prize fulfillment, payment, user identity, fraud checks, or legal rules are implemented yet.

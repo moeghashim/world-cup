@@ -45,6 +45,7 @@ import {
   worldCupTeams,
   type TournamentFixture,
 } from '../data/worldCupSchedule'
+import { captureAnalyticsEvent } from '../analytics'
 
 export type WinnerPick = TeamKey | 'draw'
 
@@ -176,6 +177,23 @@ function getPrediction(state: PredictionState, matchId: string): Prediction {
 
 function getMatch(matchId: string) {
   return matches.find((match) => match.id === matchId) ?? matches[0]
+}
+
+function getMatchAnalyticsProperties(match: Match) {
+  const homeTeam = getTeam(match.home)
+  const awayTeam = getTeam(match.away)
+
+  return {
+    match_id: match.id,
+    stage: match.stage,
+    pool: match.pool,
+    home_team: homeTeam.name,
+    away_team: awayTeam.name,
+    home_team_key: match.home,
+    away_team_key: match.away,
+    winner_slots: match.winnerSlots,
+    sponsor_drop_count: match.sponsorDrops.length,
+  }
 }
 
 function hashString(input: string) {
@@ -1355,15 +1373,24 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
     selectWinner: async (params, setState) => {
       if (!params) return
 
+      const match = getMatch(params.matchId)
+
       setState((previous) =>
         updatePredictionInState(previous as PredictionState, params.matchId, {
           winner: params.winner,
           locked: false,
         }),
       )
+      captureAnalyticsEvent('prediction_started', {
+        ...getMatchAnalyticsProperties(match),
+        predicted_winner: getPickLabel(params.winner),
+        surface: 'match_board',
+      })
     },
     setScore: async (params, setState) => {
       if (!params) return
+
+      const match = getMatch(params.matchId)
 
       setState((previous) =>
         updatePredictionInState(previous as PredictionState, params.matchId, {
@@ -1371,17 +1398,43 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
           locked: false,
         }),
       )
+      captureAnalyticsEvent('score_changed', {
+        ...getMatchAnalyticsProperties(match),
+        surface: 'match_board',
+        side: params.side,
+        score: params.score,
+      })
     },
     lockPrediction: async (params, setState) => {
       if (!params) return
+
+      const match = getMatch(params.matchId)
 
       setState((previous) => {
         const typedPrevious = previous as PredictionState
         const prediction = getPrediction(typedPrevious, params.matchId)
 
-        if (!prediction.winner) {
+        if (!prediction.winner || prediction.locked) {
           return typedPrevious
         }
+
+        const receiptHash = createReceiptHash(
+          match,
+          prediction,
+          typedPrevious.selectedTeamKey,
+        )
+        const eventProperties = {
+          ...getMatchAnalyticsProperties(match),
+          surface: 'match_board',
+          predicted_winner: getPickLabel(prediction.winner),
+          predicted_home_score: prediction.homeScore,
+          predicted_away_score: prediction.awayScore,
+          supporter_team: typedPrevious.selectedTeamKey,
+          receipt_hash: receiptHash,
+        }
+
+        captureAnalyticsEvent('prediction_locked', eventProperties)
+        captureAnalyticsEvent('draw_entry_created', eventProperties)
 
         return updatePredictionInState(typedPrevious, params.matchId, {
           locked: true,
@@ -1396,6 +1449,24 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
       setState((previous) => {
         const typedPrevious = previous as PredictionState
         const result = createDrawResult(match, typedPrevious)
+        const participantOutcome = result.participantOutcome
+
+        captureAnalyticsEvent('draw_revealed', {
+          ...getMatchAnalyticsProperties(match),
+          surface: 'draw_control',
+          eligible_count: result.eligibleCount,
+          entry_count: result.entryCount,
+          winner_count: result.winners.length,
+          alternate_count: result.alternates.length,
+          participant_outcome: participantOutcome.tone,
+        })
+        captureAnalyticsEvent('winner_selected', {
+          ...getMatchAnalyticsProperties(match),
+          surface: 'draw_control',
+          winner_count: result.winners.length,
+          alternate_count: result.alternates.length,
+          participant_outcome: participantOutcome.tone,
+        })
 
         return {
           ...typedPrevious,
@@ -1409,8 +1480,17 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
     promptReviews: async (params, setState) => {
       if (!params) return
 
+      const match = getMatch(params.matchId)
+
       setState((previous) => {
         const typedPrevious = previous as PredictionState
+        const result = typedPrevious.drawResults[params.matchId]
+
+        captureAnalyticsEvent('review_prompt_sent', {
+          ...getMatchAnalyticsProperties(match),
+          surface: 'fulfillment_pipeline',
+          winner_count: result?.winners.length ?? 0,
+        })
 
         return updateDrawResultStatus(
           {
@@ -1429,10 +1509,20 @@ export const { registry, handlers } = defineRegistry(predictionCatalog, {
     queueFulfillment: async (params, setState) => {
       if (!params) return
 
+      const match = getMatch(params.matchId)
+
       setState((previous) => {
         const typedPrevious = previous as PredictionState
         const nextQueue = new Set(typedPrevious.fulfillmentQueue)
+        const result = typedPrevious.drawResults[params.matchId]
         nextQueue.add(params.matchId)
+
+        captureAnalyticsEvent('fulfillment_queued', {
+          ...getMatchAnalyticsProperties(match),
+          surface: 'fulfillment_pipeline',
+          winner_count: result?.winners.length ?? 0,
+          queue_size: nextQueue.size,
+        })
 
         return updateDrawResultStatus(
           {

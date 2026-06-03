@@ -38,17 +38,17 @@ import {
   TrendingUp,
   UsersRound,
 } from 'lucide-react'
-import heroImage from './assets/world-cup-hero.png'
+import heroImage from './assets/world-cup-hero.jpg'
 import brandLogo from './assets/winworldcup2026-logo.svg'
-import argentinaPrizeImage from './assets/prizes/argentina-shirt.png'
-import brazilPrizeImage from './assets/prizes/brazil-shirt.png'
-import englandPrizeImage from './assets/prizes/england-shirt.png'
-import francePrizeImage from './assets/prizes/france-shirt.png'
-import japanPrizeImage from './assets/prizes/japan-shirt.png'
-import moroccoPrizeImage from './assets/prizes/morocco-shirt.png'
-import spainPrizeImage from './assets/prizes/spain-shirt.png'
-import usaPrizeImage from './assets/prizes/usa-shirt.png'
-import { initializeGoogleAnalytics } from './analytics'
+import argentinaPrizeImage from './assets/prizes/argentina-shirt.jpg'
+import brazilPrizeImage from './assets/prizes/brazil-shirt.jpg'
+import englandPrizeImage from './assets/prizes/england-shirt.jpg'
+import francePrizeImage from './assets/prizes/france-shirt.jpg'
+import japanPrizeImage from './assets/prizes/japan-shirt.jpg'
+import moroccoPrizeImage from './assets/prizes/morocco-shirt.jpg'
+import spainPrizeImage from './assets/prizes/spain-shirt.jpg'
+import usaPrizeImage from './assets/prizes/usa-shirt.jpg'
+import { captureAnalyticsEvent, initializeGoogleAnalytics, initializePostHog } from './analytics'
 import './App.css'
 import agentsMd from '../AGENTS.md?raw'
 import buildBlogMd from '../BUILD_BLOG.md?raw'
@@ -334,18 +334,18 @@ const sponsorshipAddOns = [
 ]
 
 const aiBuildMetrics = {
-  tokenTotal: '~3.3M',
-  estimatedCost: '~$26',
+  tokenTotal: '~3.7M',
+  estimatedCost: '~$30',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
 
 const posthogDashboardUrl = 'https://us.posthog.com'
-const posthogResourceName = 'worldcup2026-analytics'
+const posthogResourceName = 'WorldCup'
 const posthogEnvVars = [
-  'WORLDCUP2026_ANALYTICS_API_KEY',
-  'WORLDCUP2026_ANALYTICS_HOST',
-  'WORLDCUP2026_ANALYTICS_PERSONAL_API_KEY',
+  'WORLDCUP_API_KEY',
+  'WORLDCUP_HOST',
+  'WORLDCUP_PERSONAL_API_KEY',
 ] as const
 
 const posthogDashboardMetrics = [
@@ -385,7 +385,7 @@ const posthogFunnelSteps = [
   ['Lock receipt', 'prediction_locked', 'A draw receipt is created and committed.'],
   ['Enter draw', 'draw_entry_created', 'Correct prediction qualifies for match reward draw.'],
   ['Reveal result', 'draw_revealed', 'Participant sees winner, alternate, or not-selected state.'],
-  ['Claim reward', 'reward_claim_started', 'Winner starts shirt and sponsor package claim.'],
+  ['Queue reward', 'fulfillment_queued', 'Winner shirts and sponsor packages move into the operations queue.'],
 ] as const
 
 const posthogEventPlan = [
@@ -401,7 +401,7 @@ const posthogEventPlan = [
   },
   {
     area: 'Prizes',
-    events: ['prize_detail_viewed', 'reward_claim_started', 'shirt_selected'],
+    events: ['prize_detail_viewed', 'team_selected'],
     owner: 'Rewards UI',
   },
   {
@@ -417,11 +417,11 @@ const posthogEventPlan = [
 ] as const
 
 const posthogSetupItems = [
-  'Use the new Projects.dev PostHog analytics project resource named worldcup2026-analytics.',
-  'Map the frontend-safe API key and host into Vite env variables; keep the personal API key server-side.',
-  'Install posthog-js or the PostHog web snippet after the final tracking policy is approved.',
-  'Create a real PostHog dashboard with prediction funnel, route traffic, sponsor conversions, fulfillment queue, and review completion tiles.',
-  'Add privacy copy before enabling session replay or person-level identity tracking.',
+  'Use the new Projects.dev PostHog analytics project resource named WorldCup.',
+  'Map WORLDCUP_API_KEY and optional WORLDCUP_HOST into VITE_POSTHOG_KEY and VITE_POSTHOG_HOST, then restart or rebuild because Vite public env is build-time read.',
+  'PostHog initializes only when VITE_POSTHOG_KEY exists and sends through the first-party /ingest proxy.',
+  'Create the real dashboard inside the WorldCup PostHog project with prediction funnel, route traffic, sponsor conversions, fulfillment queue, and review completion tiles.',
+  'Keep session replay off until privacy copy and consent rules are approved.',
 ] as const
 
 const technologyFlow = [
@@ -771,6 +771,21 @@ function getFixturePickLabel(
   return 'Draw'
 }
 
+function getFixtureAnalyticsProperties(fixture: TournamentFixture) {
+  return {
+    match_id: `fixture-${fixture.matchNumber}`,
+    match_number: fixture.matchNumber,
+    group: fixture.group,
+    home_team: fixture.home,
+    away_team: fixture.away,
+    kickoff_date: fixture.date,
+    kickoff_time_et: fixture.timeET,
+    venue_name: fixture.venue.name,
+    venue_city: fixture.venue.city,
+    venue_country: fixture.venue.country,
+  }
+}
+
 function App() {
   const [routeState, setRouteState] = useState<RouteState>(() =>
     getCurrentRouteState(),
@@ -837,12 +852,18 @@ function App() {
 
   useEffect(() => {
     initializeGoogleAnalytics()
+    initializePostHog()
   }, [])
 
   useEffect(() => {
     if (!activePrizeKey) return undefined
 
     store.set('/selectedTeamKey', activePrizeKey)
+    captureAnalyticsEvent('prize_detail_viewed', {
+      team_key: activePrizeKey,
+      team_name: getTeam(activePrizeKey).name,
+      source: 'prize_detail_route',
+    })
 
     const frame = window.requestAnimationFrame(() => {
       document.getElementById('prize-detail')?.scrollIntoView({
@@ -937,6 +958,21 @@ function App() {
     '--hero-image': `url(${heroImage})`,
   } as CSSProperties
 
+  const selectSupporterTeam = (
+    teamKey: TeamKey,
+    source: 'team_picker' | 'prize_card' | 'prize_detail',
+  ) => {
+    const team = getTeam(teamKey)
+
+    store.set('/selectedTeamKey', teamKey)
+    captureAnalyticsEvent('team_selected', {
+      team_key: teamKey,
+      team_name: team.name,
+      team_code: team.code,
+      source,
+    })
+  }
+
   if (isExperimentView) {
     return (
       <main className="app-shell" style={themeVars}>
@@ -952,7 +988,7 @@ function App() {
       <main className="app-shell" style={themeVars}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
         <PrizeDetailPage
-          onSelectTeam={(teamKey) => store.set('/selectedTeamKey', teamKey)}
+          onSelectTeam={(teamKey) => selectSupporterTeam(teamKey, 'prize_detail')}
           teamKey={activePrizeKey}
         />
         <SiteFooter />
@@ -965,7 +1001,7 @@ function App() {
       <main className="app-shell" style={themeVars}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
         <PrizeHomeSection
-          onSelectTeam={(teamKey) => store.set('/selectedTeamKey', teamKey)}
+          onSelectTeam={(teamKey) => selectSupporterTeam(teamKey, 'prize_card')}
           selectedTeamKey={selectedTeamKey}
         />
         <SiteFooter />
@@ -1057,16 +1093,46 @@ function App() {
             supporter shirts, and move winners into shipping and review flows.
           </p>
           <div className="hero-actions">
-            <a className="primary-action" href="/fixtures">
+            <a
+              className="primary-action"
+              href="/fixtures"
+              onClick={() =>
+                captureAnalyticsEvent('prediction_cta_clicked', {
+                  cta: 'make_picks',
+                  source: 'homepage_hero',
+                  supporter_team: selectedTeamKey,
+                })
+              }
+            >
               <Target size={18} />
               <span>Make Picks</span>
               <ChevronRight size={17} />
             </a>
-            <a className="secondary-action" href="/prizes">
+            <a
+              className="secondary-action"
+              href="/prizes"
+              onClick={() =>
+                captureAnalyticsEvent('prize_cta_clicked', {
+                  cta: 'free_shirt_prize',
+                  source: 'homepage_hero',
+                  supporter_team: selectedTeamKey,
+                })
+              }
+            >
               <Gift size={18} />
               <span>Free Shirt Prize</span>
             </a>
-            <a className="secondary-action" href="/sponsors">
+            <a
+              className="secondary-action"
+              href="/sponsors"
+              onClick={() =>
+                captureAnalyticsEvent('sponsor_cta_clicked', {
+                  cta: 'sponsor_packages',
+                  source: 'homepage_hero',
+                  supporter_team: selectedTeamKey,
+                })
+              }
+            >
               <Handshake size={18} />
               <span>Sponsor Packages</span>
             </a>
@@ -1110,7 +1176,7 @@ function App() {
               className="team-chip"
               key={team.key}
               onClick={() =>
-                store.set('/selectedTeamKey', team.key satisfies TeamKey)
+                selectSupporterTeam(team.key satisfies TeamKey, 'team_picker')
               }
               type="button"
             >
@@ -1134,7 +1200,7 @@ function App() {
       </section>
 
       <PrizeHomeSection
-        onSelectTeam={(teamKey) => store.set('/selectedTeamKey', teamKey)}
+        onSelectTeam={(teamKey) => selectSupporterTeam(teamKey, 'prize_card')}
         selectedTeamKey={selectedTeamKey}
       />
 
@@ -1232,7 +1298,7 @@ function App() {
                 <ScoreField
                   code={getTournamentTeamCode(activeFixture.home)}
                   label={activeFixture.home}
-                  onChange={(score) =>
+                  onChange={(score) => {
                     setFixturePredictions((previous) =>
                       updateFixtureScorePrediction(
                         previous,
@@ -1241,13 +1307,20 @@ function App() {
                         score,
                       ),
                     )
-                  }
+                    captureAnalyticsEvent('score_changed', {
+                      ...getFixtureAnalyticsProperties(activeFixture),
+                      surface: 'homepage_fixture_scoreboard',
+                      side: 'home',
+                      score: clampScore(score),
+                      supporter_team: selectedTeamKey,
+                    })
+                  }}
                   value={activeFixturePrediction.homeScore}
                 />
                 <ScoreField
                   code={getTournamentTeamCode(activeFixture.away)}
                   label={activeFixture.away}
-                  onChange={(score) =>
+                  onChange={(score) => {
                     setFixturePredictions((previous) =>
                       updateFixtureScorePrediction(
                         previous,
@@ -1256,7 +1329,14 @@ function App() {
                         score,
                       ),
                     )
-                  }
+                    captureAnalyticsEvent('score_changed', {
+                      ...getFixtureAnalyticsProperties(activeFixture),
+                      surface: 'homepage_fixture_scoreboard',
+                      side: 'away',
+                      score: clampScore(score),
+                      supporter_team: selectedTeamKey,
+                    })
+                  }}
                   value={activeFixturePrediction.awayScore}
                 />
               </div>
@@ -1289,11 +1369,21 @@ function App() {
                   className={`next-lock-button ${
                     activeFixturePrediction.locked ? 'is-locked' : ''
                   }`}
-                  onClick={() =>
+                  onClick={() => {
+                    if (activeFixturePrediction.locked) return
+
                     setFixturePredictions((previous) =>
                       lockFixturePrediction(previous, activeFixture),
                     )
-                  }
+                    captureAnalyticsEvent('prediction_locked', {
+                      ...getFixtureAnalyticsProperties(activeFixture),
+                      surface: 'homepage_fixture_scoreboard',
+                      predicted_winner: activeFixturePickLabel,
+                      predicted_home_score: activeFixturePrediction.homeScore,
+                      predicted_away_score: activeFixturePrediction.awayScore,
+                      supporter_team: selectedTeamKey,
+                    })
+                  }}
                   type="button"
                 >
                   <ShieldCheck size={17} />
@@ -1676,8 +1766,9 @@ function PostHogDashboardPage() {
           <p>
             The new PostHog project resource is present in the Projects.dev
             state as <code>{posthogResourceName}</code>. The dashboard is ready
-            as a tracking contract, but real product events should wait until
-            the SDK, privacy copy, and production event names are approved.
+            as a tracking contract, but real product events still require the
+            public Vite key mapping, a fresh restart or deploy, privacy copy,
+            and final production event-name approval.
           </p>
         </div>
         <div className="posthog-resource-panel" aria-label="PostHog resource">
