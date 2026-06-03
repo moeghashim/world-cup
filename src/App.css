@@ -1772,6 +1772,8 @@
 }
 
 .team-strip,
+.team-directory-page,
+.team-detail-page,
 .prize-home,
 .prize-detail-page,
 .sponsor-band,
@@ -1820,6 +1822,8 @@
 }
 
 .prize-home,
+.team-directory-page,
+.team-detail-page,
 .prize-detail-page,
 .sponsor-band,
 .posthog-dashboard {
@@ -2041,6 +2045,396 @@
   font-size: 0.88rem;
   font-weight: 900;
   margin-top: 6px;
+}
+
+.team-directory-page,
+.team-detail-page {
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.98), rgba(238, 243, 235, 0.92)),
+    var(--surface);
+  display: grid;
+  gap: 24px;
+}
+
+.team-directory-hero,
+.team-detail-hero {
+  align-items: stretch;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.42fr);
+}
+
+.team-directory-hero > div:first-child,
+.team-detail-hero > div:first-child {
+  align-content: center;
+  background:
+    radial-gradient(circle at 12% 20%, color-mix(in srgb, var(--team-primary), transparent 72%), transparent 34%),
+    rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 14px 38px rgba(23, 24, 18, 0.08);
+  display: grid;
+  gap: 14px;
+  min-height: 330px;
+  padding: clamp(18px, 4vw, 38px);
+}
+
+.team-directory-hero h1,
+.team-detail-hero h1 {
+  color: var(--ink);
+  font-size: clamp(2.4rem, 6vw, 5.6rem);
+  line-height: 0.95;
+  margin: 0;
+  max-width: 920px;
+}
+
+.team-directory-hero p,
+.team-detail-hero p,
+.team-sponsor-math p,
+.team-source-strip p,
+.team-identity-card p,
+.team-sponsor-invite p,
+.team-identity-notes p,
+.team-fixture-sponsor-card p {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.team-detail-hero strong {
+  color: var(--team-primary);
+  font-size: clamp(1.25rem, 2.4vw, 2rem);
+  line-height: 1.1;
+}
+
+.team-known-as {
+  color: var(--ink) !important;
+  font-weight: 950;
+}
+
+.team-sponsor-math {
+  background:
+    linear-gradient(145deg, var(--team-primary), color-mix(in srgb, var(--team-primary), var(--ink) 32%)),
+    var(--team-primary);
+  border: 1px solid color-mix(in srgb, var(--team-primary), #ffffff 36%);
+  border-radius: 8px;
+  box-shadow: 0 18px 44px color-mix(in srgb, var(--team-primary), transparent 76%);
+  color: var(--team-secondary);
+  display: grid;
+  gap: 16px;
+  padding: clamp(18px, 3vw, 26px);
+}
+
+.team-sponsor-math h2 {
+  color: #ffffff;
+  font-size: clamp(1.8rem, 3.5vw, 3.2rem);
+  line-height: 0.96;
+  margin: 0;
+}
+
+.team-sponsor-math .section-kicker,
+.team-sponsor-math p {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.team-sponsor-math dl,
+.team-fixture-sponsor-card dl {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+}
+
+.team-sponsor-math dl div,
+.team-fixture-sponsor-card dl div {
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  justify-content: space-between;
+  min-height: 42px;
+  padding: 8px 10px;
+}
+
+.team-sponsor-math dt,
+.team-sponsor-math dd,
+.team-fixture-sponsor-card dt,
+.team-fixture-sponsor-card dd {
+  margin: 0;
+}
+
+.team-sponsor-math dt {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.team-sponsor-math dd {
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 950;
+}
+
+.team-directory-stats {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.team-directory-stats span {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  display: grid;
+  gap: 4px;
+  min-height: 92px;
+  padding: 14px;
+}
+
+.team-directory-stats strong {
+  color: var(--ink);
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.team-source-strip,
+.team-sponsor-invite,
+.team-identity-notes,
+.team-fixture-sponsor-card,
+.team-identity-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 34px rgba(23, 24, 18, 0.08);
+}
+
+.team-source-strip {
+  align-items: center;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 0.72fr) minmax(280px, 0.58fr);
+  padding: clamp(16px, 2.5vw, 24px);
+}
+
+.team-source-strip > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.team-source-strip a,
+.team-identity-notes a {
+  align-items: center;
+  color: var(--team-primary);
+  display: inline-flex;
+  font-weight: 900;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.team-source-strip a {
+  background: var(--team-soft);
+  border: 1px solid color-mix(in srgb, var(--team-primary), #ffffff 62%);
+  border-radius: 999px;
+  min-height: 36px;
+  padding: 0 11px;
+}
+
+.team-group-directory {
+  display: grid;
+  gap: 18px;
+}
+
+.team-group-section {
+  display: grid;
+  gap: 14px;
+}
+
+.team-group-section > header,
+.team-detail-toolbar,
+.team-fixture-sponsor-card header {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.team-group-section > header h2,
+.team-source-strip h2,
+.team-sponsor-invite h2,
+.team-identity-notes h2,
+.team-fixture-sponsor-list h2 {
+  color: var(--ink);
+  font-size: clamp(1.45rem, 2.8vw, 2.4rem);
+  line-height: 1;
+  margin: 0;
+}
+
+.team-group-section > header > span,
+.team-fixture-sponsor-list .schedule-panel-heading > span {
+  background: var(--ink);
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 950;
+  padding: 8px 12px;
+}
+
+.team-identity-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.team-identity-card {
+  display: grid;
+  gap: 12px;
+  min-height: 340px;
+  padding: 16px;
+}
+
+.team-identity-card-top {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.team-identity-card-top span {
+  background: var(--team-primary);
+  border-radius: 999px;
+  color: var(--team-secondary);
+  font-size: 0.8rem;
+  font-weight: 950;
+  padding: 7px 10px;
+}
+
+.team-identity-card-top em {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.team-identity-card h3 {
+  color: var(--ink);
+  font-size: 1.32rem;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.team-identity-card > strong {
+  color: var(--team-primary);
+  line-height: 1.25;
+}
+
+.team-card-actions,
+.team-detail-actions {
+  align-self: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 4px;
+}
+
+.team-detail-toolbar {
+  justify-content: flex-start;
+}
+
+.team-detail-layout {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.38fr);
+}
+
+.team-sponsor-invite,
+.team-identity-notes {
+  display: grid;
+  gap: 15px;
+  padding: clamp(16px, 2.5vw, 24px);
+}
+
+.team-sponsor-options {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.team-sponsor-options span {
+  background: var(--team-soft);
+  border: 1px solid color-mix(in srgb, var(--team-primary), #ffffff 62%);
+  border-radius: 8px;
+  color: var(--muted);
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+}
+
+.team-sponsor-options strong {
+  color: var(--ink);
+  font-size: 1.2rem;
+}
+
+.team-identity-notes ul {
+  display: grid;
+  gap: 9px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.team-identity-notes li {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.team-identity-notes svg {
+  color: var(--team-primary);
+}
+
+.team-fixture-sponsor-list {
+  display: grid;
+  gap: 14px;
+}
+
+.team-fixture-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.team-fixture-sponsor-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.team-fixture-sponsor-card header {
+  align-items: start;
+}
+
+.team-fixture-sponsor-card header span {
+  color: var(--team-primary);
+  font-size: 0.78rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.team-fixture-sponsor-card header strong {
+  color: var(--ink);
+  font-size: 1.1rem;
+}
+
+.team-fixture-sponsor-card dl div {
+  border-color: var(--line);
+}
+
+.team-fixture-sponsor-card dt {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.team-fixture-sponsor-card dd {
+  color: var(--ink);
+  font-weight: 950;
 }
 
 .sponsor-band {
@@ -5108,6 +5502,10 @@
   .hero-band,
   .hero-live-grid,
   .hero-prediction-grid,
+  .team-directory-hero,
+  .team-source-strip,
+  .team-detail-hero,
+  .team-detail-layout,
   .team-strip,
   .workspace-shell,
   .insight-band {
@@ -5182,6 +5580,9 @@
   .prediction-grid,
   .draw-grid,
   .reward-grid,
+  .team-directory-stats,
+  .team-identity-grid,
+  .team-fixture-grid,
   .prize-team-grid,
   .prize-detail-grid,
   .sponsor-tier-grid,
@@ -5240,6 +5641,7 @@
   .schedule-summary,
   .supporter-fixtures,
   .schedule-layout,
+  .team-sponsor-options,
   .technology-flow-heading {
     grid-template-columns: 1fr;
   }
@@ -5351,6 +5753,8 @@
   }
 
   .team-strip,
+  .team-directory-page,
+  .team-detail-page,
   .prize-home,
   .prize-detail-page,
   .sponsor-band,
@@ -5379,6 +5783,10 @@
   .prediction-grid,
   .draw-grid,
   .reward-grid,
+  .team-directory-stats,
+  .team-identity-grid,
+  .team-fixture-grid,
+  .team-sponsor-options,
   .prize-team-grid,
   .prize-detail-grid,
   .sponsor-tier-grid,
@@ -5611,6 +6019,9 @@
   }
 
   .draw-card-header,
+  .team-detail-toolbar,
+  .team-group-section > header,
+  .team-fixture-sponsor-card header,
   .prize-detail-toolbar,
   .queue-actions {
     align-items: stretch;
@@ -5618,6 +6029,8 @@
   }
 
   .draw-button,
+  .team-card-actions .prize-action,
+  .team-detail-actions .prize-action,
   .prize-action,
   .prize-back-link,
   .prize-card-link {

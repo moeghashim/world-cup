@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~5.1M`
-- estimated API-equivalent cost: `~$44`
+- estimated total tokens: `~5.3M`
+- estimated API-equivalent cost: `~$46`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -574,13 +574,23 @@ Localized the primary homepage, route hero copy, JSON-render section headers, pr
 
 Verification ran `npm run lint`, `npm run build`, and browser smoke checks for English, Arabic RTL, and Spanish language switching on the homepage. Spanish persisted across reload, Arabic set `dir="rtl"`, there was no horizontal overflow, and there were no fresh browser console errors.
 
-### Current commit - Add website sponsor package
+### Add website sponsor package
 
 Added a Website Sponsor package at `$25,000` with 4 available spots. This tier sits between the Global Cup Partner and Matchday Featured Sponsor offers. It is meant for brands that want always-on website visibility before choosing specific match campaigns: homepage placement, prediction banner presence, prize discovery placement, sponsor story content, winner review prompts, and a website performance recap.
 
 The sponsorship section was redesigned as a compact sponsor marketplace board inspired by the layout rhythm of `https://trustmrr.com/`: a top metric strip, ranked package listings, dense package details, and a responsive mobile stack. The implementation borrows the information architecture pattern, not the TrustMRR branding, assets, or exact visual identity. The new package and board labels were added to the multilingual catalog. The current AI build disclosure estimate was refreshed to `~5.1M` total tokens and `~$44`.
 
 Verification ran `npm run lint`, `npm run build`, and browser checks on `/sponsors`. The desktop check confirmed four package columns with Website Sponsor at `$25,000`, the Spanish smoke check confirmed localized sponsor-board labels, the mobile 390px check confirmed stacked sponsor listings with no horizontal overflow, and a fresh browser reload reported no console errors.
+
+### Current commit - Add team identity sponsor pages
+
+Added `src/data/teamIdentity.ts` as the typed identity catalog for all 48 teams in the tournament snapshot. Each record now has a route slug, group, code, known-as line, sponsor-safe support line, known-for statement, sponsor angle, and research source URLs. The source basis includes FIFA's qualified-team page, a World Cup 2026 nickname table, and stronger individual references for examples such as Saudi Arabia's Green Falcons, Curaçao's Blue Wave, Japan's Samurai Blue, the Socceroos, and Uzbekistan's White Wolves.
+
+The `/teams` route is now a full team directory instead of only the JSON-render schedule section. It renders 48 cards grouped from A through L, shows the support line and known-for statement for every team, links to `/teams/:slug`, and exposes the MVP sponsorship math: $10,000 match spotlight plus $5,000 reward drop per game. A three-game team group-stage package is therefore $45,000 before product, shipping, tax, legal, creative, platform, or payment costs.
+
+Each team detail page, including `/teams/saudi-arabia`, now invites sponsors to support the team or individual games, lists the team's three group-stage fixtures, shows per-game math at $15,000, and keeps source links plus the no-official-marks boundary visible. The current AI build disclosure estimate was refreshed to `~5.3M` total tokens and `~$46`.
+
+Verification ran `npm run lint`, `npm run build`, browser checks for `/teams` and `/teams/saudi-arabia`, and a 390px mobile check for both pages. The browser confirmed 48 team cards, 12 groups, Saudi's "Support the green / شجّع الأخضر" line, 3 Saudi fixture sponsor cards, source links, sponsor math, no horizontal overflow, and no console errors.
 
 ## Next Build Steps
 
