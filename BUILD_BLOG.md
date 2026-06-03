@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~3.8M`
-- estimated API-equivalent cost: `~$31`
+- estimated total tokens: `~3.9M`
+- estimated API-equivalent cost: `~$32`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -368,6 +368,7 @@ Browser checks have covered:
 - Projects.dev status showing `WorldCup` as the only active PostHog analytics resource in the default environment, with the older PostHog resources detached from site wiring
 - PR check recovery: DCO sign-offs were added to the branch commits, and the Vercel deployment failure was traced to an invalid `skipTrailingSlashRedirect` property in `vercel.json`
 - homepage prediction banner PRD with full-address entry capture, sponsor/prize bundle placement, upcoming match rail, Neon-backed persistence requirements, and Wegnener implementation handoff
+- live-banner PRD for matchday atmosphere, score-change reactions, active fixture rail states, prize-panel reveals, sponsor context, and reduced-motion behavior
 
 Current visual artifact:
 
@@ -529,7 +530,7 @@ The app now installs `posthog-js`, initializes it only when `VITE_POSTHOG_KEY` i
 
 Added `.env.example` and `POSTHOG_SETUP.md` with the dashboard plan, event taxonomy, proxy behavior, and verification steps. Live PostHog Activity is intentionally not claimed yet because no public PostHog key was set during verification. The no-key path was verified as inert, and the current AI build disclosure estimate was refreshed to `~3.5M` total tokens and `~$28`.
 
-### Current commit - Create WorldCup PostHog project
+### `118eb9b` - Create WorldCup PostHog project
 
 Created a new Projects.dev PostHog analytics project resource named `WorldCup`, following the naming requirement for any real dashboard work. The old `worldcup2026-analytics` resource is now detached from the default Projects.dev environment so the active website analytics target is only `WorldCup`.
 
@@ -541,11 +542,17 @@ The PR check panel showed DCO failing and Vercel failing. DCO failed because the
 
 The Vercel failure was not a TypeScript, Vite, or asset-build failure. `npm run build` and `vercel build` both passed. A prebuilt Vercel deploy exposed the actual issue: `vercel.json` used `skipTrailingSlashRedirect`, which is not accepted as a Vercel project configuration property here. Removing that property kept the SPA and `/ingest` rewrite behavior intact and allowed the prebuilt Vercel deployment path to proceed. The current AI build disclosure estimate was refreshed to `~3.7M` total tokens and `~$30`.
 
-### Current commit - Create homepage prediction banner PRD
+### `7137658` - Create homepage prediction banner PRD
 
 Created `HOMEPAGE_PREDICTION_BANNER_PRD.md` for the prediction-first homepage redesign. The PRD replaces the static hero with a first-viewport match prediction arena, defines an upcoming match rail, adds sponsor and prize-bundle placement inside the hero, and makes full US address capture part of locking a prediction.
 
 The key product decision is explicit: collect full address early because sponsors may choose to send gifts to all entrants, not only winners. The PRD documents the privacy implications, US-only scope, server-side storage requirement, and the Neon `primary-db` persistence path through `PRIMARY_DB_CONNECTION_STRING`. It also assigns implementation to Wegnener so the redesign can proceed in parallel while the broader product planning continues. The current AI build disclosure estimate was refreshed to `~3.8M` total tokens and `~$31`.
+
+### Current commit - Create live banner PRD
+
+Created `HOMEPAGE_LIVE_BANNER_PRD.md` as the creative companion to the homepage prediction banner PRD. This document scopes the "make the banner feel alive" work: matchday pulse, stadium atmosphere, team-color energy, score-change reactions, active fixture rail transitions, prize-panel reveals, sponsor placement, accessibility, and reduced-motion fallbacks.
+
+The PRD keeps the banner focused on prediction, not betting spectacle. It explicitly avoids slot-machine or odds-board patterns, official marks, and decorative motion that blocks the user from making a pick. Implementation has been assigned to a live-banner sub-agent, and the current AI build disclosure estimate was refreshed to `~3.9M` total tokens and `~$32`.
 
 ## Next Build Steps
 

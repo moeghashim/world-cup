@@ -202,6 +202,7 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 - Created a new Projects.dev PostHog analytics project resource named `WorldCup`, removed `worldcup2026-analytics` from the default environment so only `WorldCup` is active for site wiring, updated the `/posthog` dashboard contract and setup docs to use `WorldCup`, and refreshed the AI build estimate to `~3.6M` total tokens and `~$29`.
 - Fixed the PR check failures by rebasing the branch with DCO sign-offs, removing the invalid `skipTrailingSlashRedirect` property from `vercel.json`, confirming Vercel can build/deploy the prebuilt output, and refreshing the AI build estimate to `~3.7M` total tokens and `~$30`.
 - Added `HOMEPAGE_PREDICTION_BANNER_PRD.md` for the prediction-first homepage redesign, captured the product decision to collect full US address at prediction entry time, documented Neon `primary-db` as the persistence target, assigned implementation to Wegnener, and refreshed the AI build estimate to `~3.8M` total tokens and `~$31`.
+- Added `HOMEPAGE_LIVE_BANNER_PRD.md` for the creative "make the banner feel alive" pass, scoped matchday atmosphere/motion/score reactions/prize-panel reveals/reduced-motion behavior, assigned implementation to a live-banner sub-agent, and refreshed the AI build estimate to `~3.9M` total tokens and `~$32`.
 
 ## Verification
 

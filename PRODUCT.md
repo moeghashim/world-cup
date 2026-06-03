@@ -52,3 +52,4 @@ World Cup Predictor is a match prediction and sponsor reward experience for `win
 - Provider recommendations are architectural notes, not live integrations except for the current Google Analytics page-view setup and the Projects.dev-linked `WorldCup` PostHog resource, which is the only active PostHog analytics resource in the default environment.
 - No real prize fulfillment, payment, user identity, fraud checks, or legal rules are implemented yet.
 - `HOMEPAGE_PREDICTION_BANNER_PRD.md` defines the next homepage redesign: make the first viewport an interactive prediction banner, collect full US address at entry time, and persist entries through server-side Neon-backed APIs before treating captured entries as real campaign data.
+- `HOMEPAGE_LIVE_BANNER_PRD.md` scopes the creative banner pass: make the first viewport feel alive with matchday atmosphere, score reactions, active fixture browsing, and prize/sponsor context without adding gambling-style mechanics.
