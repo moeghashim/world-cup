@@ -200,6 +200,7 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 - Converted the runtime hero and prize shirt assets from large PNGs to display-sized JPEGs, removed the old runtime PNG copies, and refreshed the AI build estimate to `~3.4M` total tokens and `~$27`.
 - Installed `posthog-js`, added env-gated initialization, first-party `/ingest` proxying for Vite and Vercel, prediction/draw/reward event capture, `.env.example`, `POSTHOG_SETUP.md`, and refreshed the AI build estimate to `~3.5M` total tokens and `~$28`.
 - Created a new Projects.dev PostHog analytics project resource named `WorldCup`, removed `worldcup2026-analytics` from the default environment so only `WorldCup` is active for site wiring, updated the `/posthog` dashboard contract and setup docs to use `WorldCup`, and refreshed the AI build estimate to `~3.6M` total tokens and `~$29`.
+- Fixed the PR check failures by rebasing the branch with DCO sign-offs, removing the invalid `skipTrailingSlashRedirect` property from `vercel.json`, confirming Vercel can build/deploy the prebuilt output, and refreshing the AI build estimate to `~3.7M` total tokens and `~$30`.
 
 ## Verification
 
@@ -260,6 +261,7 @@ Browser verification covered:
 - verifying the optimized homepage hero and prize shirt runtime images resolve to `.jpg`, the refreshed `~3.4M` token total and `~$27` estimated cost render in the AI build disclosure, `/prizes/japan` loads the optimized shirt image, there is no horizontal overflow, and there are no browser console errors
 - verifying PostHog no-key behavior: homepage renders the refreshed `~3.5M` token total and `~$28` estimated cost, `posthog-js` is installed, no `phc_` key appears in the DOM, no `/ingest` script is present, team selection still works, and there are no browser console errors
 - verifying Projects.dev status shows `WorldCup` as the only PostHog analytics resource in the default environment, while `analytics` and `worldcup2026-analytics` remain detached from the default environment
+- verifying DCO passes after signed-off PR commits, `vercel build` completes, and `vercel deploy --prebuilt` rejects the old invalid config then succeeds after removing `skipTrailingSlashRedirect`
 
 Latest screenshot:
 

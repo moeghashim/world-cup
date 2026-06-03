@@ -42,7 +42,7 @@ Vite dev proxy:
 - `/ingest/static/*` -> `https://us-assets.i.posthog.com/static/*`
 - `/ingest/*` -> `https://us.i.posthog.com/*`
 
-Vercel production rewrites mirror the same proxy paths, with `skipTrailingSlashRedirect: true`.
+Vercel production rewrites mirror the same proxy paths. Keep `vercel.json` limited to Vercel-supported properties; `skipTrailingSlashRedirect` is not valid in this project config.
 
 ## Events
 

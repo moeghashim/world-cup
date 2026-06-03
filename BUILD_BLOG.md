@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~3.6M`
-- estimated API-equivalent cost: `~$29`
+- estimated total tokens: `~3.7M`
+- estimated API-equivalent cost: `~$30`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -366,6 +366,7 @@ Browser checks have covered:
 - static GA4 `G-RFPJRPKYQR` snippet present in `index.html`, with the runtime analytics initializer kept only as a duplicate-safe fallback
 - env-gated `posthog-js` setup with `/ingest` proxying, prediction/draw/reward event call sites, `.env.example`, `POSTHOG_SETUP.md`, and no-key browser verification
 - Projects.dev status showing `WorldCup` as the only active PostHog analytics resource in the default environment, with the older PostHog resources detached from site wiring
+- PR check recovery: DCO sign-offs were added to the branch commits, and the Vercel deployment failure was traced to an invalid `skipTrailingSlashRedirect` property in `vercel.json`
 
 Current visual artifact:
 
@@ -532,6 +533,12 @@ Added `.env.example` and `POSTHOG_SETUP.md` with the dashboard plan, event taxon
 Created a new Projects.dev PostHog analytics project resource named `WorldCup`, following the naming requirement for any real dashboard work. The old `worldcup2026-analytics` resource is now detached from the default Projects.dev environment so the active website analytics target is only `WorldCup`.
 
 The `/posthog` page, setup checklist, `POSTHOG_SETUP.md`, `PRODUCT.md`, `WEBSITE_FLOW.md`, and `AGENTS.md` now point to `WorldCup`. The documentation also calls out the new Projects.dev env names: `WORLDCUP_API_KEY`, `WORLDCUP_HOST`, and `WORLDCUP_PERSONAL_API_KEY`. The browser-facing app still remains inert until the safe public key is mapped into `VITE_POSTHOG_KEY` and the app is restarted or rebuilt. The current AI build disclosure estimate was refreshed to `~3.6M` total tokens and `~$29`.
+
+### Current commit - Fix PR checks
+
+The PR check panel showed DCO failing and Vercel failing. DCO failed because the PR commits did not include `Signed-off-by` trailers, so the branch was rebased with sign-offs added to the three commits.
+
+The Vercel failure was not a TypeScript, Vite, or asset-build failure. `npm run build` and `vercel build` both passed. A prebuilt Vercel deploy exposed the actual issue: `vercel.json` used `skipTrailingSlashRedirect`, which is not accepted as a Vercel project configuration property here. Removing that property kept the SPA and `/ingest` rewrite behavior intact and allowed the prebuilt Vercel deployment path to proceed. The current AI build disclosure estimate was refreshed to `~3.7M` total tokens and `~$30`.
 
 ## Next Build Steps
 

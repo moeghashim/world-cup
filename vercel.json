@@ -1,5 +1,4 @@
 {
-  "skipTrailingSlashRedirect": true,
   "rewrites": [
     {
       "source": "/ingest/static/:path*",
