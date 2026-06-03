@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~4.6M`
-- estimated API-equivalent cost: `~$39`
+- estimated total tokens: `~5.0M`
+- estimated API-equivalent cost: `~$43`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -565,6 +565,14 @@ Added explicit database and API verification commands for the homepage predictio
 Added `npm run dev:api` and a Vite `/api` proxy so local Vite development can submit the hero entry form through the same API handlers without depending on the currently flaky `vercel dev` wrapper. HTTP verification against the local shim confirmed `GET /api/match-prize-bundles` returns 200 and `POST /api/prediction-entries` returns a fallback receipt without address fields when no database env is inherited. Projects.dev status confirms `primary-db` is complete in the default environment and exposes the redacted `PRIMARY_DB_CONNECTION_STRING` name.
 
 Configured encrypted `PRIMARY_DB_CONNECTION_STRING` entries for Vercel Preview and Production, deployed a prebuilt preview, and added `npm run verify:api:vercel` for protected preview validation through `vercel curl`. The preview API returned a `201` Neon receipt, verified the persisted row by receipt hash, returned no address fields, and cleaned up the smoke-test row. The current AI build disclosure estimate was refreshed to `~4.6M` total tokens and `~$39`.
+
+### Current commit - Add multilingual website shell
+
+Added an app-level i18n provider with English, Arabic, French, German, Spanish, Portuguese, Chinese, and Korean language options. The top navigation now includes a compact language selector, the app shell sets `lang` and `dir` from the selected language, and RTL layout handling keeps scores, team codes, badges, and form controls readable.
+
+Localized the primary homepage, route hero copy, JSON-render section headers, prize pages, sponsor package copy, prediction receipt, entry modal, footer, score-control labels, and AI build disclosure. Language changes are captured as analytics events without exposing prediction entry address data. The current AI build disclosure estimate was refreshed to `~5.0M` total tokens and `~$43`.
+
+Verification ran `npm run lint`, `npm run build`, and browser smoke checks for English, Arabic RTL, and Korean language switching on the homepage.
 
 ## Next Build Steps
 

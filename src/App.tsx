@@ -1,6 +1,7 @@
 import {
   type CSSProperties,
   type ReactNode,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -21,6 +22,7 @@ import {
   FileText,
   FlaskConical,
   Gift,
+  Globe2,
   Handshake,
   ListChecks,
   Megaphone,
@@ -48,6 +50,15 @@ import moroccoPrizeImage from './assets/prizes/morocco-shirt.jpg'
 import spainPrizeImage from './assets/prizes/spain-shirt.jpg'
 import usaPrizeImage from './assets/prizes/usa-shirt.jpg'
 import { captureAnalyticsEvent, initializeGoogleAnalytics, initializePostHog } from './analytics'
+import {
+  formatLocalizedNumber,
+  I18nProvider,
+  languageOptions,
+  useI18n,
+  type LanguageCode,
+  type TranslationKey,
+  type Translator,
+} from './i18n'
 import './App.css'
 import agentsMd from '../AGENTS.md?raw'
 import buildBlogMd from '../BUILD_BLOG.md?raw'
@@ -337,18 +348,13 @@ const sponsorshipTiers = [
   },
 ] as const
 
-const sponsorshipAddOns = [
-  'Custom landing page for a sponsor product drop',
-  'Extra winner review videos or short-form clips',
-  'Localized email and SMS follow-up sequence',
-  'Host-city or supporter-team targeting package',
-  'Creator-style recap reel from winner submissions',
-  'Sponsor dashboard export with campaign metrics',
-]
+const sponsorshipTierTranslationKeys = ['global', 'matchday', 'fan'] as const
+const sponsorIncludeIndexes = [1, 2, 3, 4, 5] as const
+const sponsorAddOnIndexes = [1, 2, 3, 4, 5, 6] as const
 
 const aiBuildMetrics = {
-  tokenTotal: '~4.6M',
-  estimatedCost: '~$39',
+  tokenTotal: '~5.0M',
+  estimatedCost: '~$43',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
@@ -495,38 +501,40 @@ const sectionRouteMap = {
   '/operations': 'operations',
 } as const
 
-const pageTitleMap = {
-  '/fixtures': {
-    kicker: 'Fixtures',
-    title: 'Pick, Score, Lock',
-    copy: 'Predict match scores, lock receipts, and enter sponsor-funded draws when the result is right.',
-  },
-  '/teams': {
-    kicker: 'Teams',
-    title: 'Teams And Schedule',
-    copy: 'Review all participating teams, groups, fixtures, kickoff times, and the selected supporter-team schedule.',
-  },
-  '/draws': {
-    kicker: 'Draws',
-    title: 'Match-Level Winner Draws',
-    copy: 'Run deterministic winner reveals with eligible receipts, alternates, participant outcomes, and audit metadata.',
-  },
-  '/shirts': {
-    kicker: 'Shirts',
-    title: 'Localized Shirt Studio',
-    copy: 'Preview independent supporter-shirt concepts that change with the team a visitor supports.',
-  },
-  '/rewards': {
-    kicker: 'Rewards',
-    title: 'Ship, Track, Review',
-    copy: 'Move winners through sponsor packages, localized shirts, fulfillment queues, and post-delivery review prompts.',
-  },
-  '/operations': {
-    kicker: 'Operations',
-    title: 'POD, 3PL, And Provider Plan',
-    copy: 'Review how shirt production, sponsor kits, infrastructure providers, and campaign operations fit together.',
-  },
-} as const
+function getPageTitleMap(t: Translator) {
+  return {
+    '/fixtures': {
+      kicker: t('route.fixtures.kicker'),
+      title: t('route.fixtures.title'),
+      copy: t('route.fixtures.copy'),
+    },
+    '/teams': {
+      kicker: t('route.teams.kicker'),
+      title: t('route.teams.title'),
+      copy: t('route.teams.copy'),
+    },
+    '/draws': {
+      kicker: t('route.draws.kicker'),
+      title: t('route.draws.title'),
+      copy: t('route.draws.copy'),
+    },
+    '/shirts': {
+      kicker: t('route.shirts.kicker'),
+      title: t('route.shirts.title'),
+      copy: t('route.shirts.copy'),
+    },
+    '/rewards': {
+      kicker: t('route.rewards.kicker'),
+      title: t('route.rewards.title'),
+      copy: t('route.rewards.copy'),
+    },
+    '/operations': {
+      kicker: t('route.operations.kicker'),
+      title: t('route.operations.title'),
+      copy: t('route.operations.copy'),
+    },
+  } as const
+}
 
 type SectionPath = keyof typeof sectionRouteMap
 
@@ -599,11 +607,81 @@ function getCurrentRouteState(): RouteState {
   }
 }
 
-function getRoutePredictionSpec(sectionPath: SectionPath | null) {
-  if (!sectionPath) return predictionSpec
+function localizePredictionSpec(
+  spec: typeof predictionSpec,
+  t: Translator,
+): typeof predictionSpec {
+  const sectionCopy: Record<
+    string,
+    {
+      kicker: string
+      title: string
+    }
+  > = {
+    draws: {
+      kicker: t('json.draws.kicker'),
+      title: t('json.draws.title'),
+    },
+    operations: {
+      kicker: t('json.operations.kicker'),
+      title: t('json.operations.title'),
+    },
+    predictions: {
+      kicker: t('json.predictions.kicker'),
+      title: t('json.predictions.title'),
+    },
+    rewards: {
+      kicker: t('json.rewards.kicker'),
+      title: t('json.rewards.title'),
+    },
+    shirts: {
+      kicker: t('json.shirts.kicker'),
+      title: t('json.shirts.title'),
+    },
+    teams: {
+      kicker: t('json.teams.kicker'),
+      title: t('json.teams.title'),
+    },
+  }
+
+  return {
+    ...spec,
+    elements: Object.fromEntries(
+      Object.entries(spec.elements).map(([elementId, element]) => {
+        if (
+          'props' in element &&
+          typeof element.props === 'object' &&
+          element.props !== null &&
+          'id' in element.props &&
+          typeof element.props.id === 'string' &&
+          sectionCopy[element.props.id]
+        ) {
+          return [
+            elementId,
+            {
+              ...element,
+              props: {
+                ...element.props,
+                ...sectionCopy[element.props.id],
+              },
+            },
+          ]
+        }
+
+        return [elementId, element]
+      }),
+    ) as typeof predictionSpec.elements,
+  }
+}
+
+function getRoutePredictionSpec(
+  sectionPath: SectionPath | null,
+  spec: typeof predictionSpec,
+) {
+  if (!sectionPath) return spec
 
   const sectionId = sectionRouteMap[sectionPath]
-  const sectionElementId = Object.entries(predictionSpec.elements).find(
+  const sectionElementId = Object.entries(spec.elements).find(
     ([, element]) =>
       'props' in element &&
       typeof element.props === 'object' &&
@@ -615,11 +693,11 @@ function getRoutePredictionSpec(sectionPath: SectionPath | null) {
   if (!sectionElementId) return predictionSpec
 
   return {
-    ...predictionSpec,
+    ...spec,
     elements: {
-      ...predictionSpec.elements,
+      ...spec.elements,
       experience: {
-        ...predictionSpec.elements.experience,
+        ...spec.elements.experience,
         children: [sectionElementId],
       },
     },
@@ -786,6 +864,10 @@ function getFixturePickLabel(
   return 'Draw'
 }
 
+function getLocalizedPickLabel(label: string, t: Translator) {
+  return label === 'Draw' ? t('hero.draw') : label
+}
+
 function getFixtureAnalyticsProperties(fixture: TournamentFixture) {
   return {
     match_id: `fixture-${fixture.matchNumber}`,
@@ -803,11 +885,13 @@ function getFixtureAnalyticsProperties(fixture: TournamentFixture) {
 
 function getHomepagePredictionAnalyticsProperties({
   fixture,
+  language,
   prediction,
   prizeBundle,
   supporterTeamKey,
 }: {
   fixture: TournamentFixture
+  language?: LanguageCode
   prediction: FixtureScorePrediction
   prizeBundle: MatchPrizeBundle
   supporterTeamKey: TeamKey
@@ -820,6 +904,7 @@ function getHomepagePredictionAnalyticsProperties({
     prize_bundle_id: prizeBundle.id,
     sponsor_campaign_id: prizeBundle.sponsorCampaignId,
     supporter_team: supporterTeamKey,
+    ...(language ? { language } : {}),
   }
 }
 
@@ -834,7 +919,8 @@ function getFieldErrors(error: ReturnType<typeof predictionEntryFormSchema.safeP
   ) as EntryFormErrors
 }
 
-function App() {
+function AppContent() {
+  const { direction, htmlLang, language, t } = useI18n()
   const [routeState, setRouteState] = useState<RouteState>(() =>
     getCurrentRouteState(),
   )
@@ -850,9 +936,18 @@ function App() {
   const selectedTeam = getTeam(selectedTeamKey)
   const activePrizeKey = routeState.activePrizeKey
   const isExperimentView = routeState.isExperimentView
+  const localizedPredictionSpec = useMemo(
+    () => localizePredictionSpec(predictionSpec, t),
+    [t],
+  )
   const routePredictionSpec = useMemo(
-    () => getRoutePredictionSpec(routeState.sectionPath),
-    [routeState.sectionPath],
+    () => getRoutePredictionSpec(routeState.sectionPath, localizedPredictionSpec),
+    [localizedPredictionSpec, routeState.sectionPath],
+  )
+  const pageTitleMap = useMemo(() => getPageTitleMap(t), [t])
+  const localizedCount = useCallback(
+    (count: number) => formatLocalizedNumber(count, language),
+    [language],
   )
 
   useEffect(() => {
@@ -905,6 +1000,7 @@ function App() {
 
     store.set('/selectedTeamKey', activePrizeKey)
     captureAnalyticsEvent('prize_detail_viewed', {
+      language,
       team_key: activePrizeKey,
       team_name: getTeam(activePrizeKey).name,
       source: 'prize_detail_route',
@@ -917,7 +1013,7 @@ function App() {
     })
 
     return () => window.cancelAnimationFrame(frame)
-  }, [activePrizeKey, store])
+  }, [activePrizeKey, language, store])
 
   const lockedCount =
     homepageReceiptCount +
@@ -932,44 +1028,46 @@ function App() {
     {
       href: '/fixtures',
       icon: <Target size={17} />,
-      label: 'Predict',
-      meta: `${lockedCount} locked`,
+      label: t('flow.predict.label'),
+      meta: t('flow.predict.meta', { count: localizedCount(lockedCount) }),
     },
     {
       href: '/teams',
       icon: <CalendarDays size={17} />,
-      label: 'Teams',
-      meta: '48-team field',
+      label: t('flow.teams.label'),
+      meta: t('flow.teams.meta'),
     },
     {
       href: '/draws',
       icon: <Dice5 size={17} />,
-      label: 'Draw',
-      meta: `${drawCount} complete`,
+      label: t('flow.draw.label'),
+      meta: t('flow.draw.meta', { count: localizedCount(drawCount) }),
     },
     {
       href: '/prizes',
       icon: <Gift size={17} />,
-      label: 'Prize',
-      meta: 'Free shirt',
+      label: t('flow.prize.label'),
+      meta: t('flow.prize.meta'),
     },
     {
       href: '/shirts',
       icon: <Shirt size={17} />,
-      label: 'Personalize',
+      label: t('flow.personalize.label'),
       meta: selectedTeam.code,
     },
     {
       href: '/rewards',
       icon: <PackageCheck size={17} />,
-      label: 'Fulfill',
-      meta: `${predictionState.fulfillmentQueue.length} queued`,
+      label: t('flow.fulfill.label'),
+      meta: t('flow.fulfill.meta', {
+        count: localizedCount(predictionState.fulfillmentQueue.length),
+      }),
     },
     {
       href: '/operations',
       icon: <ShieldCheck size={17} />,
-      label: 'Review',
-      meta: `${reviewCount} sent`,
+      label: t('flow.review.label'),
+      meta: t('flow.review.meta', { count: localizedCount(reviewCount) }),
     },
   ]
 
@@ -981,6 +1079,12 @@ function App() {
     '--team-soft': selectedTeam.colors.soft,
     '--hero-image': `url(${heroImage})`,
   } as CSSProperties
+  const shellProps = {
+    className: 'app-shell',
+    dir: direction,
+    lang: htmlLang,
+    style: themeVars,
+  }
 
   const selectSupporterTeam = (
     teamKey: TeamKey,
@@ -990,6 +1094,7 @@ function App() {
 
     store.set('/selectedTeamKey', teamKey)
     captureAnalyticsEvent('team_selected', {
+      language,
       team_key: teamKey,
       team_name: team.name,
       team_code: team.code,
@@ -999,7 +1104,7 @@ function App() {
 
   if (isExperimentView) {
     return (
-      <main className="app-shell" style={themeVars}>
+      <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
         <ExperimentPage />
         <SiteFooter />
@@ -1009,7 +1114,7 @@ function App() {
 
   if (activePrizeKey) {
     return (
-      <main className="app-shell" style={themeVars}>
+      <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
         <PrizeDetailPage
           onSelectTeam={(teamKey) => selectSupporterTeam(teamKey, 'prize_detail')}
@@ -1022,7 +1127,7 @@ function App() {
 
   if (routeState.pathname === '/prizes') {
     return (
-      <main className="app-shell" style={themeVars}>
+      <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
         <PrizeHomeSection
           onSelectTeam={(teamKey) => selectSupporterTeam(teamKey, 'prize_card')}
@@ -1035,7 +1140,7 @@ function App() {
 
   if (routeState.pathname === '/sponsors') {
     return (
-      <main className="app-shell" style={themeVars}>
+      <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
         <SponsorSection />
         <SiteFooter />
@@ -1045,7 +1150,7 @@ function App() {
 
   if (routeState.pathname === '/posthog') {
     return (
-      <main className="app-shell" style={themeVars}>
+      <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
         <PostHogDashboardPage />
         <SiteFooter />
@@ -1057,7 +1162,7 @@ function App() {
     const routeCopy = pageTitleMap[routeState.sectionPath]
 
     return (
-      <main className="app-shell" style={themeVars}>
+      <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
 
         <section className="route-page-hero" aria-labelledby="route-page-title">
@@ -1074,12 +1179,12 @@ function App() {
         </section>
 
         <div className="workspace-shell route-workspace">
-          <aside className="flow-rail" aria-label="Prediction workflow">
+          <aside className="flow-rail" aria-label={t('flow.aria')}>
             <div className="flow-rail-header">
               <span>{selectedTeam.code}</span>
-              <strong>Matchday Flow</strong>
+              <strong>{t('flow.header')}</strong>
             </div>
-            <nav aria-label="Prediction workflow stages">
+            <nav aria-label={t('flow.stagesAria')}>
               {flowItems.map((item) => (
                 <a href={item.href} key={item.label}>
                   <span className="flow-icon">{item.icon}</span>
@@ -1105,7 +1210,7 @@ function App() {
   }
 
   return (
-    <main className="app-shell" style={themeVars}>
+    <main {...shellProps}>
       <Topbar drawCount={drawCount} lockedCount={lockedCount} />
 
       <HeroPredictionArena
@@ -1120,8 +1225,8 @@ function App() {
             <UsersRound size={18} />
           </span>
           <div>
-            <p className="section-kicker">Supporter Team</p>
-            <h2 id="supporter-team">Choose Your Team</h2>
+            <p className="section-kicker">{t('team.kicker')}</p>
+            <h2 id="supporter-team">{t('team.title')}</h2>
           </div>
         </div>
         <div className="team-picker" role="list">
@@ -1162,12 +1267,12 @@ function App() {
       <SponsorSection />
 
       <div className="workspace-shell">
-        <aside className="flow-rail" aria-label="Prediction workflow">
+        <aside className="flow-rail" aria-label={t('flow.aria')}>
           <div className="flow-rail-header">
             <span>{selectedTeam.code}</span>
-            <strong>Matchday Flow</strong>
+            <strong>{t('flow.header')}</strong>
           </div>
-          <nav aria-label="Prediction workflow stages">
+          <nav aria-label={t('flow.stagesAria')}>
             {flowItems.map((item) => (
               <a href={item.href} key={item.label}>
                 <span className="flow-icon">{item.icon}</span>
@@ -1182,7 +1287,7 @@ function App() {
 
         <div className="workspace-main">
           <JSONUIProvider registry={registry} store={store}>
-            <Renderer spec={predictionSpec} registry={registry} />
+            <Renderer spec={localizedPredictionSpec} registry={registry} />
           </JSONUIProvider>
         </div>
       </div>
@@ -1223,10 +1328,10 @@ function getFixtureVisualTeam(teamName: string) {
   }
 }
 
-function getFixtureStatusLabel(fixture: TournamentFixture) {
+function getFixtureStatusLabel(fixture: TournamentFixture, t: Translator) {
   const diffMs = getFixtureKickoffMs(fixture) - Date.now()
 
-  if (diffMs <= 0) return 'Awaiting result snapshot'
+  if (diffMs <= 0) return t('hero.status.awaitingResult')
 
   const dayMs = 24 * 60 * 60 * 1000
   const hourMs = 60 * 60 * 1000
@@ -1234,12 +1339,19 @@ function getFixtureStatusLabel(fixture: TournamentFixture) {
   if (diffMs >= dayMs) {
     const days = Math.ceil(diffMs / dayMs)
 
-    return `Kickoff in ${days} ${days === 1 ? 'day' : 'days'}`
+    return t(days === 1 ? 'hero.status.kickoffDay' : 'hero.status.kickoffDays', {
+      count: days,
+    })
   }
 
   const hours = Math.max(1, Math.ceil(diffMs / hourMs))
 
-  return `Kickoff in ${hours} ${hours === 1 ? 'hour' : 'hours'}`
+  return t(
+    hours === 1 ? 'hero.status.kickoffHour' : 'hero.status.kickoffHours',
+    {
+      count: hours,
+    },
+  )
 }
 
 function HeroPredictionArena({
@@ -1251,6 +1363,7 @@ function HeroPredictionArena({
   selectedTeam: ReturnType<typeof getTeam>
   selectedTeamKey: TeamKey
 }) {
+  const { language, t } = useI18n()
   const upcomingFixtures = useMemo(() => getUpcomingHomepageFixtures(8), [])
   const [activeMatchNumber, setActiveMatchNumber] = useState(
     () => upcomingFixtures[0]?.matchNumber ?? 1,
@@ -1289,8 +1402,9 @@ function HeroPredictionArena({
   )
   const activeReceipt = receipts[activeFixture.matchNumber]
   const activePickLabel = getFixturePickLabel(activeFixture, activePrediction)
+  const activePickDisplayLabel = getLocalizedPickLabel(activePickLabel, t)
   const activeSponsorName = activePrizeBundle.sponsorName.includes('Placeholder')
-    ? 'Sponsor this match'
+    ? t('hero.sponsorThisMatch')
     : activePrizeBundle.sponsorName
   const activeJoinedCount =
     activeReceipt?.joinedCount ??
@@ -1310,11 +1424,12 @@ function HeroPredictionArena({
     () =>
       getHomepagePredictionAnalyticsProperties({
         fixture: activeFixture,
+        language,
         prediction: activePrediction,
         prizeBundle: activePrizeBundle,
         supporterTeamKey: selectedTeamKey,
       }),
-    [activeFixture, activePrediction, activePrizeBundle, selectedTeamKey],
+    [activeFixture, activePrediction, activePrizeBundle, language, selectedTeamKey],
   )
 
   useEffect(() => {
@@ -1333,12 +1448,13 @@ function HeroPredictionArena({
   useEffect(() => {
     captureAnalyticsEvent('prize_bundle_viewed', {
       ...getFixtureAnalyticsProperties(activeFixture),
+      language,
       prize_bundle_id: activePrizeBundle.id,
       sponsor_campaign_id: activePrizeBundle.sponsorCampaignId,
       supporter_team: selectedTeamKey,
       surface: 'homepage_prediction_hero',
     })
-  }, [activeFixture, activePrizeBundle, selectedTeamKey])
+  }, [activeFixture, activePrizeBundle, language, selectedTeamKey])
 
   const updateEntryFormField = <K extends keyof PredictionEntryForm>(
     field: K,
@@ -1363,6 +1479,7 @@ function HeroPredictionArena({
     captureAnalyticsEvent('homepage_match_selected', {
       ...getHomepagePredictionAnalyticsProperties({
         fixture,
+        language,
         prediction: fixturePrediction,
         prizeBundle,
         supporterTeamKey: selectedTeamKey,
@@ -1397,6 +1514,7 @@ function HeroPredictionArena({
 
     const analyticsProperties = getHomepagePredictionAnalyticsProperties({
       fixture: activeFixture,
+      language,
       prediction: nextPrediction,
       prizeBundle: activePrizeBundle,
       supporterTeamKey: selectedTeamKey,
@@ -1437,7 +1555,7 @@ function HeroPredictionArena({
 
     if (!formValidation.success) {
       setEntryFormErrors(getFieldErrors(formValidation))
-      setSubmissionError('Check the highlighted fields before submitting.')
+      setSubmissionError(t('modal.errorCheck'))
       setSubmissionStatus('error')
       captureAnalyticsEvent('prediction_entry_failed', {
         ...activeAnalyticsProperties,
@@ -1452,6 +1570,7 @@ function HeroPredictionArena({
     const submittedBundle = activePrizeBundle
     const submittedAnalyticsProperties = getHomepagePredictionAnalyticsProperties({
       fixture: submittedFixture,
+      language,
       prediction: submittedPrediction,
       prizeBundle: submittedBundle,
       supporterTeamKey: selectedTeamKey,
@@ -1498,7 +1617,7 @@ function HeroPredictionArena({
       if (!response.ok || !responseBody?.receiptHash) {
         throw new Error(
           responseBody?.error ??
-            'Prediction entry could not be saved. Please retry.',
+            t('modal.errorRetry'),
         )
       }
 
@@ -1542,7 +1661,7 @@ function HeroPredictionArena({
       const message =
         error instanceof Error
           ? error.message
-          : 'Prediction entry could not be saved. Please retry.'
+          : t('modal.errorRetry')
 
       setSubmissionError(message)
       setSubmissionStatus('error')
@@ -1567,24 +1686,32 @@ function HeroPredictionArena({
             <div>
               <p className="eyebrow">{selectedTeam.chant}</p>
               <h1 id="page-title">
-                Predict {activeFixture.home} vs {activeFixture.away}
+                {t('hero.title', {
+                  away: activeFixture.away,
+                  home: activeFixture.home,
+                })}
               </h1>
-              <p>
-                Set the score, lock a draw entry, and see the sponsor-funded
-                prize bundle before leaving the first screen.
-              </p>
+              <p>{t('hero.subtitle')}</p>
             </div>
-            <div className="supporter-mini-panel" aria-label="Supporter mode">
+            <div
+              className="supporter-mini-panel"
+              aria-label={t('hero.supporterModeAria')}
+            >
               <span>{selectedTeam.code}</span>
               <strong>{selectedTeam.name}</strong>
               <em>{selectedTeam.mood}</em>
             </div>
           </header>
 
-          <div className="hero-fixture-meta" aria-label="Selected match details">
-            <span>{getFixtureStatusLabel(activeFixture)}</span>
-            <span>Match {activeFixture.matchNumber}</span>
-            <span>Group {activeFixture.group}</span>
+          <div
+            className="hero-fixture-meta"
+            aria-label={t('hero.selectedMatchDetailsAria')}
+          >
+            <span>{getFixtureStatusLabel(activeFixture, t)}</span>
+            <span>
+              {t('hero.match', { number: activeFixture.matchNumber })}
+            </span>
+            <span>{t('hero.group', { group: activeFixture.group })}</span>
             <span>
               {formatFixtureDate(activeFixture.date)} ·{' '}
               {formatTimeET(activeFixture.timeET)}
@@ -1596,7 +1723,12 @@ function HeroPredictionArena({
 
           <div
             className="next-score-board hero-score-board"
-            aria-label={`${activeFixture.home} ${activePrediction.homeScore}, ${activeFixture.away} ${activePrediction.awayScore}`}
+            aria-label={t('hero.scoreAria', {
+              away: activeFixture.away,
+              awayScore: activePrediction.awayScore,
+              home: activeFixture.home,
+              homeScore: activePrediction.homeScore,
+            })}
           >
             <div
               className={`next-score-team ${
@@ -1619,9 +1751,9 @@ function HeroPredictionArena({
 
           <div className="hero-outcome-row">
             <div>
-              <span>Predicted outcome</span>
+              <span>{t('hero.predictedOutcome')}</span>
               <strong>
-                {activePickLabel} · {activePrediction.homeScore}-
+                {activePickDisplayLabel} · {activePrediction.homeScore}-
                 {activePrediction.awayScore}
               </strong>
             </div>
@@ -1634,7 +1766,9 @@ function HeroPredictionArena({
               type="button"
             >
               <ShieldCheck size={17} />
-              <span>{activeReceipt ? 'Entry Received' : 'Lock Prediction'}</span>
+              <span>
+                {activeReceipt ? t('hero.entryReceived') : t('hero.lockPrediction')}
+              </span>
             </button>
           </div>
 
@@ -1661,27 +1795,27 @@ function HeroPredictionArena({
         <aside
           className="hero-prize-panel"
           key={activePrizeBundle.id}
-          aria-label="Prize bundle details"
+          aria-label={t('hero.prizeBundleAria')}
         >
           <div className="receipt-header">
             <Gift size={20} />
             <div>
-              <p className="section-kicker">Sponsor Prize Bundle</p>
+              <p className="section-kicker">{t('hero.sponsorPrizeBundle')}</p>
               <h2>{activePrizeBundle.title}</h2>
             </div>
           </div>
 
           <div className="hero-prize-stats">
             <div>
-              <span>Winners</span>
+              <span>{t('hero.winners')}</span>
               <strong>{activePrizeBundle.winnerSlots}</strong>
             </div>
             <div>
-              <span>Joined</span>
-              <strong>{activeJoinedCount.toLocaleString()}</strong>
+              <span>{t('hero.joined')}</span>
+              <strong>{formatLocalizedNumber(activeJoinedCount, language)}</strong>
             </div>
             <div>
-              <span>Sponsor</span>
+              <span>{t('hero.sponsor')}</span>
               <strong>{activeSponsorName}</strong>
             </div>
           </div>
@@ -1698,23 +1832,21 @@ function HeroPredictionArena({
           <div className="hero-prize-note">
             <ShieldCheck size={17} />
             <p>
-              {activePrizeBundle.entrantGiftNote} Independent fan rewards only;
-              no official team, tournament, federation, player, or sponsor marks
-              are used.
+              {activePrizeBundle.entrantGiftNote} {t('hero.guardrailNoteSuffix')}
             </p>
           </div>
         </aside>
       </div>
 
-      <div className="hero-match-rail" aria-label="Upcoming match rail">
+      <div className="hero-match-rail" aria-label={t('hero.upcomingAria')}>
         <div className="hero-rail-heading">
           <div>
-            <p className="section-kicker">Upcoming Matches</p>
-            <h2>Browse Nearby Fixtures</h2>
+            <p className="section-kicker">{t('hero.upcomingMatches')}</p>
+            <h2>{t('hero.browseNearbyFixtures')}</h2>
           </div>
           <a className="prize-action secondary" href="/fixtures">
             <CalendarDays size={17} />
-            <span>Full Fixtures</span>
+            <span>{t('hero.fullFixtures')}</span>
           </a>
         </div>
         <div className="hero-rail-list">
@@ -1729,20 +1861,24 @@ function HeroPredictionArena({
                 className="hero-rail-match"
                 key={fixture.matchNumber}
                 onClick={() => selectFixture(fixture)}
-                type="button"
-              >
-                <span>Match {fixture.matchNumber}</span>
+              type="button"
+            >
+                <span>{t('hero.match', { number: fixture.matchNumber })}</span>
                 <strong>
                   {getTournamentTeamCode(fixture.home)} vs{' '}
                   {getTournamentTeamCode(fixture.away)}
                 </strong>
                 <em>
-                  {formatFixtureDate(fixture.date)} · Group {fixture.group}
+                  {formatFixtureDate(fixture.date)} ·{' '}
+                  {t('hero.group', { group: fixture.group })}
                 </em>
                 <small>
                   {fixtureReceipt
-                    ? 'Receipt saved'
-                    : `${fixtureBundle.winnerSlots} winners · ${fixtureBundle.tag}`}
+                    ? t('hero.receiptSaved')
+                    : t('hero.fixturePrizeMeta', {
+                        count: fixtureBundle.winnerSlots,
+                        tag: fixtureBundle.tag,
+                      })}
                 </small>
               </button>
             )
@@ -1772,50 +1908,48 @@ function HeroPredictionArena({
 }
 
 function PredictionReceiptPanel({ receipt }: { receipt: PredictionReceipt }) {
+  const { t } = useI18n()
+  const predictedOutcome = getLocalizedPickLabel(receipt.predictedOutcome, t)
+
   return (
-    <aside className="hero-receipt-panel" aria-label="Prediction receipt">
+    <aside className="hero-receipt-panel" aria-label={t('receipt.aria')}>
       <div className="receipt-header">
         <Ticket size={18} />
         <div>
-          <p className="section-kicker">Receipt</p>
-          <h2>Prediction Locked</h2>
+          <p className="section-kicker">{t('receipt.kicker')}</p>
+          <h2>{t('receipt.title')}</h2>
         </div>
       </div>
       <div className="receipt-list">
         <div className="receipt-line">
-          <span>Match</span>
+          <span>{t('receipt.match')}</span>
           <strong>
             {receipt.homeTeam} vs {receipt.awayTeam}
           </strong>
         </div>
         <div className="receipt-line">
-          <span>Prediction</span>
+          <span>{t('receipt.prediction')}</span>
           <strong>
-            {receipt.predictedOutcome} · {receipt.homeScore}-{receipt.awayScore}
+            {predictedOutcome} · {receipt.homeScore}-{receipt.awayScore}
           </strong>
         </div>
         <div className="receipt-line">
-          <span>Email</span>
+          <span>{t('receipt.email')}</span>
           <strong>{receipt.participantEmail}</strong>
         </div>
         <div className="receipt-line">
-          <span>Receipt hash</span>
+          <span>{t('receipt.hash')}</span>
           <strong>{receipt.receiptHash}</strong>
         </div>
         <div className="receipt-line">
-          <span>Prize bundle</span>
+          <span>{t('receipt.prizeBundle')}</span>
           <strong>{receipt.prizeBundleTitle}</strong>
         </div>
       </div>
-      <p>
-        Watch for draw updates at this email. Shipping address is stored
-        server-side for eligibility and sponsor gift review, and is not shown
-        here.
-      </p>
+      <p>{t('receipt.followup')}</p>
       {!receipt.persisted ? (
         <p className="receipt-warning">
-          {receipt.persistenceMessage ??
-            'This environment returned a non-persistent fallback receipt.'}
+          {receipt.persistenceMessage ?? t('receipt.fallback')}
         </p>
       ) : null}
     </aside>
@@ -1850,7 +1984,9 @@ function PredictionEntryModal({
   submissionError: string | null
   submissionStatus: 'idle' | 'submitting' | 'error'
 }) {
+  const { t } = useI18n()
   const predictionLabel = getFixturePickLabel(fixture, prediction)
+  const predictionDisplayLabel = getLocalizedPickLabel(predictionLabel, t)
   const isSubmitting = submissionStatus === 'submitting'
 
   return (
@@ -1863,33 +1999,33 @@ function PredictionEntryModal({
       >
         <header className="entry-modal-header">
           <div>
-            <p className="section-kicker">Draw Entry</p>
-            <h2 id="prediction-entry-title">Complete Your Prediction Entry</h2>
-            <p>
-              US shipping details are collected now because sponsors may choose
-              to send gifts to more entrants after eligibility review.
-            </p>
+            <p className="section-kicker">{t('modal.drawEntry')}</p>
+            <h2 id="prediction-entry-title">{t('modal.title')}</h2>
+            <p>{t('modal.copy')}</p>
           </div>
           <button
-            aria-label="Close entry form"
+            aria-label={t('modal.closeAria')}
             disabled={isSubmitting}
             onClick={onClose}
             type="button"
           >
-            Close
+            {t('modal.close')}
           </button>
         </header>
 
         <form className="entry-form" onSubmit={onSubmit}>
           <div className="entry-summary">
-            <span>Match {fixture.matchNumber}</span>
+            <span>{t('hero.match', { number: fixture.matchNumber })}</span>
             <strong>
               {fixture.home} {prediction.homeScore} · {prediction.awayScore}{' '}
               {fixture.away}
             </strong>
             <em>
-              Prediction: {predictionLabel} · {prizeBundle.winnerSlots} winner
-              slots · {prizeBundle.sponsorName}
+              {t('modal.summaryPrediction', {
+                prediction: predictionDisplayLabel,
+                sponsor: prizeBundle.sponsorName,
+                winnerSlots: prizeBundle.winnerSlots,
+              })}
             </em>
           </div>
 
@@ -1898,7 +2034,7 @@ function PredictionEntryModal({
               autoComplete="given-name"
               error={errors.firstName}
               id="entry-first-name"
-              label="First name"
+              label={t('modal.firstName')}
               onChange={(value) => onChange('firstName', value)}
               value={entryForm.firstName}
             />
@@ -1906,7 +2042,7 @@ function PredictionEntryModal({
               autoComplete="family-name"
               error={errors.lastName}
               id="entry-last-name"
-              label="Last name"
+              label={t('modal.lastName')}
               onChange={(value) => onChange('lastName', value)}
               value={entryForm.lastName}
             />
@@ -1914,7 +2050,7 @@ function PredictionEntryModal({
               autoComplete="email"
               error={errors.email}
               id="entry-email"
-              label="Email"
+              label={t('modal.email')}
               onChange={(value) => onChange('email', value)}
               type="email"
               value={entryForm.email}
@@ -1923,7 +2059,7 @@ function PredictionEntryModal({
               autoComplete="tel"
               error={errors.phone}
               id="entry-phone"
-              label="Phone"
+              label={t('modal.phone')}
               onChange={(value) => onChange('phone', value)}
               type="tel"
               value={entryForm.phone}
@@ -1932,7 +2068,7 @@ function PredictionEntryModal({
               autoComplete="address-line1"
               error={errors.addressLine1}
               id="entry-address-line1"
-              label="Address line 1"
+              label={t('modal.address1')}
               onChange={(value) => onChange('addressLine1', value)}
               value={entryForm.addressLine1}
             />
@@ -1940,7 +2076,7 @@ function PredictionEntryModal({
               autoComplete="address-line2"
               error={errors.addressLine2}
               id="entry-address-line2"
-              label="Address line 2"
+              label={t('modal.address2')}
               onChange={(value) => onChange('addressLine2', value)}
               required={false}
               value={entryForm.addressLine2 ?? ''}
@@ -1949,12 +2085,12 @@ function PredictionEntryModal({
               autoComplete="address-level2"
               error={errors.city}
               id="entry-city"
-              label="City"
+              label={t('modal.city')}
               onChange={(value) => onChange('city', value)}
               value={entryForm.city}
             />
             <label className={`entry-field ${errors.state ? 'has-error' : ''}`}>
-              <span>State</span>
+              <span>{t('modal.state')}</span>
               <select
                 autoComplete="address-level1"
                 onChange={(event) =>
@@ -1974,7 +2110,7 @@ function PredictionEntryModal({
               autoComplete="postal-code"
               error={errors.postalCode}
               id="entry-postal-code"
-              label="ZIP code"
+              label={t('modal.zip')}
               onChange={(value) => onChange('postalCode', value)}
               value={entryForm.postalCode}
             />
@@ -1990,9 +2126,8 @@ function PredictionEntryModal({
                 type="checkbox"
               />
               <span>
-                <strong>I am eligible and accept the rules/privacy terms.</strong>
-                This MVP is US-only and requires sponsor-safe prize review before
-                any real campaign.
+                <strong>{t('modal.rulesStrong')}</strong>
+                {t('modal.rulesCopy')}
               </span>
             </label>
             {errors.rulesAccepted ? <em>{errors.rulesAccepted}</em> : null}
@@ -2005,8 +2140,8 @@ function PredictionEntryModal({
                 type="checkbox"
               />
               <span>
-                <strong>Send optional sponsor and draw updates.</strong>
-                Consent is optional and does not affect entry eligibility.
+                <strong>{t('modal.marketingStrong')}</strong>
+                {t('modal.marketingCopy')}
               </span>
             </label>
           </div>
@@ -2019,18 +2154,18 @@ function PredictionEntryModal({
 
           <div className="entry-modal-actions">
             <button disabled={isSubmitting} onClick={onClose} type="button">
-              Cancel
+              {t('modal.cancel')}
             </button>
             <button disabled={isSubmitting} type="submit">
               {isSubmitting ? (
                 <>
                   <Activity size={17} />
-                  <span>Submitting</span>
+                  <span>{t('modal.submitting')}</span>
                 </>
               ) : (
                 <>
                   <ShieldCheck size={17} />
-                  <span>Submit Entry</span>
+                  <span>{t('modal.submit')}</span>
                 </>
               )}
             </button>
@@ -2083,6 +2218,7 @@ function PrizeHomeSection({
   onSelectTeam: (teamKey: TeamKey) => void
   selectedTeamKey: TeamKey
 }) {
+  const { t } = useI18n()
   const selectedTeam = getTeam(selectedTeamKey)
   const selectedShirt = shirtConcepts[selectedTeamKey]
   const selectedPrize = prizeDetails[selectedTeamKey]
@@ -2095,15 +2231,11 @@ function PrizeHomeSection({
             <Gift size={18} />
           </span>
           <div>
-            <p className="section-kicker">Prize Draw</p>
-            <h2 id="prize-title">Win The Team Shirt You Picked</h2>
+            <p className="section-kicker">{t('prize.kicker')}</p>
+            <h2 id="prize-title">{t('prize.title')}</h2>
           </div>
         </div>
-        <p>
-          Each qualified draw winner receives a free localized supporter shirt
-          for their selected team. These are independent fan designs with no
-          official tournament, federation, player, or sponsor branding.
-        </p>
+        <p>{t('prize.copy')}</p>
       </div>
 
       <div className="featured-prize">
@@ -2114,10 +2246,15 @@ function PrizeHomeSection({
           />
         </div>
         <div className="featured-prize-copy">
-          <p className="section-kicker">{selectedTeam.name} Prize</p>
+          <p className="section-kicker">
+            {t('prize.teamPrize', { team: selectedTeam.name })}
+          </p>
           <h3>{selectedShirt.conceptName}</h3>
           <p>{selectedPrize.headline}</p>
-          <div className="prize-pill-row" aria-label="Selected prize colors">
+          <div
+            className="prize-pill-row"
+            aria-label={t('prize.selectedColorsAria')}
+          >
             {[selectedShirt.base, selectedShirt.graphic, selectedShirt.accent].map(
               (color) => (
                 <span key={color} style={{ background: color }} />
@@ -2135,23 +2272,23 @@ function PrizeHomeSection({
             </li>
             <li>
               <ShieldCheck size={17} />
-              <span>No official marks, crests, players, or sponsor logos.</span>
+              <span>{t('prize.noOfficialMarks')}</span>
             </li>
           </ul>
           <div className="prize-actions">
             <a className="prize-action primary" href={`/prizes/${selectedTeamKey}`}>
-              <span>View Team Prize</span>
+              <span>{t('prize.viewTeamPrize')}</span>
               <ChevronRight size={17} />
             </a>
             <a className="prize-action secondary" href="/fixtures">
               <Target size={17} />
-              <span>Make Picks</span>
+              <span>{t('prize.makePicks')}</span>
             </a>
           </div>
         </div>
       </div>
 
-      <div className="prize-team-grid" aria-label="Team prize previews">
+      <div className="prize-team-grid" aria-label={t('prize.previewsAria')}>
         {teamThemes.map((team) => {
           const shirt = shirtConcepts[team.key]
 
@@ -2182,7 +2319,7 @@ function PrizeHomeSection({
                   href={`/prizes/${team.key}`}
                   onClick={() => onSelectTeam(team.key)}
                 >
-                  <span>Prize Details</span>
+                  <span>{t('prize.details')}</span>
                   <ChevronRight size={16} />
                 </a>
               </div>
@@ -2195,6 +2332,26 @@ function PrizeHomeSection({
 }
 
 function SponsorSection() {
+  const { t } = useI18n()
+  const localizedSponsorshipTiers = sponsorshipTiers.map((tier, index) => {
+    const tierKey = sponsorshipTierTranslationKeys[index]
+
+    return {
+      ...tier,
+      creative: t(`sponsor.tier.${tierKey}.creative` as TranslationKey),
+      includes: sponsorIncludeIndexes.map((includeIndex) =>
+        t(`sponsor.tier.${tierKey}.include.${includeIndex}` as TranslationKey),
+      ),
+      name: t(`sponsor.tier.${tierKey}.name` as TranslationKey),
+      signal: t(`sponsor.tier.${tierKey}.signal` as TranslationKey),
+      spots: t(`sponsor.tier.${tierKey}.spots` as TranslationKey),
+      summary: t(`sponsor.tier.${tierKey}.summary` as TranslationKey),
+    }
+  })
+  const localizedSponsorshipAddOns = sponsorAddOnIndexes.map((addOnIndex) =>
+    t(`sponsor.addon.${addOnIndex}` as TranslationKey),
+  )
+
   return (
     <section
       className="sponsor-band"
@@ -2207,19 +2364,15 @@ function SponsorSection() {
             <Handshake size={18} />
           </span>
           <div>
-            <p className="section-kicker">Sponsor Packages</p>
-            <h2 id="sponsor-title">Fund The Rewards Fans Remember</h2>
+            <p className="section-kicker">{t('sponsor.kicker')}</p>
+            <h2 id="sponsor-title">{t('sponsor.title')}</h2>
           </div>
         </div>
-        <p>
-          Sponsors fund match campaigns, winner product gifts, localized shirt
-          drops, and post-delivery review prompts. Packages are designed for
-          product sampling, media proof, and measurable fan engagement.
-        </p>
+        <p>{t('sponsor.copy')}</p>
       </div>
 
-      <div className="sponsor-tier-grid" aria-label="Sponsorship tiers">
-        {sponsorshipTiers.map((tier) => {
+      <div className="sponsor-tier-grid" aria-label={t('sponsor.tiersAria')}>
+        {localizedSponsorshipTiers.map((tier) => {
           const TierIcon = tier.icon
 
           return (
@@ -2257,16 +2410,12 @@ function SponsorSection() {
 
       <div className="sponsor-addons">
         <div>
-          <p className="section-kicker">Creative Add-ons</p>
-          <h3>More Ways To Build The Campaign</h3>
-          <p>
-            Add-ons keep the core sponsorship packages simple while giving
-            larger brands, agencies, and regional partners more room to shape
-            the activation.
-          </p>
+          <p className="section-kicker">{t('sponsor.addonsKicker')}</p>
+          <h3>{t('sponsor.addonsTitle')}</h3>
+          <p>{t('sponsor.addonsCopy')}</p>
         </div>
         <ul>
-          {sponsorshipAddOns.map((addOn) => (
+          {localizedSponsorshipAddOns.map((addOn) => (
             <li key={addOn}>
               <BadgeDollarSign size={17} />
               <span>{addOn}</span>
@@ -2277,11 +2426,7 @@ function SponsorSection() {
 
       <div className="sponsor-compliance-note">
         <ShieldCheck size={18} />
-        <p>
-          Sponsor campaigns must stay separate from official tournament,
-          federation, player, crest, and mascot marks. Prize, review, and
-          fulfillment language should be reviewed before any live campaign.
-        </p>
+        <p>{t('sponsor.compliance')}</p>
       </div>
     </section>
   )
@@ -2427,6 +2572,8 @@ function Topbar({
   drawCount: number
   lockedCount: number
 }) {
+  const { language, t } = useI18n()
+
   return (
     <div className="site-chrome">
       <AIBuildBanner />
@@ -2440,46 +2587,96 @@ function Topbar({
             width="78"
           />
         </a>
-        <nav className="nav-links" aria-label="Primary navigation">
-          <a href="/fixtures">Fixtures</a>
-          <a href="/teams">Teams</a>
-          <a href="/prizes">Prizes</a>
-          <a href="/sponsors">Sponsors</a>
-          <a href="/rewards">Rewards</a>
-          <a href="/operations">Operations</a>
+        <nav className="nav-links" aria-label={t('nav.primaryAria')}>
+          <a href="/fixtures">{t('nav.fixtures')}</a>
+          <a href="/teams">{t('nav.teams')}</a>
+          <a href="/prizes">{t('nav.prizes')}</a>
+          <a href="/sponsors">{t('nav.sponsors')}</a>
+          <a href="/rewards">{t('nav.rewards')}</a>
+          <a href="/operations">{t('nav.operations')}</a>
         </nav>
-        <button className="account-button" type="button">
-          <Ticket size={17} />
-          <span>
-            {lockedCount} locked · {drawCount} draws
-          </span>
-        </button>
+        <div className="topbar-actions">
+          <LanguageSelector />
+          <button className="account-button" type="button">
+            <Ticket size={17} />
+            <span>
+              {t('nav.accountStatus', {
+                drawCount: formatLocalizedNumber(drawCount, language),
+                lockedCount: formatLocalizedNumber(lockedCount, language),
+              })}
+            </span>
+          </button>
+        </div>
       </header>
     </div>
   )
 }
 
-function AIBuildBanner() {
+function LanguageSelector() {
+  const { language, setLanguage, t } = useI18n()
+
   return (
-    <aside className="ai-build-banner" aria-label="AI build disclosure">
+    <label className="language-selector">
+      <span className="language-selector-icon" aria-hidden="true">
+        <Globe2 size={16} />
+      </span>
+      <span className="language-selector-label">
+        {t('language.selector.shortLabel')}
+      </span>
+      <select
+        aria-label={t('language.selector.label')}
+        onChange={(event) => {
+          const nextLanguage = event.target.value as LanguageCode
+
+          if (nextLanguage === language) return
+
+          captureAnalyticsEvent('language_changed', {
+            language: nextLanguage,
+            previous_language: language,
+            surface: 'topbar',
+          })
+          setLanguage(nextLanguage)
+        }}
+        value={language}
+      >
+        {languageOptions.map((option) => (
+          <option
+            dir={option.direction}
+            key={option.code}
+            lang={option.htmlLang}
+            value={option.code}
+          >
+            {option.nativeLabel}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
+function AIBuildBanner() {
+  const { t } = useI18n()
+
+  return (
+    <aside className="ai-build-banner" aria-label={t('ai.aria')}>
       <div>
         <span className="ai-build-icon">
           <Sparkles size={17} />
         </span>
-        <strong>Built entirely by AI</strong>
+        <strong>{t('ai.built')}</strong>
       </div>
-      <dl aria-label="Estimated AI usage">
+      <dl aria-label={t('ai.usageAria')}>
         <div>
-          <dt>Total tokens</dt>
+          <dt>{t('ai.totalTokens')}</dt>
           <dd>{aiBuildMetrics.tokenTotal}</dd>
         </div>
         <div>
-          <dt>Estimated cost</dt>
+          <dt>{t('ai.estimatedCost')}</dt>
           <dd>{aiBuildMetrics.estimatedCost}</dd>
         </div>
       </dl>
-      <span>{aiBuildMetrics.costLabel}</span>
-      <em>{aiBuildMetrics.note}</em>
+      <span>{t('ai.costLabel')}</span>
+      <em>{t('ai.note')}</em>
     </aside>
   )
 }
@@ -2769,25 +2966,27 @@ function ExperimentPage() {
 }
 
 function SiteFooter() {
+  const { t } = useI18n()
+
   return (
     <footer className="site-footer">
       <div>
         <strong>Win World Cup 2026</strong>
         <span>
-          An experiment from{' '}
+          {t('footer.experimentCopy')}{' '}
           <a href="https://10claws.com/" rel="noreferrer" target="_blank">
             10claws.com
             <ExternalLink size={13} />
           </a>
         </span>
       </div>
-      <nav aria-label="Footer navigation">
-        <a href="/experiment">Experiment</a>
-        <a href="/fixtures">Fixtures</a>
-        <a href="/teams">Teams</a>
-        <a href="/prizes">Prizes</a>
-        <a href="/sponsors">Sponsors</a>
-        <a href="/operations">Operations</a>
+      <nav aria-label={t('footer.aria')}>
+        <a href="/experiment">{t('footer.experiment')}</a>
+        <a href="/fixtures">{t('nav.fixtures')}</a>
+        <a href="/teams">{t('nav.teams')}</a>
+        <a href="/prizes">{t('nav.prizes')}</a>
+        <a href="/sponsors">{t('nav.sponsors')}</a>
+        <a href="/operations">{t('nav.operations')}</a>
       </nav>
     </footer>
   )
@@ -2800,6 +2999,7 @@ function PrizeDetailPage({
   onSelectTeam: (teamKey: TeamKey) => void
   teamKey: TeamKey
 }) {
+  const { t } = useI18n()
   const team = getTeam(teamKey)
   const shirt = shirtConcepts[teamKey]
   const prize = prizeDetails[teamKey]
@@ -2821,7 +3021,7 @@ function PrizeDetailPage({
       <div className="prize-detail-toolbar">
         <a className="prize-back-link" href="/prizes">
           <ArrowLeft size={17} />
-          <span>All Prizes</span>
+          <span>{t('prize.allPrizes')}</span>
         </a>
         <button
           className="prize-action secondary"
@@ -2829,7 +3029,7 @@ function PrizeDetailPage({
           type="button"
         >
           <UsersRound size={17} />
-          <span>Select {team.code}</span>
+          <span>{t('prize.selectTeam', { code: team.code })}</span>
         </button>
       </div>
 
@@ -2842,7 +3042,9 @@ function PrizeDetailPage({
         </div>
 
         <div className="prize-detail-copy">
-          <p className="section-kicker">{team.name} Prize Page</p>
+          <p className="section-kicker">
+            {t('prize.pageKicker', { team: team.name })}
+          </p>
           <h2 id={`prize-detail-${team.key}`}>{shirt.conceptName}</h2>
           <p>{prize.headline}</p>
           <div className="prize-detail-callout">
@@ -2852,11 +3054,11 @@ function PrizeDetailPage({
           <div className="prize-actions">
             <a className="prize-action primary" href="/fixtures">
               <Target size={17} />
-              <span>Enter A Draw</span>
+              <span>{t('prize.enterDraw')}</span>
             </a>
             <a className="prize-action secondary" href="/rewards">
               <PackageCheck size={17} />
-              <span>Fulfillment Flow</span>
+              <span>{t('prize.fulfillmentFlow')}</span>
             </a>
           </div>
         </div>
@@ -2867,7 +3069,7 @@ function PrizeDetailPage({
           <span className="prize-panel-icon">
             <Shirt size={18} />
           </span>
-          <h3>Winner Package</h3>
+          <h3>{t('prize.winnerPackage')}</h3>
           <ul>
             {prize.included.map((item) => (
               <li key={item}>
@@ -2882,7 +3084,7 @@ function PrizeDetailPage({
           <span className="prize-panel-icon">
             <Palette size={18} />
           </span>
-          <h3>Print Direction</h3>
+          <h3>{t('prize.printDirection')}</h3>
           <ul>
             {prize.printSpecs.map((item) => (
               <li key={item}>
@@ -2897,7 +3099,7 @@ function PrizeDetailPage({
           <span className="prize-panel-icon">
             <Target size={18} />
           </span>
-          <h3>Web UI Representation</h3>
+          <h3>{t('prize.webRepresentation')}</h3>
           <ul>
             {prize.uiNotes.map((item) => (
               <li key={item}>
@@ -2912,12 +3114,8 @@ function PrizeDetailPage({
           <span className="prize-panel-icon">
             <ShieldCheck size={18} />
           </span>
-          <h3>Safety Boundary</h3>
-          <p>
-            Independent fan design. No official team, tournament, federation,
-            sponsor, player, mascot, trophy, crest, shield, or manufacturer
-            branding is used or implied.
-          </p>
+          <h3>{t('prize.safetyBoundary')}</h3>
+          <p>{t('prize.safetyCopy')}</p>
         </article>
       </div>
     </section>
@@ -2937,6 +3135,7 @@ function ScoreField({
   onChange: (score: number) => void
   value: number
 }) {
+  const { t } = useI18n()
   const inputId = `next-score-${code.toLowerCase()}`
 
   return (
@@ -2949,7 +3148,7 @@ function ScoreField({
       </label>
       <div className="score-field-control">
         <button
-          aria-label={`Decrease ${label} score`}
+          aria-label={t('score.decrease', { label })}
           disabled={disabled || value <= 0}
           onClick={() => onChange(value - 1)}
           type="button"
@@ -2957,7 +3156,7 @@ function ScoreField({
           <Minus size={16} />
         </button>
         <input
-          aria-label={`${label} predicted goals`}
+          aria-label={t('score.predictedGoals', { label })}
           id={inputId}
           inputMode="numeric"
           max={9}
@@ -2968,7 +3167,7 @@ function ScoreField({
           value={value}
         />
         <button
-          aria-label={`Increase ${label} score`}
+          aria-label={t('score.increase', { label })}
           disabled={disabled || value >= 9}
           onClick={() => onChange(value + 1)}
           type="button"
@@ -2977,6 +3176,14 @@ function ScoreField({
         </button>
       </div>
     </div>
+  )
+}
+
+function App() {
+  return (
+    <I18nProvider>
+      <AppContent />
+    </I18nProvider>
   )
 }
 
