@@ -448,8 +448,8 @@ const leftSponsorAdBlocks = sponsorAdBlocks.slice(0, 4)
 const rightSponsorAdBlocks = sponsorAdBlocks.slice(4)
 
 const aiBuildMetrics = {
-  tokenTotal: '~5.7M',
-  estimatedCost: '~$50',
+  tokenTotal: '~5.8M',
+  estimatedCost: '~$51',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const

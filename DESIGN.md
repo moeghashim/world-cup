@@ -12,13 +12,14 @@ The interface should behave like a matchday operations surface with fan energy, 
 - For the next homepage pass, replace the static hero with a prediction-first banner that keeps score controls, match selection, prize bundle, sponsor context, and entry capture inside the first viewport.
 - `HOMEPAGE_LIVE_BANNER_PRD.md` defines the motion and atmosphere layer for that first viewport: matchday pulse, score-change reactions, active fixture rail states, prize-panel reveals, and reduced-motion fallbacks.
 - Keep the hero cinematic, but let workflow and match cards dominate the product.
+- Treat the homepage prediction arena as a premium match card: rounded stadium surface, softened glass panels, controlled headline scale, and clear score controls before secondary details.
 - Use a persistent workflow rail on desktop: Predict, Teams, Draw, Personalize, Fulfill, Review.
 - Use clean page paths for primary sections instead of hash fragments, so visitors can open `/operations`, `/posthog`, `/teams/saudi-arabia`, `/prizes/japan`, and `/experiment` as standalone URLs.
 - The `/teams` experience should behave like a dense catalog, not a marketing page: all teams, known supporter statements, source links, and sponsor math should be scannable before drilling into a detail page.
 - Use shadcn/ui source primitives for new and migrated buttons, cards, badges, separators, inputs, dialogs, and selects. Keep custom CSS for World Cup-specific composition, animation, and sponsor/page framing until those surfaces are intentionally migrated.
 - Use full-width bands and unframed workspace sections; reserve cards for repeated items, panels, and operational modules.
 - Keep repeated match, draw, reward, and provider modules visually consistent.
-- Borrow the sponsor marketplace density from `https://trustmrr.com/` for the sponsorship system: compact visible advertiser blocks around page content on desktop, a single moving sponsor banner above page content on mobile, compact board framing, metric strip, and ranked package listings. Do not copy its branding, assets, advertiser names, or exact visual identity.
+- Borrow the sponsor marketplace density from `https://trustmrr.com/` for the sponsorship system: compact visible advertiser blocks around page content on desktop, a single readable moving sponsor banner above page content on mobile, compact board framing, metric strip, and ranked package listings. Do not copy its branding, assets, advertiser names, or exact visual identity.
 - Keep footer attribution restrained and operational: show the Experiment link and `10claws.com` association on the homepage, but keep Codex Desktop App and `https://projects.dev/` inside the Experiment view and build documentation.
 
 ## Team Theming

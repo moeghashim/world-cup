@@ -221,6 +221,7 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 - Added visible TrustMRR-inspired advertiser blocks around `/sponsors`: left and right desktop rails, sponsor-safe placeholder ad cards, an empty "Advertise" slot, tablet horizontal rails, mobile horizontal ad strips, a sponsor listing banner strip above the package board, and refreshed the AI build estimate to `~5.4M` total tokens and `~$47`.
 - Added the shadcn/ui foundation with Tailwind CSS v4, path aliases, generated Button/Card/Badge/Separator primitives, migrated sponsor ad cards and sponsor package cards onto shadcn source components, promoted the sponsor ad rails into a reusable frame across homepage, prize, team, operations, PostHog, Experiment, and sponsor routes, and refreshed the AI build estimate to `~5.6M` total tokens and `~$49`.
 - Reduced the desktop sponsor rail footprint to smaller static ad blocks, converted the mobile sponsor treatment into a single animated marquee banner above page content, added reduced-motion/manual-scroll behavior, and refreshed the AI build estimate to `~5.7M` total tokens and `~$50`.
+- Applied a visual design polish pass to the public website: quieter app chrome, refined AI status bar, softer sponsor cards, rounded homepage prediction arena, cleaner hero panels, tighter mobile typography, improved team picker cards, slower mobile sponsor marquee, and refreshed the AI build estimate to `~5.8M` total tokens and `~$51`.
 
 ## Verification
 
@@ -317,6 +318,8 @@ Browser verification covered:
 - verifying the compact sponsor rails with `npm run lint` and `npm run build`
 - verifying `/` and `/sponsors` at 1440px render compact desktop sponsor cards around 130px wide, two visible sponsor rails, eight visible ad cards, no animation, no horizontal overflow, and the refreshed `~5.7M` / `~$50` AI estimate
 - verifying `/` and `/sponsors` at 390px render one visible moving sponsor banner above page content, hide the lower/right rail, animate with `sponsor-mobile-marquee`, keep eight visible ad cards, and avoid horizontal overflow
+- verifying the visual design polish with `npm run lint` and `npm run build`
+- verifying `/` and `/sponsors` at 1440px and 390px keep zero horizontal overflow, show the refreshed `~5.8M` / `~$51` AI estimate, keep desktop sponsor rails static, keep mobile sponsor marquee movement active at 48s, and report no fresh browser console errors beyond Vite/React dev messages
 
 Latest screenshot:
 
@@ -330,6 +333,8 @@ Latest screenshot:
 `artifacts/shadcn-final-390-experiment.png`
 `artifacts/sponsor-compact-marquee-final-1440-home.png`
 `artifacts/sponsor-compact-marquee-final-390-home.png`
+`artifacts/design-polish-final-1440-home.png`
+`artifacts/design-polish-final-390-home.png`
 `artifacts/team-saudi-detail-page.png`
 
 ## Next Tasks
