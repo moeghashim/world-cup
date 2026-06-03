@@ -90,6 +90,18 @@ import {
   type TournamentFixture,
 } from './data/worldCupSchedule'
 import {
+  TEAM_SPONSORSHIP_PRICING,
+  formatUsd,
+  getFixtureOpponent,
+  getTeamFixtureSummary,
+  getTeamIdentityBySlug,
+  getTeamSponsorshipMath,
+  teamIdentities,
+  teamIdentitiesByGroup,
+  teamResearchSources,
+  type TeamIdentity,
+} from './data/teamIdentity'
+import {
   initialPredictionState,
   predictionSpec,
   registry,
@@ -384,8 +396,8 @@ const sponsorshipBoardStats = [
 ] as const
 
 const aiBuildMetrics = {
-  tokenTotal: '~5.1M',
-  estimatedCost: '~$44',
+  tokenTotal: '~5.3M',
+  estimatedCost: '~$46',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
@@ -571,6 +583,7 @@ type SectionPath = keyof typeof sectionRouteMap
 
 type RouteState = {
   activePrizeKey: TeamKey | null
+  activeTeamSlug: string | null
   isExperimentView: boolean
   pathname: string
   sectionPath: SectionPath | null
@@ -590,6 +603,12 @@ function getPrizeTeamFromPath(pathname: string): TeamKey | null {
   const slug = normalizePathname(pathname).match(/^\/prizes\/([a-z]+)$/)?.[1]
 
   return slug && isTeamKey(slug) ? slug : null
+}
+
+function getTeamSlugFromPath(pathname: string) {
+  const slug = normalizePathname(pathname).match(/^\/teams\/([a-z0-9-]+)$/)?.[1]
+
+  return slug && getTeamIdentityBySlug(slug) ? slug : null
 }
 
 function getLegacyHashPath(hash: string) {
@@ -615,6 +634,12 @@ function getLegacyHashPath(hash: string) {
     return `/prizes/${prizeSlug}`
   }
 
+  const teamSlug = hash.match(/^#teams\/([a-z0-9-]+)$/)?.[1]
+
+  if (teamSlug && getTeamIdentityBySlug(teamSlug)) {
+    return `/teams/${teamSlug}`
+  }
+
   return null
 }
 
@@ -627,11 +652,13 @@ function getCurrentRouteState(): RouteState {
 
   const pathname = normalizePathname(window.location.pathname)
   const activePrizeKey = getPrizeTeamFromPath(pathname)
+  const activeTeamSlug = getTeamSlugFromPath(pathname)
   const sectionPath =
     pathname in sectionRouteMap ? (pathname as SectionPath) : null
 
   return {
     activePrizeKey,
+    activeTeamSlug,
     isExperimentView: pathname === '/experiment',
     pathname,
     sectionPath,
@@ -966,6 +993,9 @@ function AppContent() {
   const selectedTeamKey = predictionState.selectedTeamKey
   const selectedTeam = getTeam(selectedTeamKey)
   const activePrizeKey = routeState.activePrizeKey
+  const activeTeamIdentity = routeState.activeTeamSlug
+    ? getTeamIdentityBySlug(routeState.activeTeamSlug)
+    : null
   const isExperimentView = routeState.isExperimentView
   const localizedPredictionSpec = useMemo(
     () => localizePredictionSpec(predictionSpec, t),
@@ -1164,6 +1194,26 @@ function AppContent() {
           onSelectTeam={(teamKey) => selectSupporterTeam(teamKey, 'prize_card')}
           selectedTeamKey={selectedTeamKey}
         />
+        <SiteFooter />
+      </main>
+    )
+  }
+
+  if (activeTeamIdentity) {
+    return (
+      <main {...shellProps}>
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
+        <TeamDetailPage identity={activeTeamIdentity} />
+        <SiteFooter />
+      </main>
+    )
+  }
+
+  if (routeState.pathname === '/teams') {
+    return (
+      <main {...shellProps}>
+        <Topbar drawCount={drawCount} lockedCount={lockedCount} />
+        <TeamDirectoryPage />
         <SiteFooter />
       </main>
     )
@@ -2358,6 +2408,312 @@ function PrizeHomeSection({
           )
         })}
       </div>
+    </section>
+  )
+}
+
+function getSourceHost(url: string) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return url
+  }
+}
+
+function TeamSponsorshipMathPanel({
+  fixtureCount = TEAM_SPONSORSHIP_PRICING.groupStageMatches,
+}: {
+  fixtureCount?: number
+}) {
+  const math = getTeamSponsorshipMath(fixtureCount)
+
+  return (
+    <aside className="team-sponsor-math" aria-label="Team sponsorship math">
+      <div>
+        <p className="section-kicker">Sponsor Math</p>
+        <h2>{formatUsd(math.teamPackageTotal)} Team Package</h2>
+        <p>
+          {fixtureCount} group matches x{' '}
+          {formatUsd(TEAM_SPONSORSHIP_PRICING.matchSpotlightUsd)} match
+          spotlight = {formatUsd(math.matchSpotlightTotal)}. Add {fixtureCount}{' '}
+          reward drops x {formatUsd(TEAM_SPONSORSHIP_PRICING.rewardDropUsd)} ={' '}
+          {formatUsd(math.rewardDropTotal)}.
+        </p>
+      </div>
+      <dl>
+        <div>
+          <dt>Per match</dt>
+          <dd>{formatUsd(math.matchActivationUsd)}</dd>
+        </div>
+        <div>
+          <dt>Team group stage</dt>
+          <dd>{formatUsd(math.teamPackageTotal)}</dd>
+        </div>
+        <div>
+          <dt>Team-side slots</dt>
+          <dd>{math.tournamentTeamSideSlots}</dd>
+        </div>
+      </dl>
+      <p>
+        Pricing is an MVP planning model. Product cost, shipping, taxes, legal
+        review, creative production, and payment processing still need separate
+        approval.
+      </p>
+    </aside>
+  )
+}
+
+function TeamDirectoryPage() {
+  const math = getTeamSponsorshipMath()
+
+  return (
+    <section
+      className="team-directory-page"
+      id="teams"
+      aria-labelledby="team-directory-title"
+    >
+      <div className="team-directory-hero">
+        <div>
+          <p className="section-kicker">Teams</p>
+          <h1 id="team-directory-title">All 48 Team Identities</h1>
+          <p>
+            Each team has a sponsor-safe identity line, a known-for statement,
+            and a path to sponsor the whole team journey or specific group-stage
+            games.
+          </p>
+        </div>
+        <TeamSponsorshipMathPanel />
+      </div>
+
+      <div className="team-directory-stats" aria-label="Team catalog stats">
+        <span>
+          <strong>{teamIdentities.length}</strong>
+          researched team pages
+        </span>
+        <span>
+          <strong>{teamIdentitiesByGroup.length}</strong>
+          groups
+        </span>
+        <span>
+          <strong>{formatUsd(math.matchActivationUsd)}</strong>
+          per game package
+        </span>
+        <span>
+          <strong>{math.tournamentTeamSideSlots}</strong>
+          team-side sponsor slots
+        </span>
+      </div>
+
+      <section className="team-source-strip" aria-labelledby="team-source-title">
+        <div>
+          <p className="section-kicker">Research Basis</p>
+          <h2 id="team-source-title">Nicknames, Fan Lines, And Guardrails</h2>
+          <p>
+            The catalog uses public nickname research plus stronger team or
+            destination sources where available. Fan lines are independent site
+            copy and do not imply official sponsorship.
+          </p>
+        </div>
+        <div>
+          {teamResearchSources.map((source) => (
+            <a href={source.url} key={source.url} rel="noreferrer" target="_blank">
+              <ExternalLink size={15} />
+              <span>{source.label}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <div className="team-group-directory">
+        {teamIdentitiesByGroup.map((group) => (
+          <section
+            className="team-group-section"
+            key={group.id}
+            aria-labelledby={`team-group-${group.id}`}
+          >
+            <header>
+              <div>
+                <p className="section-kicker">Group {group.id}</p>
+                <h2 id={`team-group-${group.id}`}>Sponsor The Group Story</h2>
+              </div>
+              <span>{group.teams.length} teams</span>
+            </header>
+            <div className="team-identity-grid">
+              {group.teams.map((identity) => (
+                <article className="team-identity-card" key={identity.slug}>
+                  <div className="team-identity-card-top">
+                    <span>{identity.code}</span>
+                    <em>Group {identity.group}</em>
+                  </div>
+                  <h3>{identity.name}</h3>
+                  <strong>{identity.supportLine}</strong>
+                  <p className="team-known-as">{identity.knownAs}</p>
+                  <p>{identity.knownFor}</p>
+                  <div className="team-card-actions">
+                    <a className="prize-action primary" href={`/teams/${identity.slug}`}>
+                      <span>Open Team Page</span>
+                      <ChevronRight size={16} />
+                    </a>
+                    <a className="prize-action secondary" href="/sponsors">
+                      <Handshake size={16} />
+                      <span>Sponsor {identity.code}</span>
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function TeamDetailPage({ identity }: { identity: TeamIdentity }) {
+  const fixtures = getTeamFixtureSummary(identity)
+  const groupMath = getTeamSponsorshipMath(fixtures.length)
+  const matchMath = getTeamSponsorshipMath(1)
+
+  return (
+    <section
+      className="team-detail-page"
+      aria-labelledby="team-detail-title"
+      id={`team-${identity.slug}`}
+    >
+      <div className="team-detail-toolbar">
+        <a className="prize-back-link" href="/teams">
+          <ArrowLeft size={17} />
+          <span>All Teams</span>
+        </a>
+        <a className="prize-action secondary" href="/sponsors">
+          <Handshake size={17} />
+          <span>Sponsor Packages</span>
+        </a>
+      </div>
+
+      <div className="team-detail-hero">
+        <div>
+          <p className="section-kicker">Group {identity.group} Team</p>
+          <h1 id="team-detail-title">{identity.name}</h1>
+          <strong>{identity.supportLine}</strong>
+          <p className="team-known-as">{identity.knownAs}</p>
+          <p>{identity.knownFor}</p>
+          <div className="team-detail-actions">
+            <a className="prize-action primary" href="/sponsors">
+              <BadgeDollarSign size={17} />
+              <span>Sponsor {identity.name}</span>
+            </a>
+            <a className="prize-action secondary" href="/fixtures">
+              <Target size={17} />
+              <span>Predict Games</span>
+            </a>
+          </div>
+        </div>
+        <TeamSponsorshipMathPanel fixtureCount={fixtures.length} />
+      </div>
+
+      <div className="team-detail-layout">
+        <article className="team-sponsor-invite">
+          <div>
+            <p className="section-kicker">Sponsor Invitation</p>
+            <h2>Own The {identity.name} Fan Journey</h2>
+            <p>
+              Invite a sponsor to support {identity.name} fans across all{' '}
+              {fixtures.length} group-stage games. The MVP planning package is{' '}
+              {fixtures.length} x{' '}
+              {formatUsd(TEAM_SPONSORSHIP_PRICING.matchSpotlightUsd)} for match
+              spotlight placement plus {fixtures.length} x{' '}
+              {formatUsd(TEAM_SPONSORSHIP_PRICING.rewardDropUsd)} for sponsor
+              reward drops, totaling {formatUsd(groupMath.teamPackageTotal)}.
+            </p>
+          </div>
+          <div className="team-sponsor-options">
+            <span>
+              <strong>{formatUsd(groupMath.teamPackageTotal)}</strong>
+              Team group package
+            </span>
+            <span>
+              <strong>{formatUsd(matchMath.matchActivationUsd)}</strong>
+              Sponsor one game
+            </span>
+            <span>
+              <strong>{formatUsd(TEAM_SPONSORSHIP_PRICING.rewardDropUsd)}</strong>
+              Reward drop add-on
+            </span>
+          </div>
+          <p>
+            {identity.sponsorAngle} All creative must stay independent and avoid
+            official federation, tournament, player, sponsor, mascot, trophy,
+            crest, and kit marks unless rights are secured.
+          </p>
+        </article>
+
+        <aside className="team-identity-notes">
+          <p className="section-kicker">Known For</p>
+          <h2>{identity.knownAs}</h2>
+          <p>{identity.knownFor}</p>
+          <ul>
+            {identity.sourceUrls.map((url) => (
+              <li key={url}>
+                <ExternalLink size={15} />
+                <a href={url} rel="noreferrer" target="_blank">
+                  {getSourceHost(url)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </div>
+
+      <section className="team-fixture-sponsor-list" aria-labelledby="team-games-title">
+        <div className="schedule-panel-heading">
+          <div>
+            <p className="section-kicker">Sponsor Certain Games</p>
+            <h2 id="team-games-title">{identity.name} Group Fixtures</h2>
+          </div>
+          <span>{formatUsd(matchMath.matchActivationUsd)} per game</span>
+        </div>
+        <div className="team-fixture-grid">
+          {fixtures.map((fixture) => {
+            const opponent = getFixtureOpponent(fixture, identity.name)
+
+            return (
+              <article className="team-fixture-sponsor-card" key={fixture.matchNumber}>
+                <header>
+                  <span>Match {fixture.matchNumber}</span>
+                  <strong>
+                    {identity.code} vs {getTournamentTeamCode(opponent)}
+                  </strong>
+                </header>
+                <p>
+                  {formatFixtureDate(fixture.date)} · {formatTimeET(fixture.timeET)}
+                </p>
+                <p>
+                  {fixture.venue.name}, {fixture.venue.city}
+                </p>
+                <dl>
+                  <div>
+                    <dt>Spotlight</dt>
+                    <dd>{formatUsd(TEAM_SPONSORSHIP_PRICING.matchSpotlightUsd)}</dd>
+                  </div>
+                  <div>
+                    <dt>Reward drop</dt>
+                    <dd>{formatUsd(TEAM_SPONSORSHIP_PRICING.rewardDropUsd)}</dd>
+                  </div>
+                  <div>
+                    <dt>Total</dt>
+                    <dd>{formatUsd(matchMath.matchActivationUsd)}</dd>
+                  </div>
+                </dl>
+                <a className="prize-action secondary" href="/sponsors">
+                  <Handshake size={16} />
+                  <span>Sponsor This Game</span>
+                </a>
+              </article>
+            )
+          })}
+        </div>
+      </section>
     </section>
   )
 }

@@ -13,7 +13,8 @@ The interface should behave like a matchday operations surface with fan energy, 
 - `HOMEPAGE_LIVE_BANNER_PRD.md` defines the motion and atmosphere layer for that first viewport: matchday pulse, score-change reactions, active fixture rail states, prize-panel reveals, and reduced-motion fallbacks.
 - Keep the hero cinematic, but let workflow and match cards dominate the product.
 - Use a persistent workflow rail on desktop: Predict, Teams, Draw, Personalize, Fulfill, Review.
-- Use clean page paths for primary sections instead of hash fragments, so visitors can open `/operations`, `/posthog`, `/prizes/japan`, and `/experiment` as standalone URLs.
+- Use clean page paths for primary sections instead of hash fragments, so visitors can open `/operations`, `/posthog`, `/teams/saudi-arabia`, `/prizes/japan`, and `/experiment` as standalone URLs.
+- The `/teams` experience should behave like a dense catalog, not a marketing page: all teams, known supporter statements, source links, and sponsor math should be scannable before drilling into a detail page.
 - Use full-width bands and unframed workspace sections; reserve cards for repeated items, panels, and operational modules.
 - Keep repeated match, draw, reward, and provider modules visually consistent.
 - Borrow the sponsor marketplace density from `https://trustmrr.com/` for the sponsorship section: compact board framing, metric strip, ranked package listings on desktop, and a stacked listing rhythm on mobile. Do not copy its branding, assets, or exact visual identity.
@@ -56,6 +57,7 @@ The interface should behave like a matchday operations surface with fan energy, 
 
 - Match cards expose stage, teams, score inputs, winner pick, lock action, and sponsor drops.
 - Schedule panels expose source date, verification warning, all groups, all teams, full group-stage fixtures, and selected supporter-team fixtures.
+- Team identity pages expose all 48 teams, group labels, known-as lines, sponsor-safe support lines, known-for statements, detail-page source links, and per-team/per-game sponsor math.
 - Experiment documentation exposes `BUILD_BLOG.md` as the primary HTML article, keeps `AGENTS.md` as the raw agent-log markdown file, and shows a technology flowchart for Codex, GitHub, Vercel, React/TypeScript, JSON-render, Stripe Projects, and planned providers. The default homepage should not expose technical build copy.
 - Draw cards expose match, winner slots, participant receipt state, final result, eligible count, winners, alternates, and audit seed data.
 - Fulfillment panels expose queue count, review count, and match-level actions.
