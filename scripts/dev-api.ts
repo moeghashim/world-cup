@@ -4,6 +4,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { URL } from 'node:url'
 import matchPrizeBundlesHandler from '../api/match-prize-bundles'
 import predictionEntriesHandler from '../api/prediction-entries'
+import sponsorApplicationsHandler from '../api/sponsor-applications'
 
 type ApiResponseBody = Record<string, unknown> | unknown[]
 
@@ -26,6 +27,7 @@ const port = Number(process.env.PREDICTION_API_PORT ?? defaultPort)
 const handlers: Record<string, ApiHandler> = {
   '/api/match-prize-bundles': matchPrizeBundlesHandler,
   '/api/prediction-entries': predictionEntriesHandler,
+  '/api/sponsor-applications': sponsorApplicationsHandler,
 }
 
 function readRequestBody(request: IncomingMessage) {

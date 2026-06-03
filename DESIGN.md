@@ -20,6 +20,7 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Use full-width bands and unframed workspace sections; reserve cards for repeated items, panels, and operational modules.
 - Keep repeated match, draw, reward, and provider modules visually consistent.
 - Borrow the sponsor marketplace density from `https://trustmrr.com/` for the sponsorship system: compact visible advertiser blocks around page content on desktop, a single readable moving sponsor banner above page content on mobile, compact board framing, metric strip, and ranked package listings. Do not copy its branding, assets, advertiser names, or exact visual identity.
+- Treat sponsor onboarding as an operational application flow after the package marketplace: package selection, logo preview, free-product offer, AI one-pager, legal terms, and receipt should be visible without turning the page into a generic contact form.
 - Keep footer attribution restrained and operational: show the Experiment link and `10claws.com` association on the homepage, but keep Codex Desktop App and `https://projects.dev/` inside the Experiment view and build documentation.
 
 ## Team Theming
@@ -66,6 +67,7 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Shirt studio exposes concept name, print copy, motif, and no-official-branding disclaimer.
 - Provider cards distinguish role, reason, and operational risk.
 - PostHog dashboard cards expose acquisition, prediction funnel, prize claim, fulfillment health, event taxonomy, and setup state without implying live tracking before SDK capture is enabled.
+- Sponsor onboarding exposes the selected package, logo preview on light and dark placements, required terms, optional product-offer fields, optional AI one-pager fields, and an `awaiting_payment` receipt when the local API accepts the application.
 
 ## Polish Checklist
 
@@ -75,3 +77,4 @@ The interface should behave like a matchday operations surface with fan energy, 
 - The top navigation and workflow rail should link to real page paths.
 - Run lint, build, and browser verification after visual changes.
 - Full address capture should be visually framed as draw/shipping eligibility, not checkout, and should avoid sending address data to analytics.
+- Sponsor application copy should distinguish prototype receipt, payment, webhook confirmation, admin review, and live activation.

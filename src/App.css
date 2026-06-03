@@ -2990,6 +2990,474 @@
   border-color: rgba(255, 255, 255, 0.22);
 }
 
+.sponsor-application {
+  background:
+    radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--team-primary), transparent 76%), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(247, 249, 242, 0.96));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 14px 38px rgba(23, 24, 18, 0.08);
+  display: grid;
+  gap: 18px;
+  overflow: hidden;
+  padding: clamp(16px, 3vw, 26px);
+  scroll-margin-top: calc(var(--topbar-height) + 18px);
+}
+
+.sponsor-application-hero {
+  align-items: end;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(280px, 0.72fr) minmax(300px, 0.6fr);
+}
+
+.sponsor-application-hero h3,
+.sponsor-form-section h4,
+.sponsor-preview-card h4,
+.sponsor-preview-summary h4,
+.sponsor-application-receipt h4 {
+  color: var(--ink);
+  line-height: 1;
+  margin: 0;
+}
+
+.sponsor-application-hero h3 {
+  font-size: clamp(2rem, 4vw, 3.8rem);
+  max-width: 760px;
+}
+
+.sponsor-application-hero p,
+.sponsor-preview-summary p,
+.sponsor-application-receipt p,
+.sponsor-submit-row p {
+  color: var(--muted);
+  line-height: 1.52;
+  margin: 0;
+}
+
+.sponsor-application-steps {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sponsor-application-steps li {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 7px;
+  min-height: 88px;
+  padding: 10px;
+}
+
+.sponsor-application-steps span {
+  align-items: center;
+  background: var(--team-primary);
+  color: var(--team-secondary);
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 950;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.sponsor-application-steps strong {
+  color: var(--ink);
+  font-size: 0.86rem;
+  line-height: 1.16;
+}
+
+.sponsor-application-layout {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.38fr);
+}
+
+.sponsor-application-form,
+.sponsor-preview-panel,
+.sponsor-form-section,
+.sponsor-consent-list,
+.sponsor-preview-summary [data-slot='card-content'],
+.sponsor-application-receipt [data-slot='card-content'] {
+  display: grid;
+  gap: 14px;
+}
+
+.sponsor-form-section {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: clamp(14px, 2.2vw, 20px);
+}
+
+.sponsor-form-section header {
+  align-items: start;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 32px minmax(0, 1fr);
+}
+
+.sponsor-form-section header > svg {
+  color: var(--team-primary);
+  margin-top: 2px;
+}
+
+.sponsor-form-section h4,
+.sponsor-preview-summary h4,
+.sponsor-application-receipt h4 {
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+.sponsor-form-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sponsor-field,
+.sponsor-checkbox {
+  display: grid;
+  gap: 6px;
+}
+
+.sponsor-field.is-wide,
+.sponsor-checkbox.is-wide {
+  grid-column: 1 / -1;
+}
+
+.sponsor-field span {
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 950;
+}
+
+.sponsor-field input,
+.sponsor-field select,
+.sponsor-field textarea {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  font: inherit;
+  min-height: 44px;
+  padding: 0 11px;
+  width: 100%;
+}
+
+.sponsor-field textarea {
+  min-height: 100px;
+  padding: 10px 11px;
+  resize: vertical;
+}
+
+.sponsor-field em,
+.sponsor-logo-uploader em,
+.sponsor-checkbox em {
+  color: #b42318;
+  font-size: 0.78rem;
+  font-style: normal;
+  line-height: 1.35;
+}
+
+.sponsor-checkbox em {
+  color: var(--muted);
+}
+
+.sponsor-checkbox.has-error {
+  border-color: #b42318;
+}
+
+.sponsor-checkbox.has-error em {
+  color: #b42318;
+}
+
+.sponsor-logo-uploader {
+  align-items: stretch;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(260px, 0.62fr) minmax(0, 1fr);
+}
+
+.sponsor-logo-uploader label {
+  background: var(--team-soft);
+  border: 1px dashed color-mix(in srgb, var(--team-primary), #ffffff 45%);
+  border-radius: 10px;
+  cursor: pointer;
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+}
+
+.sponsor-logo-uploader label svg {
+  color: var(--team-primary);
+}
+
+.sponsor-logo-uploader strong,
+.sponsor-logo-uploader span,
+.sponsor-logo-uploader em {
+  display: block;
+}
+
+.sponsor-logo-uploader span {
+  color: var(--muted);
+  line-height: 1.42;
+}
+
+.sponsor-logo-uploader input {
+  max-width: 100%;
+}
+
+.sponsor-logo-uploader > div {
+  align-content: center;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+}
+
+.sponsor-package-picker {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.sponsor-package-option {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  gap: 8px;
+  min-height: 138px;
+  padding: 12px;
+  text-align: left;
+}
+
+.sponsor-package-option span {
+  align-items: center;
+  background: var(--team-soft);
+  color: var(--team-primary);
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+}
+
+.sponsor-package-option strong {
+  color: inherit;
+  line-height: 1.15;
+}
+
+.sponsor-package-option em {
+  color: var(--muted);
+  font-style: normal;
+  font-weight: 950;
+}
+
+.sponsor-package-option.is-selected {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #ffffff;
+}
+
+.sponsor-package-option.is-selected span {
+  background: var(--team-primary);
+  color: var(--team-secondary);
+}
+
+.sponsor-package-option.is-selected em {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sponsor-checkbox {
+  align-items: start;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  grid-template-columns: 20px minmax(0, 1fr);
+  padding: 12px;
+}
+
+.sponsor-checkbox input {
+  margin-top: 2px;
+}
+
+.sponsor-checkbox span {
+  color: var(--muted);
+  display: grid;
+  gap: 4px;
+  line-height: 1.42;
+}
+
+.sponsor-checkbox strong {
+  color: var(--ink);
+}
+
+.sponsor-submit-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.sponsor-submit-row p {
+  flex: 1 1 280px;
+  font-size: 0.88rem;
+}
+
+.sponsor-preview-panel {
+  position: sticky;
+  top: calc(var(--topbar-height) + 18px);
+}
+
+.sponsor-preview-card,
+.sponsor-preview-summary,
+.sponsor-application-receipt {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 12px 34px rgba(23, 24, 18, 0.08);
+}
+
+.sponsor-preview-card {
+  display: grid;
+  gap: 10px;
+  min-height: 188px;
+  padding: 16px;
+}
+
+.sponsor-preview-card.is-dark {
+  background:
+    linear-gradient(145deg, rgba(22, 24, 18, 0.98), rgba(35, 45, 30, 0.94)),
+    var(--ink);
+  color: #ffffff;
+}
+
+.sponsor-preview-logo {
+  align-items: center;
+  background: var(--team-soft);
+  border: 1px solid color-mix(in srgb, var(--team-primary), #ffffff 62%);
+  display: inline-flex;
+  height: 54px;
+  justify-content: center;
+  overflow: hidden;
+  width: 86px;
+}
+
+.sponsor-preview-card.is-dark .sponsor-preview-logo {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.sponsor-preview-logo img {
+  display: block;
+  max-height: 46px;
+  max-width: 78px;
+  object-fit: contain;
+}
+
+.sponsor-preview-card p,
+.sponsor-preview-card span {
+  margin: 0;
+}
+
+.sponsor-preview-card p {
+  color: var(--team-primary);
+  font-size: 0.76rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.sponsor-preview-card.is-dark p {
+  color: var(--team-secondary);
+}
+
+.sponsor-preview-card span {
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.sponsor-preview-card.is-dark h4,
+.sponsor-preview-card.is-dark span {
+  color: #ffffff;
+}
+
+.sponsor-preview-summary [data-slot='card-content'],
+.sponsor-application-receipt [data-slot='card-content'] {
+  padding: 0 14px;
+}
+
+.sponsor-preview-summary ul {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sponsor-preview-summary li {
+  align-items: start;
+  color: var(--muted);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 18px minmax(0, 1fr);
+  line-height: 1.35;
+}
+
+.sponsor-preview-summary svg {
+  color: var(--team-primary);
+  margin-top: 2px;
+}
+
+.sponsor-receipt-icon {
+  align-items: center;
+  background: var(--team-primary);
+  color: var(--team-secondary);
+  display: inline-flex;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.sponsor-application-receipt dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.sponsor-application-receipt dl div {
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 4px;
+  padding: 9px;
+}
+
+.sponsor-application-receipt dt,
+.sponsor-application-receipt dd {
+  margin: 0;
+}
+
+.sponsor-application-receipt dt {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.sponsor-application-receipt dd {
+  color: var(--ink);
+  font-weight: 950;
+  overflow-wrap: anywhere;
+}
+
 .sponsor-addons {
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--line);
@@ -5822,6 +6290,8 @@
   .hero-band,
   .hero-live-grid,
   .hero-prediction-grid,
+  .sponsor-application-hero,
+  .sponsor-application-layout,
   .team-directory-hero,
   .team-source-strip,
   .team-detail-hero,
@@ -5905,6 +6375,7 @@
   .team-fixture-grid,
   .prize-team-grid,
   .prize-detail-grid,
+  .sponsor-package-picker,
   .sponsor-tier-grid,
   .posthog-status-grid,
   .provider-grid,
@@ -5994,6 +6465,10 @@
 
   .sponsor-tier.is-featured {
     border-bottom-color: rgba(255, 255, 255, 0.16);
+  }
+
+  .sponsor-preview-panel {
+    position: static;
   }
 
   .spotlight,
@@ -6161,6 +6636,9 @@
   .prize-team-grid,
   .prize-detail-grid,
   .sponsor-tier-grid,
+  .sponsor-form-grid,
+  .sponsor-package-picker,
+  .sponsor-logo-uploader,
   .sponsor-addons ul,
   .posthog-status-grid,
   .provider-grid,
@@ -6190,6 +6668,21 @@
 
   .sponsor-banner-strip {
     gap: 8px;
+  }
+
+  .sponsor-application-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .sponsor-application-steps li {
+    align-items: center;
+    grid-template-columns: 28px minmax(0, 1fr);
+    min-height: 48px;
+  }
+
+  .sponsor-field.is-wide,
+  .sponsor-checkbox.is-wide {
+    grid-column: auto;
   }
 
   .sponsor-listing-banner {

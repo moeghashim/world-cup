@@ -6,6 +6,32 @@ Last updated: 2026-06-03
 
 Create a complete sponsor onboarding process for the World Cup prediction website. Sponsors should be able to submit their brand assets, describe any free product offer, select and pay for a sponsorship package, receive confirmation by email, and move through review before anything goes live.
 
+## Current Implementation Status
+
+Built in this pass:
+
+- `/sponsors` now includes a real sponsor application section after the package marketplace.
+- Sponsors can enter company, contact, billing, category, and targeting details.
+- Sponsors can upload a logo for local preview and provide logo alt text. The current MVP sends logo metadata to the API, not the binary file.
+- Sponsors can select Global Cup Partner, Website Sponsor, Matchday Featured Sponsor, or Fan Drop Sponsor.
+- Sponsors can opt into a free product offer and provide offer type, description, value, quantity cap, fulfillment owner, countries, redemption instructions, and winner data-sharing acknowledgement.
+- AI companies can opt into a required one-pager flow with product description, usefulness-to-fans copy, and data/privacy summary.
+- Required sponsorship terms are collected before payment.
+- `POST /api/sponsor-applications` validates the same payload shape as the client, creates an `awaiting_payment` receipt, persists to Neon when `PRIMARY_DB_CONNECTION_STRING` is configured, and returns an explicit `server-fallback-no-database` response when persistence is unavailable.
+- `.env.example` documents the future Stripe Checkout and webhook variables: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and package price IDs.
+
+Not built yet:
+
+- Real logo storage, SVG sanitization, raster normalization, or optimized public asset generation.
+- Stripe Checkout Session creation.
+- Stripe webhook signature verification and status transitions from paid checkout to `pending_review`.
+- Confirmation emails.
+- Admin review UI.
+- Sponsor reporting dashboard.
+- Physical inventory, 3PL, POD, and winner consent fulfillment workflows.
+
+Important boundary: this MVP never activates a sponsor from a success redirect or prototype receipt. Paid sponsorship activation still requires Stripe webhook confirmation and admin approval.
+
 ## Recommended Flow
 
 1. Sponsor lands on the sponsorship page.

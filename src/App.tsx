@@ -1,5 +1,7 @@
 import {
   type CSSProperties,
+  type ChangeEvent,
+  type FormEvent,
   type ReactNode,
   useCallback,
   useEffect,
@@ -17,6 +19,7 @@ import {
   CalendarDays,
   CheckCircle2,
   ChevronRight,
+  CreditCard,
   Dice5,
   ExternalLink,
   FileText,
@@ -24,6 +27,7 @@ import {
   Gift,
   Globe2,
   Handshake,
+  Image as ImageIcon,
   ListChecks,
   Megaphone,
   Minus,
@@ -31,12 +35,14 @@ import {
   PackageCheck,
   Palette,
   Plus,
+  ReceiptText,
   ShieldCheck,
   Shirt,
   Sparkles,
   Target,
   Ticket,
   TrendingUp,
+  UploadCloud,
   UsersRound,
 } from 'lucide-react'
 import heroImage from './assets/world-cup-hero.jpg'
@@ -77,6 +83,17 @@ import {
   type PredictionEntryForm,
   type PredictionEntryPayload,
 } from './data/predictionEntry'
+import {
+  emptySponsorApplicationForm,
+  sponsorApplicationPayloadSchema,
+  sponsorFulfillmentOwnerLabels,
+  sponsorFulfillmentOwners,
+  sponsorOfferTypeLabels,
+  sponsorOfferTypes,
+  sponsorPackages,
+  type SponsorApplicationPayload,
+  type SponsorPackageId,
+} from './data/sponsorOnboarding'
 import {
   getTeam,
   shirtConcepts,
@@ -306,8 +323,10 @@ const prizeDetails: Record<
 
 const sponsorshipTiers = [
   {
+    id: sponsorPackages[0].id,
     name: 'Global Cup Partner',
     price: '$50,000',
+    priceUsd: 50000,
     spots: '2 spots',
     signal: 'Tournament-wide sponsor presence',
     icon: Sparkles,
@@ -325,8 +344,10 @@ const sponsorshipTiers = [
       'Best for national launches, hero product drops, travel, electronics, sportswear, food delivery, streaming, telecom, fintech, and fan-experience brands.',
   },
   {
+    id: sponsorPackages[1].id,
     name: 'Website Sponsor',
     price: '$25,000',
+    priceUsd: 25000,
     spots: '4 spots',
     signal: 'Homepage and site-wide visibility',
     icon: MousePointerClick,
@@ -344,8 +365,10 @@ const sponsorshipTiers = [
       'Best for brands that want persistent website reach before choosing specific match campaigns: apps, CPG, travel, creator tools, local services, and fan-commerce launches.',
   },
   {
+    id: sponsorPackages[2].id,
     name: 'Matchday Featured Sponsor',
     price: '$10,000',
+    priceUsd: 10000,
     spots: '10 spots',
     signal: 'Featured match or regional campaign',
     icon: Megaphone,
@@ -363,8 +386,10 @@ const sponsorshipTiers = [
       'Best for match launches, retail promotions, watch-party offers, product sampling, city activations, and market-specific brand moments.',
   },
   {
+    id: sponsorPackages[3].id,
     name: 'Fan Drop Sponsor',
     price: '$5,000',
+    priceUsd: 5000,
     spots: '30 spots',
     signal: 'Accessible product sampling package',
     icon: Gift,
@@ -448,8 +473,8 @@ const leftSponsorAdBlocks = sponsorAdBlocks.slice(0, 4)
 const rightSponsorAdBlocks = sponsorAdBlocks.slice(4)
 
 const aiBuildMetrics = {
-  tokenTotal: '~5.8M',
-  estimatedCost: '~$51',
+  tokenTotal: '~6.0M',
+  estimatedCost: '~$53',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
@@ -909,6 +934,40 @@ type PredictionEntryApiResponse = {
   receiptId: string
 }
 
+type SponsorApplicationApiResponse = {
+  applicationId: string
+  billingEmail: string
+  checkoutMode: string
+  createdAt: string
+  error?: string
+  message: string
+  packageName: string
+  packagePriceUsd: number
+  persisted: boolean
+  persistenceMode: string
+  receiptHash: string
+  sponsorDisplayName: string
+  status: string
+}
+
+type SponsorApplicationFieldErrors = Record<string, string>
+
+type SponsorTierIcon = (typeof sponsorshipTiers)[number]['icon']
+
+type LocalizedSponsorTier = {
+  creative: string
+  featured: boolean
+  icon: SponsorTierIcon
+  id: SponsorPackageId
+  includes: string[]
+  name: string
+  price: string
+  priceUsd: number
+  signal: string
+  spots: string
+  summary: string
+}
+
 const defaultFixtureScorePrediction: FixtureScorePrediction = {
   homeScore: 0,
   awayScore: 0,
@@ -1027,6 +1086,42 @@ function getFieldErrors(error: ReturnType<typeof predictionEntryFormSchema.safeP
       messages?.[0],
     ]),
   ) as EntryFormErrors
+}
+
+function getSponsorApplicationFieldErrors(
+  result: ReturnType<typeof sponsorApplicationPayloadSchema.safeParse>,
+) {
+  if (result.success) return {}
+
+  return result.error.issues.reduce<SponsorApplicationFieldErrors>(
+    (fieldErrors, issue) => {
+      const path = issue.path.join('.')
+
+      if (path && !fieldErrors[path]) {
+        fieldErrors[path] = issue.message
+      }
+
+      return fieldErrors
+    },
+    {},
+  )
+}
+
+function updateSponsorApplicationSection<
+  Section extends keyof SponsorApplicationPayload,
+>(
+  application: SponsorApplicationPayload,
+  section: Section,
+  field: keyof SponsorApplicationPayload[Section],
+  value: unknown,
+) {
+  return {
+    ...application,
+    [section]: {
+      ...(application[section] as Record<string, unknown>),
+      [field]: value,
+    },
+  } as SponsorApplicationPayload
 }
 
 function AppContent() {
@@ -2880,6 +2975,890 @@ function TeamDetailPage({ identity }: { identity: TeamIdentity }) {
   )
 }
 
+function getLogoMimeType(file: File) {
+  if (file.type) return file.type
+
+  const extension = file.name.split('.').pop()?.toLowerCase()
+
+  if (extension === 'svg') return 'image/svg+xml'
+  if (extension === 'png') return 'image/png'
+  if (extension === 'jpg' || extension === 'jpeg') return 'image/jpeg'
+  if (extension === 'webp') return 'image/webp'
+
+  return ''
+}
+
+function SponsorApplicationFlow({ tiers }: { tiers: LocalizedSponsorTier[] }) {
+  const [form, setForm] = useState<SponsorApplicationPayload>(
+    emptySponsorApplicationForm,
+  )
+  const [fieldErrors, setFieldErrors] =
+    useState<SponsorApplicationFieldErrors>({})
+  const [submitError, setSubmitError] = useState('')
+  const [logoError, setLogoError] = useState('')
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState('')
+  const [receipt, setReceipt] = useState<SponsorApplicationApiResponse | null>(
+    null,
+  )
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const selectedTier =
+    tiers.find((tier) => tier.id === form.packageId) ?? tiers[1] ?? tiers[0]
+  const errorFor = (path: string) => fieldErrors[path]
+  const updateSection = <Section extends keyof SponsorApplicationPayload>(
+    section: Section,
+    field: keyof SponsorApplicationPayload[Section],
+    value: unknown,
+  ) => {
+    setForm((current) =>
+      updateSponsorApplicationSection(current, section, field, value),
+    )
+  }
+
+  const handlePackageSelect = (packageId: SponsorPackageId) => {
+    setForm((current) => ({ ...current, packageId }))
+    captureAnalyticsEvent('sponsor_package_selected', {
+      package_id: packageId,
+      package_name: tiers.find((tier) => tier.id === packageId)?.name,
+      surface: 'sponsor_application',
+    })
+  }
+
+  const handleLogoFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+
+    if (!file) return
+
+    const mimeType = getLogoMimeType(file)
+
+    if (
+      !['image/svg+xml', 'image/png', 'image/jpeg', 'image/webp'].includes(
+        mimeType,
+      )
+    ) {
+      setLogoError('Upload an SVG, PNG, JPG, or WebP logo.')
+      return
+    }
+
+    if (file.size > 5_000_000) {
+      setLogoError('Keep logo uploads under 5 MB.')
+      return
+    }
+
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      setLogoPreviewUrl(typeof reader.result === 'string' ? reader.result : '')
+    }
+    reader.readAsDataURL(file)
+    setLogoError('')
+    setReceipt(null)
+    setFieldErrors((current) => {
+      const next = { ...current }
+
+      delete next['logo.fileName']
+      delete next['logo.mimeType']
+      delete next['logo.sizeBytes']
+      delete next['logo.altText']
+
+      return next
+    })
+    setForm((current) => ({
+      ...current,
+      logo: {
+        altText:
+          current.logo.altText ||
+          `${current.company.displayName || current.company.legalName || file.name} logo`,
+        fileName: file.name,
+        mimeType,
+        sizeBytes: file.size,
+      },
+    }))
+  }
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setReceipt(null)
+    setSubmitError('')
+
+    const parsedApplication = sponsorApplicationPayloadSchema.safeParse(form)
+
+    if (!parsedApplication.success) {
+      setFieldErrors(getSponsorApplicationFieldErrors(parsedApplication))
+      setSubmitError('Complete the required sponsor details before checkout.')
+      captureAnalyticsEvent('sponsor_application_validation_failed', {
+        package_id: form.packageId,
+      })
+      return
+    }
+
+    setFieldErrors({})
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch('/api/sponsor-applications', {
+        body: JSON.stringify(parsedApplication.data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      })
+      const responseBody = (await response.json()) as SponsorApplicationApiResponse
+
+      if (!response.ok) {
+        throw new Error(responseBody.error ?? 'Sponsor application failed.')
+      }
+
+      setReceipt(responseBody)
+      captureAnalyticsEvent('sponsor_application_submitted', {
+        checkout_mode: responseBody.checkoutMode,
+        package_id: form.packageId,
+        package_name: responseBody.packageName,
+        persisted: responseBody.persisted,
+        status: responseBody.status,
+      })
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Sponsor application failed. Please retry.',
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <section
+      className="sponsor-application"
+      id="sponsor-apply"
+      aria-labelledby="sponsor-apply-title"
+    >
+      <div className="sponsor-application-hero">
+        <div>
+          <p className="section-kicker">Sponsor Onboarding</p>
+          <h3 id="sponsor-apply-title">Apply, Preview, Then Move To Payment</h3>
+          <p>
+            Sponsors submit brand details, logo assets, offer rules, AI product
+            context when relevant, and legal confirmations before anything goes
+            live on the prediction experience.
+          </p>
+        </div>
+        <ol className="sponsor-application-steps">
+          {['Apply', 'Logo check', 'Payment', 'Admin review', 'Go live'].map(
+            (step, index) => (
+              <li key={step}>
+                <span>{index + 1}</span>
+                <strong>{step}</strong>
+              </li>
+            ),
+          )}
+        </ol>
+      </div>
+
+      <div className="sponsor-application-layout">
+        <form className="sponsor-application-form" onSubmit={handleSubmit}>
+          <section className="sponsor-form-section">
+            <header>
+              <BuildingIcon />
+              <div>
+                <p className="section-kicker">Company</p>
+                <h4>Required sponsor details</h4>
+              </div>
+            </header>
+            <div className="sponsor-form-grid">
+              <label className="sponsor-field">
+                <span>Company name</span>
+                <input
+                  required
+                  onChange={(event) =>
+                    updateSection('company', 'legalName', event.target.value)
+                  }
+                  value={form.company.legalName}
+                />
+                {errorFor('company.legalName') ? (
+                  <em>{errorFor('company.legalName')}</em>
+                ) : null}
+              </label>
+              <label className="sponsor-field">
+                <span>Sponsor display name</span>
+                <input
+                  required
+                  onChange={(event) =>
+                    updateSection('company', 'displayName', event.target.value)
+                  }
+                  value={form.company.displayName}
+                />
+                {errorFor('company.displayName') ? (
+                  <em>{errorFor('company.displayName')}</em>
+                ) : null}
+              </label>
+              <label className="sponsor-field">
+                <span>Website URL</span>
+                <input
+                  required
+                  inputMode="url"
+                  onChange={(event) =>
+                    updateSection('company', 'websiteUrl', event.target.value)
+                  }
+                  placeholder="https://example.com"
+                  value={form.company.websiteUrl}
+                />
+                {errorFor('company.websiteUrl') ? (
+                  <em>{errorFor('company.websiteUrl')}</em>
+                ) : null}
+              </label>
+              <label className="sponsor-field">
+                <span>Country</span>
+                <input
+                  required
+                  onChange={(event) =>
+                    updateSection('company', 'country', event.target.value)
+                  }
+                  value={form.company.country}
+                />
+                {errorFor('company.country') ? (
+                  <em>{errorFor('company.country')}</em>
+                ) : null}
+              </label>
+              <label className="sponsor-field">
+                <span>Category</span>
+                <input
+                  onChange={(event) =>
+                    updateSection('company', 'category', event.target.value)
+                  }
+                  placeholder="AI, travel, CPG, fintech..."
+                  value={form.company.category ?? ''}
+                />
+              </label>
+              <label className="sponsor-field">
+                <span>Contact name</span>
+                <input
+                  required
+                  onChange={(event) =>
+                    updateSection('contact', 'contactName', event.target.value)
+                  }
+                  value={form.contact.contactName}
+                />
+                {errorFor('contact.contactName') ? (
+                  <em>{errorFor('contact.contactName')}</em>
+                ) : null}
+              </label>
+              <label className="sponsor-field">
+                <span>Contact email</span>
+                <input
+                  required
+                  inputMode="email"
+                  onChange={(event) =>
+                    updateSection('contact', 'contactEmail', event.target.value)
+                  }
+                  value={form.contact.contactEmail}
+                />
+                {errorFor('contact.contactEmail') ? (
+                  <em>{errorFor('contact.contactEmail')}</em>
+                ) : null}
+              </label>
+              <label className="sponsor-field">
+                <span>Billing email</span>
+                <input
+                  required
+                  inputMode="email"
+                  onChange={(event) =>
+                    updateSection('contact', 'billingEmail', event.target.value)
+                  }
+                  value={form.contact.billingEmail}
+                />
+                {errorFor('contact.billingEmail') ? (
+                  <em>{errorFor('contact.billingEmail')}</em>
+                ) : null}
+              </label>
+            </div>
+          </section>
+
+          <section className="sponsor-form-section">
+            <header>
+              <ImageIcon size={18} />
+              <div>
+                <p className="section-kicker">Logo</p>
+                <h4>Upload and preview brand placement</h4>
+              </div>
+            </header>
+            <div className="sponsor-logo-uploader">
+              <label>
+                <UploadCloud size={20} />
+                <strong>Upload logo</strong>
+                <span>SVG, PNG, JPG, or WebP. Transparent SVG or PNG preferred.</span>
+                <input
+                  accept="image/svg+xml,image/png,image/jpeg,image/webp"
+                  onChange={handleLogoFile}
+                  type="file"
+                />
+              </label>
+              <div>
+                <span>{form.logo.fileName || 'No logo selected'}</span>
+                <em>{logoError || errorFor('logo.fileName')}</em>
+              </div>
+            </div>
+            <label className="sponsor-field">
+              <span>Logo alt text</span>
+              <input
+                required
+                onChange={(event) =>
+                  updateSection('logo', 'altText', event.target.value)
+                }
+                value={form.logo.altText}
+              />
+              {errorFor('logo.altText') ? (
+                <em>{errorFor('logo.altText')}</em>
+              ) : null}
+            </label>
+          </section>
+
+          <section className="sponsor-form-section">
+            <header>
+              <CreditCard size={18} />
+              <div>
+                <p className="section-kicker">Package</p>
+                <h4>Select sponsorship level</h4>
+              </div>
+            </header>
+            <div className="sponsor-package-picker">
+              {tiers.map((tier) => {
+                const TierIcon = tier.icon
+                const isSelected = tier.id === form.packageId
+
+                return (
+                  <button
+                    className={`sponsor-package-option ${isSelected ? 'is-selected' : ''}`}
+                    key={tier.id}
+                    onClick={() => handlePackageSelect(tier.id)}
+                    type="button"
+                  >
+                    <span>
+                      <TierIcon size={17} />
+                    </span>
+                    <strong>{tier.name}</strong>
+                    <em>{tier.price}</em>
+                  </button>
+                )
+              })}
+            </div>
+          </section>
+
+          <section className="sponsor-form-section">
+            <header>
+              <Target size={18} />
+              <div>
+                <p className="section-kicker">Targeting</p>
+                <h4>Preferred campaign focus</h4>
+              </div>
+            </header>
+            <div className="sponsor-form-grid">
+              <label className="sponsor-field">
+                <span>Target countries</span>
+                <input
+                  onChange={(event) =>
+                    updateSection(
+                      'targeting',
+                      'targetCountries',
+                      event.target.value,
+                    )
+                  }
+                  placeholder="United States, Brazil, Saudi Arabia..."
+                  value={form.targeting.targetCountries ?? ''}
+                />
+              </label>
+              <label className="sponsor-field">
+                <span>Target languages</span>
+                <input
+                  onChange={(event) =>
+                    updateSection(
+                      'targeting',
+                      'targetLanguages',
+                      event.target.value,
+                    )
+                  }
+                  placeholder="English, Arabic, Portuguese..."
+                  value={form.targeting.targetLanguages ?? ''}
+                />
+              </label>
+              <label className="sponsor-field">
+                <span>Preferred dates</span>
+                <input
+                  onChange={(event) =>
+                    updateSection(
+                      'targeting',
+                      'preferredDates',
+                      event.target.value,
+                    )
+                  }
+                  placeholder="Opening week, group stage, final weekend..."
+                  value={form.targeting.preferredDates ?? ''}
+                />
+              </label>
+              <label className="sponsor-field">
+                <span>UTM destination URL</span>
+                <input
+                  inputMode="url"
+                  onChange={(event) =>
+                    updateSection(
+                      'targeting',
+                      'utmDestinationUrl',
+                      event.target.value,
+                    )
+                  }
+                  placeholder="https://example.com/worldcup"
+                  value={form.targeting.utmDestinationUrl ?? ''}
+                />
+                {errorFor('targeting.utmDestinationUrl') ? (
+                  <em>{errorFor('targeting.utmDestinationUrl')}</em>
+                ) : null}
+              </label>
+              <label className="sponsor-field is-wide">
+                <span>Teams, matches, or regions</span>
+                <textarea
+                  onChange={(event) =>
+                    updateSection(
+                      'targeting',
+                      'targetMatchesTeamsRegions',
+                      event.target.value,
+                    )
+                  }
+                  placeholder="Brazil vs Saudi Arabia, US fans, host-city watch parties..."
+                  value={form.targeting.targetMatchesTeamsRegions ?? ''}
+                />
+              </label>
+            </div>
+          </section>
+
+          <section className="sponsor-form-section">
+            <header>
+              <Gift size={18} />
+              <div>
+                <p className="section-kicker">Free Product</p>
+                <h4>Tell us what winners or entrants receive</h4>
+              </div>
+            </header>
+            <label className="sponsor-checkbox">
+              <input
+                checked={form.productOffer.wantsToOffer}
+                onChange={(event) =>
+                  updateSection(
+                    'productOffer',
+                    'wantsToOffer',
+                    event.target.checked,
+                  )
+                }
+                type="checkbox"
+              />
+              <span>
+                <strong>We want to offer a free product, credit, trial, or gift.</strong>
+                <em>
+                  This unlocks offer rules, quantity caps, fulfillment owner,
+                  and winner data-sharing consent.
+                </em>
+              </span>
+            </label>
+            {form.productOffer.wantsToOffer ? (
+              <div className="sponsor-form-grid">
+                <label className="sponsor-field">
+                  <span>Product name</span>
+                  <input
+                    onChange={(event) =>
+                      updateSection(
+                        'productOffer',
+                        'productName',
+                        event.target.value,
+                      )
+                    }
+                    value={form.productOffer.productName ?? ''}
+                  />
+                  {errorFor('productOffer.productName') ? (
+                    <em>{errorFor('productOffer.productName')}</em>
+                  ) : null}
+                </label>
+                <label className="sponsor-field">
+                  <span>Offer type</span>
+                  <select
+                    onChange={(event) =>
+                      updateSection(
+                        'productOffer',
+                        'type',
+                        event.target.value,
+                      )
+                    }
+                    value={form.productOffer.type ?? 'digital'}
+                  >
+                    {sponsorOfferTypes.map((offerType) => (
+                      <option key={offerType} value={offerType}>
+                        {sponsorOfferTypeLabels[offerType]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="sponsor-field">
+                  <span>Retail value USD</span>
+                  <input
+                    min="0"
+                    onChange={(event) =>
+                      updateSection(
+                        'productOffer',
+                        'valueUsd',
+                        Number(event.target.value || 0),
+                      )
+                    }
+                    type="number"
+                    value={form.productOffer.valueUsd || ''}
+                  />
+                </label>
+                <label className="sponsor-field">
+                  <span>Quantity cap</span>
+                  <input
+                    min="0"
+                    onChange={(event) =>
+                      updateSection(
+                        'productOffer',
+                        'quantityCap',
+                        Number(event.target.value || 0),
+                      )
+                    }
+                    type="number"
+                    value={form.productOffer.quantityCap || ''}
+                  />
+                </label>
+                <label className="sponsor-field is-wide">
+                  <span>Offer description</span>
+                  <textarea
+                    onChange={(event) =>
+                      updateSection(
+                        'productOffer',
+                        'description',
+                        event.target.value,
+                      )
+                    }
+                    value={form.productOffer.description ?? ''}
+                  />
+                </label>
+                <label className="sponsor-field is-wide">
+                  <span>Redemption instructions</span>
+                  <textarea
+                    onChange={(event) =>
+                      updateSection(
+                        'productOffer',
+                        'redemptionInstructions',
+                        event.target.value,
+                      )
+                    }
+                    value={form.productOffer.redemptionInstructions ?? ''}
+                  />
+                  {errorFor('productOffer.redemptionInstructions') ? (
+                    <em>{errorFor('productOffer.redemptionInstructions')}</em>
+                  ) : null}
+                </label>
+                <label className="sponsor-field">
+                  <span>Fulfillment owner</span>
+                  <select
+                    onChange={(event) =>
+                      updateSection(
+                        'productOffer',
+                        'fulfillmentOwner',
+                        event.target.value,
+                      )
+                    }
+                    value={form.productOffer.fulfillmentOwner ?? 'platform'}
+                  >
+                    {sponsorFulfillmentOwners.map((owner) => (
+                      <option key={owner} value={owner}>
+                        {sponsorFulfillmentOwnerLabels[owner]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="sponsor-field">
+                  <span>Eligible countries</span>
+                  <input
+                    onChange={(event) =>
+                      updateSection(
+                        'productOffer',
+                        'eligibleCountries',
+                        event.target.value,
+                      )
+                    }
+                    value={form.productOffer.eligibleCountries ?? ''}
+                  />
+                </label>
+                <label className="sponsor-checkbox is-wide">
+                  <input
+                    checked={form.productOffer.winnerDataSharingConsent}
+                    onChange={(event) =>
+                      updateSection(
+                        'productOffer',
+                        'winnerDataSharingConsent',
+                        event.target.checked,
+                      )
+                    }
+                    type="checkbox"
+                  />
+                  <span>
+                    <strong>
+                      We understand winner personal data requires explicit
+                      consent before sharing.
+                    </strong>
+                    <em>
+                      Platform-controlled fulfillment or a 3PL is preferred
+                      when physical products are involved.
+                    </em>
+                  </span>
+                </label>
+              </div>
+            ) : null}
+          </section>
+
+          <section className="sponsor-form-section">
+            <header>
+              <FileText size={18} />
+              <div>
+                <p className="section-kicker">AI One-Pager</p>
+                <h4>Required for AI companies</h4>
+              </div>
+            </header>
+            <label className="sponsor-checkbox">
+              <input
+                checked={form.aiOnePager.isAiCompany}
+                onChange={(event) =>
+                  updateSection(
+                    'aiOnePager',
+                    'isAiCompany',
+                    event.target.checked,
+                  )
+                }
+                type="checkbox"
+              />
+              <span>
+                <strong>This sponsor is an AI product or AI-enabled company.</strong>
+                <em>
+                  AI sponsors need product context, usefulness, privacy summary,
+                  support, and terms before review.
+                </em>
+              </span>
+            </label>
+            {form.aiOnePager.isAiCompany ? (
+              <div className="sponsor-form-grid">
+                <label className="sponsor-field is-wide">
+                  <span>Product description</span>
+                  <textarea
+                    onChange={(event) =>
+                      updateSection(
+                        'aiOnePager',
+                        'productDescription',
+                        event.target.value,
+                      )
+                    }
+                    value={form.aiOnePager.productDescription ?? ''}
+                  />
+                  {errorFor('aiOnePager.productDescription') ? (
+                    <em>{errorFor('aiOnePager.productDescription')}</em>
+                  ) : null}
+                </label>
+                <label className="sponsor-field is-wide">
+                  <span>Why it helps fans or winners</span>
+                  <textarea
+                    onChange={(event) =>
+                      updateSection(
+                        'aiOnePager',
+                        'usefulnessToFans',
+                        event.target.value,
+                      )
+                    }
+                    value={form.aiOnePager.usefulnessToFans ?? ''}
+                  />
+                  {errorFor('aiOnePager.usefulnessToFans') ? (
+                    <em>{errorFor('aiOnePager.usefulnessToFans')}</em>
+                  ) : null}
+                </label>
+                <label className="sponsor-field is-wide">
+                  <span>Data and privacy summary</span>
+                  <textarea
+                    onChange={(event) =>
+                      updateSection(
+                        'aiOnePager',
+                        'dataPrivacySummary',
+                        event.target.value,
+                      )
+                    }
+                    value={form.aiOnePager.dataPrivacySummary ?? ''}
+                  />
+                  {errorFor('aiOnePager.dataPrivacySummary') ? (
+                    <em>{errorFor('aiOnePager.dataPrivacySummary')}</em>
+                  ) : null}
+                </label>
+              </div>
+            ) : null}
+          </section>
+
+          <section className="sponsor-form-section">
+            <header>
+              <ShieldCheck size={18} />
+              <div>
+                <p className="section-kicker">Terms</p>
+                <h4>Required before payment</h4>
+              </div>
+            </header>
+            <div className="sponsor-consent-list">
+              {[
+                [
+                  'terms.logoRightsAccepted',
+                  'logoRightsAccepted',
+                  'We have the rights to submit this logo and sponsor assets.',
+                ],
+                [
+                  'terms.sponsorAgreementAccepted',
+                  'sponsorAgreementAccepted',
+                  'We accept sponsorship terms, timing, review, rejection, cancellation, and refund rules.',
+                ],
+                [
+                  'terms.noGuaranteeAccepted',
+                  'noGuaranteeAccepted',
+                  'We understand placements, impressions, conversions, winners, and redemptions are not guaranteed.',
+                ],
+                [
+                  'terms.contentReviewAccepted',
+                  'contentReviewAccepted',
+                  'We accept that content, offers, and claims can be edited, paused, or rejected during review.',
+                ],
+                [
+                  'terms.winnerPrivacyAccepted',
+                  'winnerPrivacyAccepted',
+                  'We accept winner privacy rules and consent requirements for any product fulfillment data sharing.',
+                ],
+              ].map(([path, field, label]) => (
+                <label
+                  className={`sponsor-checkbox ${errorFor(path) ? 'has-error' : ''}`}
+                  key={field}
+                >
+                  <input
+                    checked={
+                      form.terms[field as keyof SponsorApplicationPayload['terms']]
+                    }
+                    onChange={(event) =>
+                      updateSection(
+                        'terms',
+                        field as keyof SponsorApplicationPayload['terms'],
+                        event.target.checked,
+                      )
+                    }
+                    type="checkbox"
+                  />
+                  <span>
+                    <strong>{label}</strong>
+                    {errorFor(path) ? <em>{errorFor(path)}</em> : null}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </section>
+
+          {submitError ? <p className="entry-submit-error">{submitError}</p> : null}
+
+          <div className="sponsor-submit-row">
+            <Button className="sponsor-primary-action" disabled={isSubmitting} size="lg">
+              <CreditCard size={17} />
+              <span>{isSubmitting ? 'Submitting...' : 'Submit Sponsor Application'}</span>
+            </Button>
+            <p>
+              Payment is activated by Stripe Checkout only after package price
+              IDs and webhook handling are configured. Success redirects alone
+              never activate a sponsor.
+            </p>
+          </div>
+        </form>
+
+        <aside className="sponsor-preview-panel" aria-label="Sponsor preview">
+          <div className="sponsor-preview-card">
+            <div className="sponsor-preview-logo">
+              {logoPreviewUrl ? (
+                <img alt={form.logo.altText || 'Sponsor logo preview'} src={logoPreviewUrl} />
+              ) : (
+                <ImageIcon size={26} />
+              )}
+            </div>
+            <p>Light placement preview</p>
+            <h4>{form.company.displayName || 'Sponsor Display Name'}</h4>
+            <span>{selectedTier.name}</span>
+          </div>
+          <div className="sponsor-preview-card is-dark">
+            <div className="sponsor-preview-logo">
+              {logoPreviewUrl ? (
+                <img alt="" src={logoPreviewUrl} />
+              ) : (
+                <ImageIcon size={26} />
+              )}
+            </div>
+            <p>Match card preview</p>
+            <h4>{form.company.displayName || 'Sponsor Display Name'}</h4>
+            <span>{selectedTier.price} package</span>
+          </div>
+          <Card className="sponsor-preview-summary" size="sm">
+            <CardContent>
+              <Badge variant="outline">{selectedTier.price}</Badge>
+              <h4>{selectedTier.name}</h4>
+              <p>{selectedTier.summary}</p>
+              <ul>
+                <li>
+                  <CheckCircle2 size={15} />
+                  <span>Status starts as awaiting payment.</span>
+                </li>
+                <li>
+                  <CheckCircle2 size={15} />
+                  <span>Webhook confirmation moves paid sponsors to review.</span>
+                </li>
+                <li>
+                  <CheckCircle2 size={15} />
+                  <span>Admin approval is required before live placement.</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          {receipt ? (
+            <Card className="sponsor-application-receipt" size="sm">
+              <CardContent>
+                <span className="sponsor-receipt-icon">
+                  <ReceiptText size={18} />
+                </span>
+                <p className="section-kicker">Application Receipt</p>
+                <h4>{receipt.sponsorDisplayName}</h4>
+                <dl>
+                  <div>
+                    <dt>Status</dt>
+                    <dd>{receipt.status}</dd>
+                  </div>
+                  <div>
+                    <dt>Package</dt>
+                    <dd>{receipt.packageName}</dd>
+                  </div>
+                  <div>
+                    <dt>Receipt</dt>
+                    <dd>{receipt.receiptHash}</dd>
+                  </div>
+                  <div>
+                    <dt>Persistence</dt>
+                    <dd>{receipt.persistenceMode}</dd>
+                  </div>
+                </dl>
+                <p>{receipt.message}</p>
+              </CardContent>
+            </Card>
+          ) : null}
+        </aside>
+      </div>
+    </section>
+  )
+}
+
+function BuildingIcon() {
+  return <Handshake size={18} />
+}
+
 function SponsorSection() {
   const { t } = useI18n()
   const localizedSponsorshipTiers = sponsorshipTiers.map((tier, index) => {
@@ -3021,6 +4000,8 @@ function SponsorSection() {
           })}
         </div>
       </Card>
+
+      <SponsorApplicationFlow tiers={localizedSponsorshipTiers} />
 
       <div className="sponsor-addons">
         <div>
