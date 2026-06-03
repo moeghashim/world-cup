@@ -16,6 +16,7 @@ The interface should behave like a matchday operations surface with fan energy, 
 - Use clean page paths for primary sections instead of hash fragments, so visitors can open `/operations`, `/posthog`, `/prizes/japan`, and `/experiment` as standalone URLs.
 - Use full-width bands and unframed workspace sections; reserve cards for repeated items, panels, and operational modules.
 - Keep repeated match, draw, reward, and provider modules visually consistent.
+- Borrow the sponsor marketplace density from `https://trustmrr.com/` for the sponsorship section: compact board framing, metric strip, ranked package listings on desktop, and a stacked listing rhythm on mobile. Do not copy its branding, assets, or exact visual identity.
 - Keep footer attribution restrained and operational: show the Experiment link and `10claws.com` association on the homepage, but keep Codex Desktop App and `https://projects.dev/` inside the Experiment view and build documentation.
 
 ## Team Theming

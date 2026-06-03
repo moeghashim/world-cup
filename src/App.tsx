@@ -309,6 +309,25 @@ const sponsorshipTiers = [
       'Best for national launches, hero product drops, travel, electronics, sportswear, food delivery, streaming, telecom, fintech, and fan-experience brands.',
   },
   {
+    name: 'Website Sponsor',
+    price: '$25,000',
+    spots: '4 spots',
+    signal: 'Homepage and site-wide visibility',
+    icon: MousePointerClick,
+    featured: false,
+    summary:
+      'A premium website package for brands that want always-on visibility across the homepage, prediction banner, prize pages, and sponsor discovery paths.',
+    includes: [
+      'Featured website placement in the homepage sponsor board, top prediction flow, and prize discovery surfaces.',
+      'Sponsor badge attached to selected homepage match cards and prize bundle previews without using official team marks.',
+      'Dedicated sponsor story panel with product education, offer links, and campaign-safe creative copy.',
+      'Five winner product review prompts or short-form quote captures after delivery.',
+      'Website performance recap covering views, prediction starts, entry volume, prize clicks, and review completion.',
+    ],
+    creative:
+      'Best for brands that want persistent website reach before choosing specific match campaigns: apps, CPG, travel, creator tools, local services, and fan-commerce launches.',
+  },
+  {
     name: 'Matchday Featured Sponsor',
     price: '$10,000',
     spots: '10 spots',
@@ -348,13 +367,25 @@ const sponsorshipTiers = [
   },
 ] as const
 
-const sponsorshipTierTranslationKeys = ['global', 'matchday', 'fan'] as const
+const sponsorshipTierTranslationKeys = [
+  'global',
+  'website',
+  'matchday',
+  'fan',
+] as const
 const sponsorIncludeIndexes = [1, 2, 3, 4, 5] as const
 const sponsorAddOnIndexes = [1, 2, 3, 4, 5, 6] as const
 
+const sponsorshipBoardStats = [
+  ['sponsor.board.packages', '4'],
+  ['sponsor.board.entryPoint', 'sponsor.board.homepage'],
+  ['sponsor.board.winnerSlots', '5-10'],
+  ['sponsor.board.proof', 'sponsor.board.reviews'],
+] as const
+
 const aiBuildMetrics = {
-  tokenTotal: '~5.0M',
-  estimatedCost: '~$43',
+  tokenTotal: '~5.1M',
+  estimatedCost: '~$44',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
@@ -2371,41 +2402,65 @@ function SponsorSection() {
         <p>{t('sponsor.copy')}</p>
       </div>
 
-      <div className="sponsor-tier-grid" aria-label={t('sponsor.tiersAria')}>
-        {localizedSponsorshipTiers.map((tier) => {
-          const TierIcon = tier.icon
+      <div className="sponsor-board" aria-label={t('sponsor.boardAria')}>
+        <div className="sponsor-board-strip">
+          {sponsorshipBoardStats.map(([labelKey, value]) => (
+            <div className="sponsor-board-stat" key={labelKey}>
+              <span>{t(labelKey as TranslationKey)}</span>
+              <strong>
+                {value.startsWith('sponsor.')
+                  ? t(value as TranslationKey)
+                  : value}
+              </strong>
+            </div>
+          ))}
+        </div>
 
-          return (
-            <article
-              className={`sponsor-tier ${tier.featured ? 'is-featured' : ''}`}
-              key={tier.name}
-            >
-              <header className="sponsor-tier-header">
-                <span className="sponsor-tier-icon">
-                  <TierIcon size={19} />
-                </span>
-                <div>
-                  <p>{tier.signal}</p>
-                  <h3>{tier.name}</h3>
+        <div className="sponsor-tier-grid" aria-label={t('sponsor.tiersAria')}>
+          {localizedSponsorshipTiers.map((tier, index) => {
+            const TierIcon = tier.icon
+
+            return (
+              <article
+                className={`sponsor-tier ${tier.featured ? 'is-featured' : ''}`}
+                key={tier.name}
+              >
+                <header className="sponsor-tier-header">
+                  <div className="sponsor-tier-rank">
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <span className="sponsor-tier-icon">
+                      <TierIcon size={19} />
+                    </span>
+                  </div>
+                  <div>
+                    <p>{tier.signal}</p>
+                    <h3>{tier.name}</h3>
+                  </div>
+                </header>
+                <div className="sponsor-price-row">
+                  <div>
+                    <span>{t('sponsor.packageLabel')}</span>
+                    <strong>{tier.price}</strong>
+                  </div>
+                  <div>
+                    <span>{t('sponsor.availabilityLabel')}</span>
+                    <strong>{tier.spots}</strong>
+                  </div>
                 </div>
-              </header>
-              <div className="sponsor-price-row">
-                <strong>{tier.price}</strong>
-                <span>{tier.spots}</span>
-              </div>
-              <p className="sponsor-summary">{tier.summary}</p>
-              <ul className="sponsor-feature-list">
-                {tier.includes.map((item) => (
-                  <li key={item}>
-                    <CheckCircle2 size={16} />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="sponsor-creative">{tier.creative}</p>
-            </article>
-          )
-        })}
+                <p className="sponsor-summary">{tier.summary}</p>
+                <ul className="sponsor-feature-list">
+                  {tier.includes.map((item) => (
+                    <li key={item}>
+                      <CheckCircle2 size={16} />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="sponsor-creative">{tier.creative}</p>
+              </article>
+            )
+          })}
+        </div>
       </div>
 
       <div className="sponsor-addons">
