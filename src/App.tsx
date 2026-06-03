@@ -20,7 +20,6 @@ import {
   ExternalLink,
   FileText,
   FlaskConical,
-  Gauge,
   Gift,
   Handshake,
   ListChecks,
@@ -354,7 +353,6 @@ const aiBuildMetrics = {
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
 
-const posthogDashboardUrl = 'https://us.posthog.com'
 const posthogResourceName = 'WorldCup'
 const posthogEnvVars = [
   'WORLDCUP_API_KEY',
@@ -364,78 +362,76 @@ const posthogEnvVars = [
 
 const posthogDashboardMetrics = [
   {
-    label: 'Acquisition',
-    title: 'Supporter Visits',
-    value: '$pageview',
-    detail: 'Track page paths, referrers, selected team pages, and sponsor routes.',
+    label: 'Traffic',
+    title: 'Daily Visitors',
+    value: 'Aggregate only',
+    detail: 'Count daily unique visitors without showing identity, email, address, or session details.',
     icon: MousePointerClick,
   },
   {
-    label: 'Core Funnel',
-    title: 'Prediction Conversion',
-    value: '5 events',
-    detail: 'Follow a visitor from first pick through locked receipt and draw entry.',
+    label: 'Audience',
+    title: 'Number Of Signups',
+    value: 'Aggregate only',
+    detail: 'Show the total signup count only. No names, emails, phone numbers, or address data.',
+    icon: UsersRound,
+  },
+  {
+    label: 'Engagement',
+    title: 'Number Of Predictions',
+    value: 'Aggregate only',
+    detail: 'Show locked prediction totals by day or match without receipt hashes or participant records.',
     icon: TrendingUp,
   },
   {
-    label: 'Reward Flow',
-    title: 'Prize Claims',
-    value: '3 stages',
-    detail: 'Monitor winner reveal, claim start, shipment queue, and review prompt.',
-    icon: Gift,
-  },
-  {
-    label: 'Operations',
-    title: 'Fulfillment Health',
-    value: 'Live queue',
-    detail: 'Give sponsors a clean status readout for packages, shirts, and reviews.',
-    icon: Gauge,
+    label: 'Prize Status',
+    title: 'No Winners',
+    value: '0',
+    detail: 'No winner names or winner records are exposed on this public dashboard.',
+    icon: ShieldCheck,
   },
 ] as const
 
 const posthogFunnelSteps = [
-  ['Visit match page', '$pageview', 'Route-level traffic by fixture, team, and campaign.'],
-  ['Start prediction', 'prediction_started', 'Visitor selects a match or begins score entry.'],
-  ['Lock receipt', 'prediction_locked', 'A draw receipt is created and committed.'],
-  ['Enter draw', 'draw_entry_created', 'Correct prediction qualifies for match reward draw.'],
-  ['Reveal result', 'draw_revealed', 'Participant sees winner, alternate, or not-selected state.'],
-  ['Queue reward', 'fulfillment_queued', 'Winner shirts and sponsor packages move into the operations queue.'],
+  ['Daily visitors', '$pageview', 'Aggregate unique visitor count by day.'],
+  ['Number of signups', 'signup_completed', 'Aggregate signup count from approved signup events or server totals.'],
+  ['Number of predictions', 'prediction_locked', 'Aggregate locked prediction count by day or match.'],
+  ['No winners', 'winner_count', 'Display 0 until an approved winner workflow exists.'],
 ] as const
 
 const posthogEventPlan = [
   {
-    area: 'Prediction',
-    events: ['prediction_started', 'prediction_locked', 'score_changed'],
-    owner: 'Frontend',
+    area: 'Names',
+    events: ['first_name', 'last_name', 'full_name'],
+    owner: 'Never expose',
   },
   {
-    area: 'Draw',
-    events: ['draw_entry_created', 'draw_revealed', 'winner_selected'],
-    owner: 'Draw engine',
+    area: 'Contact',
+    events: ['email', 'phone', 'address'],
+    owner: 'Never expose',
   },
   {
-    area: 'Prizes',
-    events: ['prize_detail_viewed', 'team_selected'],
-    owner: 'Rewards UI',
+    area: 'Receipts',
+    events: ['receipt_hash', 'participant_id', 'session_id'],
+    owner: 'Never expose',
   },
   {
-    area: 'Sponsors',
-    events: ['sponsor_card_viewed', 'sponsor_cta_clicked', 'review_prompt_sent'],
-    owner: 'Campaign ops',
+    area: 'Raw Activity',
+    events: ['raw events', 'session recordings', 'event payloads'],
+    owner: 'Never expose',
   },
   {
-    area: 'Fulfillment',
-    events: ['fulfillment_queued', 'shipment_created', 'review_completed'],
-    owner: 'Operations',
+    area: 'Winners',
+    events: ['winner names', 'winner addresses', 'winner records'],
+    owner: 'Never expose',
   },
 ] as const
 
 const posthogSetupItems = [
-  'Use the new Projects.dev PostHog analytics project resource named WorldCup.',
-  'Map WORLDCUP_API_KEY and optional WORLDCUP_HOST into VITE_POSTHOG_KEY and VITE_POSTHOG_HOST, then restart or rebuild because Vite public env is build-time read.',
-  'PostHog initializes only when VITE_POSTHOG_KEY exists and sends through the first-party /ingest proxy.',
-  'Create the real dashboard inside the WorldCup PostHog project with prediction funnel, route traffic, sponsor conversions, fulfillment queue, and review completion tiles.',
-  'Keep session replay off until privacy copy and consent rules are approved.',
+  'Show only daily visitors, signup count, prediction count, and winner status.',
+  'Keep all participant PII out of this page and out of browser-visible metric payloads.',
+  'Use server-safe aggregate counts for signups and predictions when database data is available.',
+  'Keep session replay and raw event inspection off this public dashboard.',
+  'Leave winner count at 0 until the legal and fulfillment workflow is approved.',
 ] as const
 
 const technologyFlow = [
@@ -2304,28 +2300,17 @@ function PostHogDashboardPage() {
             <BarChart3 size={18} />
           </span>
           <div>
-            <p className="section-kicker">PostHog Dashboard</p>
-            <h1 id="posthog-title">Measure The Prediction Funnel</h1>
+            <p className="section-kicker">Dashboard</p>
+            <h1 id="posthog-title">Public Campaign Snapshot</h1>
           </div>
         </div>
         <div>
           <p>
-            This dashboard defines the PostHog view for visitor acquisition,
-            prediction conversion, draw reveals, prize claims, sponsor reviews,
-            and fulfillment health. It is the operational map for the real
-            PostHog insights once event capture is enabled.
+            A privacy-safe snapshot for the World Cup campaign: daily visitors,
+            signups, predictions, and winner status. It exposes aggregate counts
+            only and never shows private participant information.
           </p>
           <div className="posthog-dashboard-actions">
-            <a
-              className="prize-action"
-              href={posthogDashboardUrl}
-              rel="noreferrer"
-              target="_blank"
-            >
-              <BarChart3 size={17} />
-              <span>Open PostHog Account</span>
-              <ExternalLink size={15} />
-            </a>
             <a className="prize-action secondary" href="/operations">
               <ShieldCheck size={17} />
               <span>Operations Plan</span>
@@ -2357,8 +2342,8 @@ function PostHogDashboardPage() {
           <header>
             <Activity size={18} />
             <div>
-              <p className="section-kicker">Main Funnel</p>
-              <h2>Visitor To Reward Claim</h2>
+              <p className="section-kicker">Aggregate Sources</p>
+              <h2>What This Dashboard May Show</h2>
             </div>
           </header>
           <ol className="posthog-funnel-list">
@@ -2379,8 +2364,8 @@ function PostHogDashboardPage() {
           <header>
             <ListChecks size={18} />
             <div>
-              <p className="section-kicker">Event Taxonomy</p>
-              <h2>Dashboard Tiles To Build</h2>
+              <p className="section-kicker">Privacy Rules</p>
+              <h2>Never Show Private Data</h2>
             </div>
           </header>
           <div className="posthog-event-table" role="table">
@@ -2398,13 +2383,13 @@ function PostHogDashboardPage() {
       <aside className="posthog-setup-panel">
         <div>
           <p className="section-kicker">Setup State</p>
-          <h2>Connected Through Projects.dev, Capture Still Pending</h2>
+          <h2>Public Aggregates Only</h2>
           <p>
             The new PostHog project resource is present in the Projects.dev
-            state as <code>{posthogResourceName}</code>. The dashboard is ready
-            as a tracking contract, but real product events still require the
-            public Vite key mapping, a fresh restart or deploy, privacy copy,
-            and final production event-name approval.
+            state as <code>{posthogResourceName}</code>. The public dashboard
+            should use only aggregate analytics and server-safe counts. Do not
+            expose names, emails, phone numbers, addresses, receipt hashes, raw
+            events, session recordings, or winner records.
           </p>
         </div>
         <div className="posthog-resource-panel" aria-label="PostHog resource">
@@ -2462,7 +2447,6 @@ function Topbar({
           <a href="/sponsors">Sponsors</a>
           <a href="/rewards">Rewards</a>
           <a href="/operations">Operations</a>
-          <a href="/posthog">PostHog Dashboard</a>
         </nav>
         <button className="account-button" type="button">
           <Ticket size={17} />
@@ -2804,7 +2788,6 @@ function SiteFooter() {
         <a href="/prizes">Prizes</a>
         <a href="/sponsors">Sponsors</a>
         <a href="/operations">Operations</a>
-        <a href="/posthog">PostHog Dashboard</a>
       </nav>
     </footer>
   )
