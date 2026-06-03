@@ -107,6 +107,10 @@ import {
   registry,
   type PredictionState,
 } from './jsonRender/predictionCatalog'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 
 function parsePointer(path: string) {
   if (!path || path === '/') {
@@ -395,9 +399,57 @@ const sponsorshipBoardStats = [
   ['sponsor.board.proof', 'sponsor.board.reviews'],
 ] as const
 
+const sponsorAdBlocks = [
+  {
+    name: 'Matchday Studio',
+    copy: 'Sponsor the next prediction rush',
+    icon: Target,
+    tone: 'stone',
+  },
+  {
+    name: 'Prize Drop',
+    copy: 'Put your product in winner boxes',
+    icon: Gift,
+    tone: 'rose',
+  },
+  {
+    name: 'Fan Review Lab',
+    copy: 'Collect guided post-delivery proof',
+    icon: Megaphone,
+    tone: 'blue',
+  },
+  {
+    name: 'Team Journey',
+    copy: 'Own a supporter story across fixtures',
+    icon: UsersRound,
+    tone: 'mint',
+  },
+  {
+    name: 'Website Sponsor',
+    copy: 'Stay visible across sponsor discovery',
+    icon: MousePointerClick,
+    tone: 'sky',
+  },
+  {
+    name: 'Culture Kit',
+    copy: 'Bundle gifts around both teams',
+    icon: PackageCheck,
+    tone: 'sand',
+  },
+  {
+    name: 'Sponsor Recap',
+    copy: 'Views, entries, clicks, reviews',
+    icon: BarChart3,
+    tone: 'lavender',
+  },
+] as const
+
+const leftSponsorAdBlocks = sponsorAdBlocks.slice(0, 4)
+const rightSponsorAdBlocks = sponsorAdBlocks.slice(4)
+
 const aiBuildMetrics = {
-  tokenTotal: '~5.3M',
-  estimatedCost: '~$46',
+  tokenTotal: '~5.6M',
+  estimatedCost: '~$49',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
@@ -1167,7 +1219,9 @@ function AppContent() {
     return (
       <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
-        <ExperimentPage />
+        <SponsoredPageFrame className="sponsor-page-documentation">
+          <ExperimentPage />
+        </SponsoredPageFrame>
         <SiteFooter />
       </main>
     )
@@ -1177,10 +1231,14 @@ function AppContent() {
     return (
       <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
-        <PrizeDetailPage
-          onSelectTeam={(teamKey) => selectSupporterTeam(teamKey, 'prize_detail')}
-          teamKey={activePrizeKey}
-        />
+        <SponsoredPageFrame className="sponsor-page-prize-detail">
+          <PrizeDetailPage
+            onSelectTeam={(teamKey) =>
+              selectSupporterTeam(teamKey, 'prize_detail')
+            }
+            teamKey={activePrizeKey}
+          />
+        </SponsoredPageFrame>
         <SiteFooter />
       </main>
     )
@@ -1190,10 +1248,12 @@ function AppContent() {
     return (
       <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
-        <PrizeHomeSection
-          onSelectTeam={(teamKey) => selectSupporterTeam(teamKey, 'prize_card')}
-          selectedTeamKey={selectedTeamKey}
-        />
+        <SponsoredPageFrame className="sponsor-page-prizes">
+          <PrizeHomeSection
+            onSelectTeam={(teamKey) => selectSupporterTeam(teamKey, 'prize_card')}
+            selectedTeamKey={selectedTeamKey}
+          />
+        </SponsoredPageFrame>
         <SiteFooter />
       </main>
     )
@@ -1203,7 +1263,9 @@ function AppContent() {
     return (
       <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
-        <TeamDetailPage identity={activeTeamIdentity} />
+        <SponsoredPageFrame className="sponsor-page-team-detail">
+          <TeamDetailPage identity={activeTeamIdentity} />
+        </SponsoredPageFrame>
         <SiteFooter />
       </main>
     )
@@ -1213,7 +1275,9 @@ function AppContent() {
     return (
       <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
-        <TeamDirectoryPage />
+        <SponsoredPageFrame className="sponsor-page-teams">
+          <TeamDirectoryPage />
+        </SponsoredPageFrame>
         <SiteFooter />
       </main>
     )
@@ -1223,7 +1287,7 @@ function AppContent() {
     return (
       <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
-        <SponsorSection />
+        <SponsorPage />
         <SiteFooter />
       </main>
     )
@@ -1233,7 +1297,9 @@ function AppContent() {
     return (
       <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
-        <PostHogDashboardPage />
+        <SponsoredPageFrame className="sponsor-page-dashboard">
+          <PostHogDashboardPage />
+        </SponsoredPageFrame>
         <SiteFooter />
       </main>
     )
@@ -1246,20 +1312,111 @@ function AppContent() {
       <main {...shellProps}>
         <Topbar drawCount={drawCount} lockedCount={lockedCount} />
 
-        <section className="route-page-hero" aria-labelledby="route-page-title">
-          <div className="section-heading">
+        <SponsoredPageFrame className="sponsor-page-route">
+          <section className="route-page-hero" aria-labelledby="route-page-title">
+            <div className="section-heading">
+              <span className="icon-box">
+                <Sparkles size={18} />
+              </span>
+              <div>
+                <p className="section-kicker">{routeCopy.kicker}</p>
+                <h1 id="route-page-title">{routeCopy.title}</h1>
+                <p>{routeCopy.copy}</p>
+              </div>
+            </div>
+          </section>
+
+          <div className="workspace-shell route-workspace">
+            <aside className="flow-rail" aria-label={t('flow.aria')}>
+              <div className="flow-rail-header">
+                <span>{selectedTeam.code}</span>
+                <strong>{t('flow.header')}</strong>
+              </div>
+              <nav aria-label={t('flow.stagesAria')}>
+                {flowItems.map((item) => (
+                  <a href={item.href} key={item.label}>
+                    <span className="flow-icon">{item.icon}</span>
+                    <span>
+                      <strong>{item.label}</strong>
+                      <em>{item.meta}</em>
+                    </span>
+                  </a>
+                ))}
+              </nav>
+            </aside>
+
+            <div className="workspace-main">
+              <JSONUIProvider registry={registry} store={store}>
+                <Renderer spec={routePredictionSpec} registry={registry} />
+              </JSONUIProvider>
+            </div>
+          </div>
+        </SponsoredPageFrame>
+
+        <SiteFooter />
+      </main>
+    )
+  }
+
+  return (
+    <main {...shellProps}>
+      <Topbar drawCount={drawCount} lockedCount={lockedCount} />
+
+      <SponsoredPageFrame className="sponsor-page-home">
+        <HeroPredictionArena
+          onReceiptCountChange={setHomepageReceiptCount}
+          selectedTeam={selectedTeam}
+          selectedTeamKey={selectedTeamKey}
+        />
+
+        <section className="team-strip" aria-labelledby="supporter-team">
+          <div className="section-heading compact">
             <span className="icon-box">
-              <Sparkles size={18} />
+              <UsersRound size={18} />
             </span>
             <div>
-              <p className="section-kicker">{routeCopy.kicker}</p>
-              <h1 id="route-page-title">{routeCopy.title}</h1>
-              <p>{routeCopy.copy}</p>
+              <p className="section-kicker">{t('team.kicker')}</p>
+              <h2 id="supporter-team">{t('team.title')}</h2>
             </div>
+          </div>
+          <div className="team-picker" role="list">
+            {teamThemes.map((team) => (
+              <button
+                aria-pressed={team.key === selectedTeamKey}
+                className="team-chip"
+                key={team.key}
+                onClick={() =>
+                  selectSupporterTeam(team.key satisfies TeamKey, 'team_picker')
+                }
+                type="button"
+              >
+                <span
+                  className="team-swatch"
+                  style={
+                    {
+                      '--swatch-primary': team.colors.primary,
+                      '--swatch-secondary': team.colors.secondary,
+                      '--swatch-accent': team.colors.accent,
+                    } as CSSProperties
+                  }
+                />
+                <span>
+                  <strong>{team.code}</strong>
+                  {team.name}
+                </span>
+              </button>
+            ))}
           </div>
         </section>
 
-        <div className="workspace-shell route-workspace">
+        <PrizeHomeSection
+          onSelectTeam={(teamKey) => selectSupporterTeam(teamKey, 'prize_card')}
+          selectedTeamKey={selectedTeamKey}
+        />
+
+        <SponsorSection />
+
+        <div className="workspace-shell">
           <aside className="flow-rail" aria-label={t('flow.aria')}>
             <div className="flow-rail-header">
               <span>{selectedTeam.code}</span>
@@ -1280,98 +1437,11 @@ function AppContent() {
 
           <div className="workspace-main">
             <JSONUIProvider registry={registry} store={store}>
-              <Renderer spec={routePredictionSpec} registry={registry} />
+              <Renderer spec={localizedPredictionSpec} registry={registry} />
             </JSONUIProvider>
           </div>
         </div>
-
-        <SiteFooter />
-      </main>
-    )
-  }
-
-  return (
-    <main {...shellProps}>
-      <Topbar drawCount={drawCount} lockedCount={lockedCount} />
-
-      <HeroPredictionArena
-        onReceiptCountChange={setHomepageReceiptCount}
-        selectedTeam={selectedTeam}
-        selectedTeamKey={selectedTeamKey}
-      />
-
-      <section className="team-strip" aria-labelledby="supporter-team">
-        <div className="section-heading compact">
-          <span className="icon-box">
-            <UsersRound size={18} />
-          </span>
-          <div>
-            <p className="section-kicker">{t('team.kicker')}</p>
-            <h2 id="supporter-team">{t('team.title')}</h2>
-          </div>
-        </div>
-        <div className="team-picker" role="list">
-          {teamThemes.map((team) => (
-            <button
-              aria-pressed={team.key === selectedTeamKey}
-              className="team-chip"
-              key={team.key}
-              onClick={() =>
-                selectSupporterTeam(team.key satisfies TeamKey, 'team_picker')
-              }
-              type="button"
-            >
-              <span
-                className="team-swatch"
-                style={
-                  {
-                    '--swatch-primary': team.colors.primary,
-                    '--swatch-secondary': team.colors.secondary,
-                    '--swatch-accent': team.colors.accent,
-                  } as CSSProperties
-                }
-              />
-              <span>
-                <strong>{team.code}</strong>
-                {team.name}
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <PrizeHomeSection
-        onSelectTeam={(teamKey) => selectSupporterTeam(teamKey, 'prize_card')}
-        selectedTeamKey={selectedTeamKey}
-      />
-
-      <SponsorSection />
-
-      <div className="workspace-shell">
-        <aside className="flow-rail" aria-label={t('flow.aria')}>
-          <div className="flow-rail-header">
-            <span>{selectedTeam.code}</span>
-            <strong>{t('flow.header')}</strong>
-          </div>
-          <nav aria-label={t('flow.stagesAria')}>
-            {flowItems.map((item) => (
-              <a href={item.href} key={item.label}>
-                <span className="flow-icon">{item.icon}</span>
-                <span>
-                  <strong>{item.label}</strong>
-                  <em>{item.meta}</em>
-                </span>
-              </a>
-            ))}
-          </nav>
-        </aside>
-
-        <div className="workspace-main">
-          <JSONUIProvider registry={registry} store={store}>
-            <Renderer spec={localizedPredictionSpec} registry={registry} />
-          </JSONUIProvider>
-        </div>
-      </div>
+      </SponsoredPageFrame>
 
       <SiteFooter />
     </main>
@@ -2412,6 +2482,87 @@ function PrizeHomeSection({
   )
 }
 
+function SponsorAdRail({
+  blocks,
+  side,
+}: {
+  blocks: typeof leftSponsorAdBlocks | typeof rightSponsorAdBlocks
+  side: 'left' | 'right'
+}) {
+  return (
+    <aside
+      className={`sponsor-ad-rail ${side}`}
+      aria-label={`${side} advertiser placements`}
+    >
+      {blocks.map((block) => {
+        const BlockIcon = block.icon
+
+        return (
+          <Card
+            className={`sponsor-ad-block tone-${block.tone}`}
+            key={block.name}
+            size="sm"
+          >
+            <CardContent className="sponsor-ad-content">
+              <span className="sponsor-ad-icon">
+                <BlockIcon size={18} />
+              </span>
+              <strong>{block.name}</strong>
+              <p>{block.copy}</p>
+            </CardContent>
+          </Card>
+        )
+      })}
+
+      {side === 'right' ? (
+        <Card className="sponsor-ad-block is-empty" size="sm">
+          <CardContent className="sponsor-ad-content">
+            <span className="sponsor-ad-icon">
+              <Megaphone size={18} />
+            </span>
+            <strong>Advertise</strong>
+            <Badge className="sponsor-ad-badge" variant="outline">
+              6/20 spots left
+            </Badge>
+          </CardContent>
+        </Card>
+      ) : null}
+    </aside>
+  )
+}
+
+function SponsoredPageFrame({
+  ariaLabel = 'Sponsored page content',
+  children,
+  className = '',
+}: {
+  ariaLabel?: string
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <section
+      className={`sponsor-page ${className}`.trim()}
+      aria-label={ariaLabel}
+    >
+      <SponsorAdRail blocks={leftSponsorAdBlocks} side="left" />
+      <div className="sponsor-page-core">{children}</div>
+      <SponsorAdRail blocks={rightSponsorAdBlocks} side="right" />
+    </section>
+  )
+}
+
+function SponsorPage() {
+  return (
+    <SponsoredPageFrame
+      ariaLabel="Sponsor advertising page"
+      className="sponsor-page-sponsors"
+    >
+      <SponsorSection />
+    </SponsoredPageFrame>
+  )
+}
+
 function getSourceHost(url: string) {
   try {
     return new URL(url).hostname.replace(/^www\./, '')
@@ -2758,7 +2909,47 @@ function SponsorSection() {
         <p>{t('sponsor.copy')}</p>
       </div>
 
-      <div className="sponsor-board" aria-label={t('sponsor.boardAria')}>
+      <div className="sponsor-banner-strip" aria-label={t('sponsor.boardAria')}>
+        {localizedSponsorshipTiers.slice(1).map((tier, index) => {
+          const TierIcon = tier.icon
+
+          return (
+            <Card
+              className={`sponsor-listing-banner ${index === 0 ? 'is-primary' : ''}`}
+              key={tier.name}
+              size="sm"
+            >
+              <div className="sponsor-listing-main">
+                <span className="sponsor-listing-rank">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <span className="sponsor-listing-icon">
+                  <TierIcon size={18} />
+                </span>
+                <div>
+                  <p>{tier.signal}</p>
+                  <h3>{tier.name}</h3>
+                </div>
+              </div>
+              <div className="sponsor-listing-metrics">
+                <span>
+                  <em>{t('sponsor.packageLabel')}</em>
+                  <strong>{tier.price}</strong>
+                </span>
+                <span>
+                  <em>{t('sponsor.availabilityLabel')}</em>
+                  <strong>{tier.spots}</strong>
+                </span>
+              </div>
+              <p className="sponsor-listing-summary">{tier.summary}</p>
+            </Card>
+          )
+        })}
+      </div>
+
+      <Separator className="sponsor-section-separator" />
+
+      <Card className="sponsor-board" aria-label={t('sponsor.boardAria')}>
         <div className="sponsor-board-strip">
           {sponsorshipBoardStats.map(([labelKey, value]) => (
             <div className="sponsor-board-stat" key={labelKey}>
@@ -2777,9 +2968,10 @@ function SponsorSection() {
             const TierIcon = tier.icon
 
             return (
-              <article
+              <Card
                 className={`sponsor-tier ${tier.featured ? 'is-featured' : ''}`}
                 key={tier.name}
+                size="sm"
               >
                 <header className="sponsor-tier-header">
                   <div className="sponsor-tier-rank">
@@ -2813,11 +3005,11 @@ function SponsorSection() {
                   ))}
                 </ul>
                 <p className="sponsor-creative">{tier.creative}</p>
-              </article>
+              </Card>
             )
           })}
         </div>
-      </div>
+      </Card>
 
       <div className="sponsor-addons">
         <div>
@@ -2833,6 +3025,21 @@ function SponsorSection() {
             </li>
           ))}
         </ul>
+      </div>
+
+      <div className="sponsor-action-row">
+        <Button asChild className="sponsor-primary-action" size="lg">
+          <a href="mailto:sponsors@winworldcup2026.com">
+            <Handshake size={17} />
+            <span>{t('sponsor.title')}</span>
+          </a>
+        </Button>
+        <Button asChild size="lg" variant="outline">
+          <a href="/teams">
+            <UsersRound size={17} />
+            <span>{t('nav.teams')}</span>
+          </a>
+        </Button>
       </div>
 
       <div className="sponsor-compliance-note">
