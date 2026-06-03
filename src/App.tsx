@@ -348,8 +348,8 @@ const sponsorshipAddOns = [
 ]
 
 const aiBuildMetrics = {
-  tokenTotal: '~4.4M',
-  estimatedCost: '~$37',
+  tokenTotal: '~4.6M',
+  estimatedCost: '~$39',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const

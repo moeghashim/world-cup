@@ -79,7 +79,7 @@ The tournament schedule snapshot lives in `src/data/worldCupSchedule.ts` and inc
 
 Draw application happens when a visitor locks a winner prediction. The prototype creates a receipt hash, evaluates the ticket against the demo result, ranks eligible tickets with a public seed plus reveal seed, selects winners, preserves alternates, and shows audit metadata beside the reveal.
 
-The homepage prediction arena now submits full entry data through Vercel API routes. `POST /api/prediction-entries` validates the prediction and participant data, keeps full address data server-side only, upserts a participant by email, creates a prediction entry, and returns only receipt metadata plus participant email. When `PRIMARY_DB_CONNECTION_STRING` is not configured, the endpoint returns an explicit non-persistent fallback receipt instead of pretending the entry was saved. `GET /api/match-prize-bundles` currently returns static-backed prize bundle data shaped for future database reads.
+The homepage prediction arena now submits full entry data through Vercel API routes. `POST /api/prediction-entries` validates the prediction and participant data, keeps full address data server-side only, upserts a participant by email, creates a prediction entry, and returns only receipt metadata plus participant email. When `PRIMARY_DB_CONNECTION_STRING` is not configured, the endpoint returns an explicit non-persistent fallback receipt instead of pretending the entry was saved. `GET /api/match-prize-bundles` currently returns static-backed prize bundle data shaped for future database reads. Local Vite development can run `npm run dev:api` on port 5176; `vite.config.ts` proxies `/api/*` to that server so the same handlers are exercised without relying on `vercel dev`.
 
 ## Research Decisions
 
@@ -213,6 +213,7 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 
 - Implemented the homepage Matchday Pulse live banner with first-viewport score prediction, active fixture rail, match status strip, fixture-colored energy, score pulse reactions, prize-panel reveal, sponsor/prize placeholder placement, entry drawer handoff, reduced-motion CSS, and refreshed the AI build estimate to `~4.1M` total tokens and `~$34`.
 - Implemented `HOMEPAGE_PREDICTION_BANNER_PRD.md` with a prediction-first homepage arena, upcoming match rail, live score controls, sponsor/prize bundle panel, joined and winner counts, full US entry modal, server-side Vercel endpoints, Neon schema artifact, explicit no-database fallback receipts, and refreshed the AI build estimate to `~4.4M` total tokens and `~$37`.
+- Added explicit prediction persistence commands: `npm run db:prediction-schema`, `npm run verify:api:fallback`, `npm run verify:api:persisted`, `npm run verify:api:vercel`, and `npm run dev:api`; applied the committed schema to Neon; configured encrypted `PRIMARY_DB_CONNECTION_STRING` entries for Vercel Preview and Production; verified a deployed protected Vercel preview write with smoke-test cleanup; confirmed Projects.dev exposes the redacted env var name for `primary-db`; and refreshed the AI build estimate to `~4.6M` total tokens and `~$39`.
 
 ## Verification
 
@@ -221,6 +222,10 @@ Latest successful commands:
 ```bash
 npm run lint
 npm run build
+npm run verify:api:fallback
+npm run db:prediction-schema
+npm run verify:api:persisted
+npm run verify:api:vercel
 npx vercel build
 ```
 
@@ -285,6 +290,14 @@ Browser verification covered:
 - verifying the built `GET /api/match-prize-bundles` handler returns one static-backed bundle for `limit=1`
 - verifying the built `POST /api/prediction-entries` handler returns a `202` `server-fallback-no-database` receipt when `PRIMARY_DB_CONNECTION_STRING` is absent, includes a receipt hash and joined count, and does not return address fields
 - noting local `vercel dev` still returned `NO_RESPONSE_FROM_FUNCTION` for API routes even though `npx vercel build` and direct built-handler checks passed; deployed/prebuilt validation should be used for the API path until the local wrapper issue is resolved
+- verifying Projects.dev status shows Neon `primary-db` complete in the default environment and `stripe projects env` exposes the redacted `PRIMARY_DB_CONNECTION_STRING` name without printing secrets
+- verifying `npm run verify:api:fallback` exercises the source handlers directly and returns a `202` no-database receipt with no address fields
+- verifying `npm run db:prediction-schema` applies seven schema statements to Neon using `PRIMARY_DB_CONNECTION_STRING` without printing secrets
+- verifying `npm run verify:api:persisted` returns a `201` Neon receipt, confirms no address fields are returned, verifies the persisted row by receipt hash, and cleans up the smoke-test participant and entry
+- verifying `npm run dev:api` serves local API handlers on `127.0.0.1:5176`; direct HTTP smoke checks return `200` for bundles and `202` fallback for prediction entries without address fields
+- verifying Vercel has encrypted `PRIMARY_DB_CONNECTION_STRING` values for Preview and Production
+- verifying `npx vercel deploy --prebuilt` creates a protected Vercel preview
+- verifying `npm run verify:api:vercel` uses Vercel CLI protected-deployment access, receives a deployed `201` Neon receipt, returns no address fields, verifies the row, and cleans up the smoke-test data
 
 Latest screenshot:
 
@@ -295,7 +308,7 @@ Latest screenshot:
 
 ## Next Tasks
 
-- Configure `PRIMARY_DB_CONNECTION_STRING` in Vercel, apply `db/schema.sql`, and verify real Neon writes for homepage prediction entries.
+- Promote or deploy to production only after legal/privacy review and final campaign readiness.
 - Add real persistence for draws, shipments, and reviews.
 - Add authentication and user profiles.
 - Add official rules/no-purchase/eligibility disclosures before any real prize campaign.

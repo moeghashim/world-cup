@@ -10,6 +10,10 @@ export default defineConfig({
   ],
   server: {
     proxy: {
+      '/api': {
+        target: `http://127.0.0.1:${process.env.PREDICTION_API_PORT ?? '5176'}`,
+        changeOrigin: true,
+      },
       '/ingest/static': {
         target: 'https://us-assets.i.posthog.com',
         changeOrigin: true,

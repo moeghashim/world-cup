@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~4.4M`
-- estimated API-equivalent cost: `~$37`
+- estimated total tokens: `~4.6M`
+- estimated API-equivalent cost: `~$39`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -558,11 +558,19 @@ Added Vercel API routes for the entry path. `GET /api/match-prize-bundles` retur
 
 Verification ran `npm run lint`, `npm run build`, `npx vercel build`, browser checks at 1280x720 confirming score cards, steppers, predicted outcome, and the lock CTA fit in the first viewport with no horizontal overflow, and a modal retry-state check confirming form values are preserved when a local Vite submission cannot reach the Vercel API. Built-handler checks confirmed `GET /api/match-prize-bundles` returns a bundle and `POST /api/prediction-entries` returns a non-persistent fallback receipt without address fields when the database env var is not present. Local `vercel dev` still returned `NO_RESPONSE_FROM_FUNCTION` for API routes, so the deployable API path was validated through `npx vercel build` and direct built-handler invocation.
 
+### Add prediction persistence verification scripts
+
+Added explicit database and API verification commands for the homepage prediction entry path. `npm run db:prediction-schema` applies `db/schema.sql` to Neon when `PRIMARY_DB_CONNECTION_STRING` is present, `npm run verify:api:fallback` proves the no-database receipt path still returns no address fields, and `npm run verify:api:persisted` exercises the real Neon write path, verifies a safe receipt row, and removes the smoke-test participant afterward without printing connection strings or address data. The schema command and persisted smoke test both passed using the CLI-managed local environment.
+
+Added `npm run dev:api` and a Vite `/api` proxy so local Vite development can submit the hero entry form through the same API handlers without depending on the currently flaky `vercel dev` wrapper. HTTP verification against the local shim confirmed `GET /api/match-prize-bundles` returns 200 and `POST /api/prediction-entries` returns a fallback receipt without address fields when no database env is inherited. Projects.dev status confirms `primary-db` is complete in the default environment and exposes the redacted `PRIMARY_DB_CONNECTION_STRING` name.
+
+Configured encrypted `PRIMARY_DB_CONNECTION_STRING` entries for Vercel Preview and Production, deployed a prebuilt preview, and added `npm run verify:api:vercel` for protected preview validation through `vercel curl`. The preview API returned a `201` Neon receipt, verified the persisted row by receipt hash, returned no address fields, and cleaned up the smoke-test row. The current AI build disclosure estimate was refreshed to `~4.6M` total tokens and `~$39`.
+
 ## Next Build Steps
 
 The prototype needs several production layers before it can become a real campaign:
 
-- configure `PRIMARY_DB_CONNECTION_STRING` in Vercel, apply `db/schema.sql`, and verify real Neon writes for homepage prediction entries
+- promote or deploy to production only after legal/privacy review and final campaign readiness
 - database persistence for draws, shipments, and reviews
 - authentication through WorkOS or another provider
 - official rules, no-purchase route, age/location eligibility, and compliance review
