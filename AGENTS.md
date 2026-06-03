@@ -19,6 +19,7 @@ This document is the project artifact for how the product is being built. Update
 - `@json-render/core` and `@json-render/react` for the spec-driven product surface.
 - `zod` for catalog props/action schemas.
 - `lucide-react` for interface icons.
+- `@neondatabase/serverless` for Vercel server-side prediction entry writes to Neon.
 - Google Analytics gtag for page-view tracking, with the static homepage snippet using `G-RFPJRPKYQR` and `VITE_GA_MEASUREMENT_ID` reserved for the runtime fallback path.
 - `posthog-js` for env-gated product analytics through the first-party `/ingest` proxy.
 - Optimized raster stadium hero loaded from `src/assets/world-cup-hero.jpg`.
@@ -67,6 +68,8 @@ The data layer lives in `src/data/worldCup.ts` and includes:
 - localized T-shirt concepts
 - provider recommendations
 
+Additional homepage entry helpers live in `src/data/homepageFixtures.ts`, `src/data/homepagePrizeBundles.ts`, and `src/data/predictionEntry.ts`. They select the next fixtures, generate independent culture-inspired prize bundles, and validate US-only prediction entry form payloads.
+
 The tournament schedule snapshot lives in `src/data/worldCupSchedule.ts` and includes:
 
 - all 48 teams grouped from A through L
@@ -75,6 +78,8 @@ The tournament schedule snapshot lives in `src/data/worldCupSchedule.ts` and inc
 - dated source metadata and a verification warning for real prize campaigns
 
 Draw application happens when a visitor locks a winner prediction. The prototype creates a receipt hash, evaluates the ticket against the demo result, ranks eligible tickets with a public seed plus reveal seed, selects winners, preserves alternates, and shows audit metadata beside the reveal.
+
+The homepage prediction arena now submits full entry data through Vercel API routes. `POST /api/prediction-entries` validates the prediction and participant data, keeps full address data server-side only, upserts a participant by email, creates a prediction entry, and returns only receipt metadata plus participant email. When `PRIMARY_DB_CONNECTION_STRING` is not configured, the endpoint returns an explicit non-persistent fallback receipt instead of pretending the entry was saved. `GET /api/match-prize-bundles` currently returns static-backed prize bundle data shaped for future database reads.
 
 ## Research Decisions
 
@@ -204,6 +209,11 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 - Added `HOMEPAGE_PREDICTION_BANNER_PRD.md` for the prediction-first homepage redesign, captured the product decision to collect full US address at prediction entry time, documented Neon `primary-db` as the persistence target, assigned implementation to Wegnener, and refreshed the AI build estimate to `~3.8M` total tokens and `~$31`.
 - Added `HOMEPAGE_LIVE_BANNER_PRD.md` for the creative "make the banner feel alive" pass, scoped matchday atmosphere/motion/score reactions/prize-panel reveals/reduced-motion behavior, assigned implementation to a live-banner sub-agent, and refreshed the AI build estimate to `~3.9M` total tokens and `~$32`.
 
+### 2026-06-03
+
+- Implemented the homepage Matchday Pulse live banner with first-viewport score prediction, active fixture rail, match status strip, fixture-colored energy, score pulse reactions, prize-panel reveal, sponsor/prize placeholder placement, entry drawer handoff, reduced-motion CSS, and refreshed the AI build estimate to `~4.1M` total tokens and `~$34`.
+- Implemented `HOMEPAGE_PREDICTION_BANNER_PRD.md` with a prediction-first homepage arena, upcoming match rail, live score controls, sponsor/prize bundle panel, joined and winner counts, full US entry modal, server-side Vercel endpoints, Neon schema artifact, explicit no-database fallback receipts, and refreshed the AI build estimate to `~4.4M` total tokens and `~$37`.
+
 ## Verification
 
 Latest successful commands:
@@ -211,6 +221,7 @@ Latest successful commands:
 ```bash
 npm run lint
 npm run build
+npx vercel build
 ```
 
 Browser verification covered:
@@ -265,15 +276,27 @@ Browser verification covered:
 - verifying Projects.dev status shows `WorldCup` as the only PostHog analytics resource in the default environment, while `analytics` and `worldcup2026-analytics` remain detached from the default environment
 - verifying DCO passes after signed-off PR commits, `vercel build` completes, and `vercel deploy --prebuilt` rejects the old invalid config then succeeds after removing `skipTrailingSlashRedirect`
 - verifying Projects.dev status shows Neon `primary-db` exists and exposes the redacted `PRIMARY_DB_CONNECTION_STRING` env var for future server-side prediction entry persistence
+- verifying `npm run lint` and `npm run build` pass after the Matchday Pulse live-banner implementation
+- verifying the homepage live banner renders the `~4.1M` token and `~$34` AI build disclosure, shows the active match prediction surface, updates Mexico from 0-0 to 1-0 with the predicted outcome changing to Mexico, switches the rail to Match 2 and updates the title/prize panel to South Korea vs Czechia, has no horizontal overflow, and reports no fresh browser console errors after reload
+- verifying a 390px mobile viewport keeps the Lock Prediction CTA and score controls before the prize/sponsor panel, with no horizontal overflow
+- verifying `npx vercel build` passes with the new API functions and Neon serverless dependency bundled into `.vercel/output`
+- verifying the homepage prediction arena renders the refreshed `~4.4M` token and `~$37` AI build disclosure, keeps score cards, score steppers, predicted outcome, and the Lock Prediction CTA visible in a 1280x720 first viewport, and has no horizontal overflow
+- verifying the entry modal opens from Lock Prediction, explains early US shipping-address collection, preserves full form values after a failed Vite-local submission, and does not display the full address in the receipt surface
+- verifying the built `GET /api/match-prize-bundles` handler returns one static-backed bundle for `limit=1`
+- verifying the built `POST /api/prediction-entries` handler returns a `202` `server-fallback-no-database` receipt when `PRIMARY_DB_CONNECTION_STRING` is absent, includes a receipt hash and joined count, and does not return address fields
+- noting local `vercel dev` still returned `NO_RESPONSE_FROM_FUNCTION` for API routes even though `npx vercel build` and direct built-handler checks passed; deployed/prebuilt validation should be used for the API path until the local wrapper issue is resolved
 
 Latest screenshot:
 
 `artifacts/asset-cleanup-homepage.png`
 `artifacts/asset-cleanup-prize-japan.png`
+`artifacts/homepage-prediction-arena.png`
+`artifacts/homepage-entry-modal-retry.png`
 
 ## Next Tasks
 
-- Add real persistence for users, predictions, draws, shipments, and reviews.
+- Configure `PRIMARY_DB_CONNECTION_STRING` in Vercel, apply `db/schema.sql`, and verify real Neon writes for homepage prediction entries.
+- Add real persistence for draws, shipments, and reviews.
 - Add authentication and user profiles.
 - Add official rules/no-purchase/eligibility disclosures before any real prize campaign.
 - Add admin tooling for sponsor campaigns, product SKUs, and fulfillment batches.

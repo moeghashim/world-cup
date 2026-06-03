@@ -1,6 +1,6 @@
 # Building A World Cup Prediction And Sponsor Rewards Website
 
-Last updated: 2026-06-02
+Last updated: 2026-06-03
 
 This is the working blog post for the project. Update this file on every commit so the article stays aligned with the real build history.
 
@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~3.9M`
-- estimated API-equivalent cost: `~$32`
+- estimated total tokens: `~4.4M`
+- estimated API-equivalent cost: `~$37`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -548,17 +548,22 @@ Created `HOMEPAGE_PREDICTION_BANNER_PRD.md` for the prediction-first homepage re
 
 The key product decision is explicit: collect full address early because sponsors may choose to send gifts to all entrants, not only winners. The PRD documents the privacy implications, US-only scope, server-side storage requirement, and the Neon `primary-db` persistence path through `PRIMARY_DB_CONNECTION_STRING`. It also assigns implementation to Wegnener so the redesign can proceed in parallel while the broader product planning continues. The current AI build disclosure estimate was refreshed to `~3.8M` total tokens and `~$31`.
 
-### Current commit - Create live banner PRD
+### Current commit - Implement prediction-first entry banner
 
-Created `HOMEPAGE_LIVE_BANNER_PRD.md` as the creative companion to the homepage prediction banner PRD. This document scopes the "make the banner feel alive" work: matchday pulse, stadium atmosphere, team-color energy, score-change reactions, active fixture rail transitions, prize-panel reveals, sponsor placement, accessibility, and reduced-motion fallbacks.
+Implemented `HOMEPAGE_PREDICTION_BANNER_PRD.md`. The homepage first viewport is now a prediction arena instead of a static hero and lower duplicate scoreboard. Visitors can browse upcoming fixtures from the hero rail, edit scores, see the predicted outcome, review the sponsor-funded prize bundle, joined count, winner slots, and lock a prediction from the first screen.
 
-The PRD keeps the banner focused on prediction, not betting spectacle. It explicitly avoids slot-machine or odds-board patterns, official marks, and decorative motion that blocks the user from making a pick. Implementation has been assigned to a live-banner sub-agent, and the current AI build disclosure estimate was refreshed to `~3.9M` total tokens and `~$32`.
+Locking opens a draw-entry modal that collects first name, last name, email, phone, full US shipping address, rules acceptance, and optional marketing consent. The address reason is visible in the form because sponsors may choose to send gifts to more eligible entrants, but the full address is not sent to analytics and is not shown in the receipt UI.
+
+Added Vercel API routes for the entry path. `GET /api/match-prize-bundles` returns static-backed bundle data in the future database shape. `POST /api/prediction-entries` validates the submitted participant and prediction payload, recomputes the outcome server-side, upserts the participant by email, inserts the prediction entry, and returns receipt metadata when `PRIMARY_DB_CONNECTION_STRING` is configured. If that env var is absent, the endpoint returns an explicit `server-fallback-no-database` receipt with `persisted: false` instead of pretending the entry was saved. The schema contract lives in `db/schema.sql`. The current AI build disclosure estimate was refreshed to `~4.4M` total tokens and `~$37`.
+
+Verification ran `npm run lint`, `npm run build`, `npx vercel build`, browser checks at 1280x720 confirming score cards, steppers, predicted outcome, and the lock CTA fit in the first viewport with no horizontal overflow, and a modal retry-state check confirming form values are preserved when a local Vite submission cannot reach the Vercel API. Built-handler checks confirmed `GET /api/match-prize-bundles` returns a bundle and `POST /api/prediction-entries` returns a non-persistent fallback receipt without address fields when the database env var is not present. Local `vercel dev` still returned `NO_RESPONSE_FROM_FUNCTION` for API routes, so the deployable API path was validated through `npx vercel build` and direct built-handler invocation.
 
 ## Next Build Steps
 
 The prototype needs several production layers before it can become a real campaign:
 
-- database persistence for users, predictions, draws, shipments, and reviews
+- configure `PRIMARY_DB_CONNECTION_STRING` in Vercel, apply `db/schema.sql`, and verify real Neon writes for homepage prediction entries
+- database persistence for draws, shipments, and reviews
 - authentication through WorkOS or another provider
 - official rules, no-purchase route, age/location eligibility, and compliance review
 - admin tooling for sponsors, matches, product SKUs, and fulfillment batches

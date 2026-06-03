@@ -1,4 +1,4 @@
-import type { TeamKey } from './worldCup'
+import type { TeamKey } from './worldCup.js'
 
 export type TournamentVenue = {
   id: string
