@@ -1,10 +1,19 @@
+import posthog from 'posthog-js'
+
 const defaultMeasurementId = 'G-RFPJRPKYQR'
 const scriptId = 'google-analytics-gtag'
 
 export const googleAnalyticsMeasurementId =
   import.meta.env.VITE_GA_MEASUREMENT_ID || defaultMeasurementId
+export const posthogKey = import.meta.env.VITE_POSTHOG_KEY
+export const posthogUiHost =
+  import.meta.env.VITE_POSTHOG_HOST || 'https://us.posthog.com'
 
 type GtagArguments = [string, ...unknown[]]
+type AnalyticsProperties = Record<
+  string,
+  string | number | boolean | null | undefined
+>
 
 declare global {
   interface Window {
@@ -14,6 +23,7 @@ declare global {
 }
 
 let hasInitializedAnalytics = false
+let hasInitializedPostHog = false
 
 export function initializeGoogleAnalytics() {
   if (hasInitializedAnalytics || !googleAnalyticsMeasurementId) return
@@ -40,4 +50,29 @@ export function initializeGoogleAnalytics() {
   window.gtag('config', googleAnalyticsMeasurementId)
 
   hasInitializedAnalytics = true
+}
+
+export function initializePostHog() {
+  if (hasInitializedPostHog || !posthogKey) return
+
+  posthog.init(posthogKey, {
+    api_host: '/ingest',
+    ui_host: posthogUiHost,
+    capture_pageview: 'history_change',
+    capture_pageleave: true,
+    person_profiles: 'identified_only',
+  })
+
+  hasInitializedPostHog = true
+}
+
+export function captureAnalyticsEvent(
+  eventName: string,
+  properties: AnalyticsProperties = {},
+) {
+  window.gtag?.('event', eventName, properties)
+
+  if (!hasInitializedPostHog || !posthogKey) return
+
+  posthog.capture(eventName, properties)
 }
