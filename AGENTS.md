@@ -300,7 +300,7 @@ Browser verification covered:
 - verifying `npx vercel deploy --prebuilt` creates a protected Vercel preview
 - verifying `npm run verify:api:vercel` uses Vercel CLI protected-deployment access, receives a deployed `201` Neon receipt, returns no address fields, verifies the row, and cleans up the smoke-test data
 - verifying `npm run lint` and `npm run build` pass after adding the multilingual website shell
-- verifying English, Arabic RTL, and Korean language switching on the homepage keeps the prediction controls readable with no fresh browser console errors
+- verifying English, Arabic RTL, and Spanish language switching on the homepage keeps the prediction controls readable, Spanish persists across reload, Arabic sets `dir="rtl"`, there is no horizontal overflow, and there are no fresh browser console errors
 
 Latest screenshot:
 

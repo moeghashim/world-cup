@@ -572,7 +572,7 @@ Added an app-level i18n provider with English, Arabic, French, German, Spanish, 
 
 Localized the primary homepage, route hero copy, JSON-render section headers, prize pages, sponsor package copy, prediction receipt, entry modal, footer, score-control labels, and AI build disclosure. Language changes are captured as analytics events without exposing prediction entry address data. The current AI build disclosure estimate was refreshed to `~5.0M` total tokens and `~$43`.
 
-Verification ran `npm run lint`, `npm run build`, and browser smoke checks for English, Arabic RTL, and Korean language switching on the homepage.
+Verification ran `npm run lint`, `npm run build`, and browser smoke checks for English, Arabic RTL, and Spanish language switching on the homepage. Spanish persisted across reload, Arabic set `dir="rtl"`, there was no horizontal overflow, and there were no fresh browser console errors.
 
 ## Next Build Steps
 
