@@ -1,7 +1,7 @@
 /// <reference types="node" />
 
 import { createHash, randomUUID } from 'node:crypto'
-import { neon } from '@neondatabase/serverless'
+import { neon, type NeonQueryFunction } from '@neondatabase/serverless'
 import { z } from 'zod'
 import { getPrizeBundleForFixture } from '../src/data/homepagePrizeBundles.js'
 import { predictionEntryPayloadSchema } from '../src/data/predictionEntry.js'
@@ -21,7 +21,7 @@ type ApiResponse = {
   status: (code: number) => ApiResponse
 }
 
-type SqlQuery = ReturnType<typeof neon>
+type SqlQuery = NeonQueryFunction<false, false>
 
 let schemaReady: Promise<void> | null = null
 
