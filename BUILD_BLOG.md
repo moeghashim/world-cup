@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~5.3M`
-- estimated API-equivalent cost: `~$46`
+- estimated total tokens: `~5.6M`
+- estimated API-equivalent cost: `~$49`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -582,7 +582,7 @@ The sponsorship section was redesigned as a compact sponsor marketplace board in
 
 Verification ran `npm run lint`, `npm run build`, and browser checks on `/sponsors`. The desktop check confirmed four package columns with Website Sponsor at `$25,000`, the Spanish smoke check confirmed localized sponsor-board labels, the mobile 390px check confirmed stacked sponsor listings with no horizontal overflow, and a fresh browser reload reported no console errors.
 
-### Current commit - Add team identity sponsor pages
+### Add team identity sponsor pages
 
 Added `src/data/teamIdentity.ts` as the typed identity catalog for all 48 teams in the tournament snapshot. Each record now has a route slug, group, code, known-as line, sponsor-safe support line, known-for statement, sponsor angle, and research source URLs. The source basis includes FIFA's qualified-team page, a World Cup 2026 nickname table, and stronger individual references for examples such as Saudi Arabia's Green Falcons, Curaçao's Blue Wave, Japan's Samurai Blue, the Socceroos, and Uzbekistan's White Wolves.
 
@@ -591,6 +591,20 @@ The `/teams` route is now a full team directory instead of only the JSON-render 
 Each team detail page, including `/teams/saudi-arabia`, now invites sponsors to support the team or individual games, lists the team's three group-stage fixtures, shows per-game math at $15,000, and keeps source links plus the no-official-marks boundary visible. The current AI build disclosure estimate was refreshed to `~5.3M` total tokens and `~$46`.
 
 Verification ran `npm run lint`, `npm run build`, browser checks for `/teams` and `/teams/saudi-arabia`, and a 390px mobile check for both pages. The browser confirmed 48 team cards, 12 groups, Saudi's "Support the green / شجّع الأخضر" line, 3 Saudi fixture sponsor cards, source links, sponsor math, no horizontal overflow, and no console errors.
+
+### Apply visible sponsor banners
+
+The sponsor design pass originally applied the TrustMRR-inspired structure to the package board, but the page did not have the visible advertiser blocks shown around the TrustMRR page. This pass adds a dedicated `/sponsors` page frame with left and right advertiser rails on desktop, sponsor-safe placeholder ad cards, an empty "Advertise" slot, tablet horizontal rails, and mobile horizontal ad strips.
+
+The sponsor banner strip above the package board remains in place and highlights Website Sponsor, Matchday Featured Sponsor, and Fan Drop Sponsor as compact listing rows with rank, icon, package price, availability, and summary. The implementation uses the advertiser-block layout pattern, not TrustMRR's branding, assets, advertiser names, or exact visual identity. The current AI build disclosure estimate was refreshed to `~5.4M` total tokens and `~$47`.
+
+### Current commit - Add shadcn foundation and all-page sponsor panels
+
+The website is now set up for an incremental shadcn/ui migration. The pass added Tailwind CSS v4, shadcn's Vite configuration, the `@/` import alias, generated source primitives for Button, Card, Badge, and Separator, and kept the generated components inside the repository so they can be adapted to the product instead of treated as a black-box UI dependency.
+
+The first migrated surface is the sponsor system. Sponsor ad blocks, the sponsor listing banners, and sponsor package cards now render through shadcn source primitives while preserving the existing World Cup reward visual direction. The sponsor rails were also promoted from a `/sponsors`-only frame into a reusable sponsored page frame. Homepage, prize pages, team pages, route pages, PostHog, Experiment, and the sponsors page now all show the advertiser panels: left/right rails on desktop and horizontal sponsor strips on mobile.
+
+Verification ran `npm run lint`, `npm run build`, and browser checks for `/`, `/sponsors`, `/teams/saudi-arabia`, and `/experiment`. The browser confirmed two sponsor rails, eight sponsor ad blocks, shadcn card primitives, no horizontal overflow at desktop, no horizontal overflow at 390px mobile after the grid min-width fix, and no fresh console errors beyond normal Vite/React development messages. The current AI build disclosure estimate was refreshed to `~5.6M` total tokens and `~$49`.
 
 ## Next Build Steps
 

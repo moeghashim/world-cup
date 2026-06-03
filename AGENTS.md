@@ -16,6 +16,7 @@ This document is the project artifact for how the product is being built. Update
 ## Current Stack
 
 - Vite + React + TypeScript.
+- Tailwind CSS v4 and shadcn/ui source primitives for new and migrated interface components.
 - `@json-render/core` and `@json-render/react` for the spec-driven product surface.
 - `zod` for catalog props/action schemas.
 - `lucide-react` for interface icons.
@@ -217,6 +218,8 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 - Added an app-level language selector and i18n provider for English, Arabic, French, German, Spanish, Portuguese, Chinese, and Korean; localized the main public shell, homepage prediction arena, route copy, JSON-render section headers, prize/sponsor surfaces, receipt/modal text, footer, and score controls; added RTL handling for Arabic; and refreshed the AI build estimate to `~5.0M` total tokens and `~$43`.
 - Added a `$25,000` Website Sponsor package with 4 spots, redesigned the sponsor package section as a compact marketplace-style board inspired by `https://trustmrr.com/` for desktop and mobile, localized the new sponsor tier and board labels, documented the design boundary, and refreshed the AI build estimate to `~5.1M` total tokens and `~$44`.
 - Added `src/data/teamIdentity.ts` with researched known-as/support-line/known-for/sponsor-angle records for all 48 teams; replaced `/teams` with a full grouped team identity directory; added `/teams/:slug` detail pages with source links, team sponsorship invitations, three group fixtures, per-game sponsorship cards, and $45,000 team package / $15,000 game package math; and refreshed the AI build estimate to `~5.3M` total tokens and `~$46`.
+- Added visible TrustMRR-inspired advertiser blocks around `/sponsors`: left and right desktop rails, sponsor-safe placeholder ad cards, an empty "Advertise" slot, tablet horizontal rails, mobile horizontal ad strips, a sponsor listing banner strip above the package board, and refreshed the AI build estimate to `~5.4M` total tokens and `~$47`.
+- Added the shadcn/ui foundation with Tailwind CSS v4, path aliases, generated Button/Card/Badge/Separator primitives, migrated sponsor ad cards and sponsor package cards onto shadcn source components, promoted the sponsor ad rails into a reusable frame across homepage, prize, team, operations, PostHog, Experiment, and sponsor routes, and refreshed the AI build estimate to `~5.6M` total tokens and `~$49`.
 
 ## Verification
 
@@ -307,6 +310,9 @@ Browser verification covered:
 - verifying `/teams` renders 48 team identity cards across 12 groups, shows the Saudi "Support the green / شجّع الأخضر" support line, shows $45,000 package math and 144 team-side sponsor slots, has no horizontal overflow, and reports no browser console errors
 - verifying `/teams/saudi-arabia` renders the Green Falcons known-as line, three group fixture sponsorship cards, source links including Saudipedia, $15,000 per-game math, no horizontal overflow, and no browser console errors
 - verifying a 390px mobile viewport keeps `/teams` and `/teams/saudi-arabia` readable with all 48 cards, Saudi sponsor CTAs, three fixture cards, no horizontal overflow, and no browser console errors
+- verifying the shadcn migration with `npm run lint` and `npm run build`
+- verifying `/`, `/sponsors`, and `/teams/saudi-arabia` at 1440px render two sponsor rails, eight sponsor ad cards, shadcn card primitives, no horizontal overflow, and no fresh browser console errors beyond Vite/React dev messages
+- verifying `/experiment` at 390px renders horizontal sponsor strips, eight sponsor ad cards, shadcn card primitives, no horizontal overflow after the grid min-width fix, and no fresh browser console errors beyond Vite/React dev messages
 
 Latest screenshot:
 
@@ -315,6 +321,9 @@ Latest screenshot:
 `artifacts/homepage-prediction-arena.png`
 `artifacts/homepage-entry-modal-retry.png`
 `artifacts/team-directory-page.png`
+`artifacts/shadcn-final-1440-home.png`
+`artifacts/shadcn-final-1440-sponsors.png`
+`artifacts/shadcn-final-390-experiment.png`
 `artifacts/team-saudi-detail-page.png`
 
 ## Next Tasks
