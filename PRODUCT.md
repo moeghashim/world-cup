@@ -40,6 +40,13 @@ World Cup Predictor is a match prediction and sponsor reward experience for `win
 - Team group-stage package: planning model at $45,000 per team, calculated as 3 group matches x $10,000 match spotlight plus 3 group reward drops x $5,000. Single-game sponsorship is modeled at $15,000 per game. These amounts exclude product cost, shipping, taxes, legal review, creative production, and payment processing.
 - Creative add-ons can include custom sponsor landing pages, extra review videos, localized email/SMS sequences, host-city targeting, creator-style recap reels, and sponsor dashboard exports.
 
+## Sponsor Onboarding
+
+- `/sponsors` now has an application flow that collects sponsor company details, contact and billing emails, website URL, country, category, logo metadata, selected package, optional targeting, optional product offer details, optional AI one-pager details, and required sponsorship terms.
+- Logo upload is currently client-side preview plus metadata capture. Production still needs object storage, SVG sanitization, image normalization, and public asset review before logos render from sponsor submissions.
+- Product offers can be digital, coupon, trial, AI credits, download, physical product, service consultation, or other. Physical offers remain a planning input until a 3PL or platform-controlled fulfillment workflow exists.
+- Sponsor applications start as `awaiting_payment`. They should move to `pending_review` only from a verified Stripe webhook after Checkout payment succeeds. Admin approval is required before any sponsor becomes active.
+
 ## MVP Boundaries
 
 - Demo draws are seeded in local data.
@@ -53,6 +60,7 @@ World Cup Predictor is a match prediction and sponsor reward experience for `win
 - Google Analytics is live for page-view tracking through the GA4 stream `G-RFPJRPKYQR`, with selected custom funnel events also emitted through the shared analytics helper.
 - `/posthog` is now the dashboard contract for product analytics. `posthog-js` is installed and event call sites are wired, but PostHog capture stays inert until `VITE_POSTHOG_KEY` is set and the app is restarted or rebuilt.
 - Provider recommendations are architectural notes, not live integrations except for the current Google Analytics page-view setup and the Projects.dev-linked `WorldCup` PostHog resource, which is the only active PostHog analytics resource in the default environment.
+- Sponsor application persistence uses `PRIMARY_DB_CONNECTION_STRING` when configured and returns an explicit no-database fallback receipt otherwise. No payment, email, logo storage, admin approval, or sponsor activation is live yet.
 - No real prize fulfillment, payment, user identity, fraud checks, or legal rules are implemented yet.
 - `HOMEPAGE_PREDICTION_BANNER_PRD.md` defines the next homepage redesign: make the first viewport an interactive prediction banner, collect full US address at entry time, and persist entries through server-side Neon-backed APIs before treating captured entries as real campaign data.
 - `HOMEPAGE_LIVE_BANNER_PRD.md` scopes the creative banner pass: make the first viewport feel alive with matchday atmosphere, score reactions, active fixture browsing, and prize/sponsor context without adding gambling-style mechanics.

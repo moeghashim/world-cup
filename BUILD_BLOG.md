@@ -258,8 +258,8 @@ The point is to explain the build stack and production path, not to repeat the p
 
 The site now includes a compact notification status bar at the very top of the page, above the logo and main navigation. It says the project was built entirely by AI and shows a public usage estimate:
 
-- estimated total tokens: `~5.8M`
-- estimated API-equivalent cost: `~$51`
+- estimated total tokens: `~6.0M`
+- estimated API-equivalent cost: `~$53`
 
 The banner labels the cost as an estimate because the repository does not contain a complete token-by-token billing export for every Codex, sub-agent, tool, and image generation step. The number is a transparent project estimate, not a billing receipt.
 
@@ -614,7 +614,7 @@ The mobile treatment is now a moving sponsor banner instead of stacked rails. Th
 
 Verification ran `npm run lint`, `npm run build`, and browser checks for `/` and `/sponsors` at 1440px and 390px. The browser confirmed compact static desktop rails, one visible moving mobile banner using `sponsor-mobile-marquee`, eight visible ad cards, hidden mobile right rail, no horizontal overflow, and the refreshed `~5.7M` total token / `~$50` estimated cost disclosure.
 
-### Current commit - Polish the public website design
+### Polish the public website design
 
 The website needed a visual design pass because the first screen was too boxy and heavy. This pass keeps the existing product model but improves the presentation layer: the app chrome is quieter, the top status bar is thinner, the nav links are rounded and less harsh, and the page background uses softer layered tones instead of flat beige.
 
@@ -624,6 +624,16 @@ The sponsor system also got visual polish. Desktop sponsor cards now use softer 
 
 Verification ran `npm run lint`, `npm run build`, and browser checks for `/` and `/sponsors` at 1440px and 390px. The browser confirmed zero horizontal overflow, static desktop sponsor rails, active mobile marquee motion, visible `~5.8M` total token / `~$51` estimated cost disclosure, and no fresh console errors beyond normal Vite/React development messages.
 
+### Current commit - Build sponsor onboarding flow
+
+Built `sponsorship_plan.md` into the first working sponsor intake path. The `/sponsors` page now keeps the package marketplace and adds an operational application section with company/contact fields, logo upload preview, selected package, optional free-product offer, optional AI one-pager, legal consent checklist, preview cards, and a receipt panel.
+
+The shared sponsor schema lives in `src/data/sponsorOnboarding.ts`, and `POST /api/sponsor-applications` validates the same payload server-side. The endpoint persists to Neon when `PRIMARY_DB_CONNECTION_STRING` is configured and otherwise returns an explicit `202` `server-fallback-no-database` receipt. Stripe stays intentionally gated: the endpoint returns `awaiting_payment` and `stripe-checkout-not-configured` unless future Stripe package price IDs, Checkout creation, webhook signature verification, and admin review are wired.
+
+The plan, product notes, design notes, env example, AGENTS log, and build blog were updated together. The current AI build disclosure estimate was refreshed to `~6.0M` total tokens and `~$53`.
+
+Verification ran `npm run lint`, `npm run build`, browser checks for `/sponsors` desktop and 390px mobile overflow, console-error checks, and a local API smoke test through the Vite proxy. The API returned a fake sponsor application receipt with status `awaiting_payment`, package `Website Sponsor`, persistence mode `server-fallback-no-database`, and checkout mode `stripe-checkout-not-configured`.
+
 ## Next Build Steps
 
 The prototype needs several production layers before it can become a real campaign:
@@ -632,7 +642,8 @@ The prototype needs several production layers before it can become a real campai
 - database persistence for draws, shipments, and reviews
 - authentication through WorkOS or another provider
 - official rules, no-purchase route, age/location eligibility, and compliance review
-- admin tooling for sponsors, matches, product SKUs, and fulfillment batches
+- Stripe Checkout Session creation, webhook signature verification, sponsor confirmation email, and admin review tooling for sponsor applications
+- admin tooling for matches, product SKUs, fulfillment batches, and sponsor campaign activation
 - real POD integration for T-shirt orders
 - real 3PL/kitting integration for sponsor boxes
 - enable PostHog SDK capture for the `/posthog` dashboard events after the tracking and privacy policy is approved

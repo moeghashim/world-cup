@@ -71,6 +71,10 @@ The data layer lives in `src/data/worldCup.ts` and includes:
 
 Additional homepage entry helpers live in `src/data/homepageFixtures.ts`, `src/data/homepagePrizeBundles.ts`, and `src/data/predictionEntry.ts`. They select the next fixtures, generate independent culture-inspired prize bundles, and validate US-only prediction entry form payloads.
 
+Sponsor onboarding data lives in `src/data/sponsorOnboarding.ts` and includes sponsor package IDs/prices, future Stripe price env var names, application statuses, free-product offer types, fulfillment owner options, and the shared Zod application schema used by the React form and API route.
+
+The sponsor application API lives in `api/sponsor-applications.ts`. It validates the shared schema, returns `awaiting_payment`, persists to Neon when `PRIMARY_DB_CONNECTION_STRING` is configured, and otherwise returns an explicit `server-fallback-no-database` receipt. Stripe Checkout, webhook signature verification, sponsor email confirmation, and admin approval are not live yet.
+
 The tournament schedule snapshot lives in `src/data/worldCupSchedule.ts` and includes:
 
 - all 48 teams grouped from A through L
@@ -222,6 +226,7 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 - Added the shadcn/ui foundation with Tailwind CSS v4, path aliases, generated Button/Card/Badge/Separator primitives, migrated sponsor ad cards and sponsor package cards onto shadcn source components, promoted the sponsor ad rails into a reusable frame across homepage, prize, team, operations, PostHog, Experiment, and sponsor routes, and refreshed the AI build estimate to `~5.6M` total tokens and `~$49`.
 - Reduced the desktop sponsor rail footprint to smaller static ad blocks, converted the mobile sponsor treatment into a single animated marquee banner above page content, added reduced-motion/manual-scroll behavior, and refreshed the AI build estimate to `~5.7M` total tokens and `~$50`.
 - Applied a visual design polish pass to the public website: quieter app chrome, refined AI status bar, softer sponsor cards, rounded homepage prediction arena, cleaner hero panels, tighter mobile typography, improved team picker cards, slower mobile sponsor marquee, and refreshed the AI build estimate to `~5.8M` total tokens and `~$51`.
+- Built `sponsorship_plan.md` into an MVP sponsor onboarding path on `/sponsors`: company/contact/billing fields, package selection, client-side logo preview, free-product offer details, AI one-pager fields, required sponsorship terms, preview cards, local API receipt handling, shared client/server Zod schema, `POST /api/sponsor-applications`, documented Stripe env placeholders, and refreshed the AI build estimate to `~6.0M` total tokens and `~$53`.
 
 ## Verification
 
@@ -320,6 +325,10 @@ Browser verification covered:
 - verifying `/` and `/sponsors` at 390px render one visible moving sponsor banner above page content, hide the lower/right rail, animate with `sponsor-mobile-marquee`, keep eight visible ad cards, and avoid horizontal overflow
 - verifying the visual design polish with `npm run lint` and `npm run build`
 - verifying `/` and `/sponsors` at 1440px and 390px keep zero horizontal overflow, show the refreshed `~5.8M` / `~$51` AI estimate, keep desktop sponsor rails static, keep mobile sponsor marquee movement active at 48s, and report no fresh browser console errors beyond Vite/React dev messages
+- verifying the sponsor onboarding flow with `npm run lint` and `npm run build`
+- verifying `/sponsors` at desktop renders the sponsor application heading, logo upload section, terms section, refreshed `~6.0M` / `~$53` AI estimate, zero horizontal overflow, and no browser console errors
+- verifying `/sponsors` at 390px mobile keeps zero horizontal overflow and the sponsor marquee/page layout active with no browser console errors
+- verifying local `POST /api/sponsor-applications` through the Vite proxy returns a `202` `server-fallback-no-database` receipt for fake sponsor data with status `awaiting_payment`, package `Website Sponsor`, and checkout mode `stripe-checkout-not-configured`
 
 Latest screenshot:
 
@@ -336,6 +345,8 @@ Latest screenshot:
 `artifacts/design-polish-final-1440-home.png`
 `artifacts/design-polish-final-390-home.png`
 `artifacts/team-saudi-detail-page.png`
+`artifacts/sponsor-onboarding-form.png`
+`artifacts/sponsor-onboarding-mobile.png`
 
 ## Next Tasks
 
@@ -343,7 +354,8 @@ Latest screenshot:
 - Add real persistence for draws, shipments, and reviews.
 - Add authentication and user profiles.
 - Add official rules/no-purchase/eligibility disclosures before any real prize campaign.
-- Add admin tooling for sponsor campaigns, product SKUs, and fulfillment batches.
+- Wire Stripe Checkout Session creation, webhook signature verification, sponsor confirmation email, and admin review tooling for sponsor applications.
+- Add admin tooling for active sponsor campaigns, product SKUs, and fulfillment batches.
 - Integrate a real POD provider API behind server-side actions.
 - Design production shirt artwork files or outsource design refinements.
 - Replace the prototype schedule snapshot with an official data feed or maintained admin import before launch.
