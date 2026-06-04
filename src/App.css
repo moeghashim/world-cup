@@ -1567,6 +1567,16 @@
   padding: 14px;
 }
 
+.hero-receipt-panel .receipt-list,
+.hero-receipt-panel .receipt-line {
+  min-width: 0;
+  width: 100%;
+}
+
+.hero-receipt-panel .receipt-list {
+  display: grid;
+}
+
 .hero-receipt-panel .receipt-line strong {
   color: #ffffff;
   overflow-wrap: anywhere;
@@ -6871,6 +6881,16 @@
 
   .hero-prize-stats {
     grid-template-columns: 1fr;
+  }
+
+  .hero-receipt-panel .receipt-line {
+    align-items: start;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .hero-receipt-panel .receipt-line strong {
+    text-align: left;
   }
 
   .hero-match-rail {

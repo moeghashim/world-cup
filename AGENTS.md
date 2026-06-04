@@ -84,7 +84,7 @@ The tournament schedule snapshot lives in `src/data/worldCupSchedule.ts` and inc
 
 Draw application happens when a visitor locks a winner prediction. The prototype creates a receipt hash, evaluates the ticket against the demo result, ranks eligible tickets with a public seed plus reveal seed, selects winners, preserves alternates, and shows audit metadata beside the reveal.
 
-The homepage prediction arena now submits full entry data through Vercel API routes. `POST /api/prediction-entries` validates the prediction and participant data, keeps full address data server-side only, upserts a participant by email, creates a prediction entry, and returns only receipt metadata plus participant email. When `PRIMARY_DB_CONNECTION_STRING` is not configured, the endpoint returns an explicit non-persistent fallback receipt instead of pretending the entry was saved. `GET /api/match-prize-bundles` currently returns static-backed prize bundle data shaped for future database reads. Local Vite development can run `npm run dev:api` on port 5176; `vite.config.ts` proxies `/api/*` to that server so the same handlers are exercised without relying on `vercel dev`.
+The homepage prediction arena now submits full entry data through Vercel API routes. `POST /api/prediction-entries` validates the prediction and participant data, keeps full address data server-side only, upserts a participant by email, creates a prediction entry, and returns only receipt metadata plus participant email. When `PRIMARY_DB_CONNECTION_STRING` is not configured, the endpoint returns an explicit non-persistent fallback receipt instead of pretending the entry was saved. `GET /api/match-prize-bundles` currently returns static-backed prize bundle data shaped for future database reads. Local development runs the Vite app and prediction API shim together through `npm run dev`; `vite.config.ts` proxies `/api/*` to the API server on port 5176 so the same handlers are exercised without relying on `vercel dev`. Use `npm run dev:app` only when intentionally testing the frontend without API submission support.
 
 ## Research Decisions
 
@@ -228,6 +228,10 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 - Applied a visual design polish pass to the public website: quieter app chrome, refined AI status bar, softer sponsor cards, rounded homepage prediction arena, cleaner hero panels, tighter mobile typography, improved team picker cards, slower mobile sponsor marquee, and refreshed the AI build estimate to `~5.8M` total tokens and `~$51`.
 - Built `sponsorship_plan.md` into an MVP sponsor onboarding path on `/sponsors`: company/contact/billing fields, package selection, client-side logo preview, free-product offer details, AI one-pager fields, required sponsorship terms, preview cards, local API receipt handling, shared client/server Zod schema, `POST /api/sponsor-applications`, documented Stripe env placeholders, and refreshed the AI build estimate to `~6.0M` total tokens and `~$53`.
 
+### 2026-06-04
+
+- Repaired the homepage prediction QA path by making `npm run dev` start both Vite and the local prediction API shim, adding `npm run dev:app` for frontend-only work, adding `npm run verify:api:dev` for Vite-proxy prediction submission smoke tests, extracting the homepage prediction payload builder, mapping raw network failures to the localized retry copy, improving the State field label, fixing mobile receipt wrapping, and refreshing the AI build estimate to `~6.2M` total tokens and `~$55`.
+
 ## Verification
 
 Latest successful commands:
@@ -236,6 +240,7 @@ Latest successful commands:
 npm run lint
 npm run build
 npm run verify:api:fallback
+npm run verify:api:dev
 npm run db:prediction-schema
 npm run verify:api:persisted
 npm run verify:api:vercel
@@ -329,6 +334,11 @@ Browser verification covered:
 - verifying `/sponsors` at desktop renders the sponsor application heading, logo upload section, terms section, refreshed `~6.0M` / `~$53` AI estimate, zero horizontal overflow, and no browser console errors
 - verifying `/sponsors` at 390px mobile keeps zero horizontal overflow and the sponsor marquee/page layout active with no browser console errors
 - verifying local `POST /api/sponsor-applications` through the Vite proxy returns a `202` `server-fallback-no-database` receipt for fake sponsor data with status `awaiting_payment`, package `Website Sponsor`, and checkout mode `stripe-checkout-not-configured`
+- verifying `npm run dev` now starts both the Vite app on `127.0.0.1:5173` and the prediction API shim on `127.0.0.1:5176`
+- verifying `npm run verify:api:dev` submits through the Vite `/api/*` proxy and returns a `202` `server-fallback-no-database` prediction receipt without address fields
+- verifying desktop browser prediction flow: increase Mexico to 1-0, open the entry modal, submit valid US participant data, receive a prediction receipt, keep the full address out of the rendered page, avoid horizontal overflow, and report no browser console errors
+- verifying 390px mobile prediction flow: score change, modal open, exact State label access, valid entry submit, full-width receipt rows for long email/hash fields, no address rendered back, no horizontal overflow, and no browser console errors
+- noting `npm run verify:api:persisted` could not run in this shell because `PRIMARY_DB_CONNECTION_STRING` was not present
 
 Latest screenshot:
 

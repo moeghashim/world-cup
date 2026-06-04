@@ -28,7 +28,12 @@ npm install
 npm run dev
 npm run lint
 npm run build
+npm run verify:api:dev
 ```
+
+`npm run dev` starts both the Vite app and the local prediction API shim.
+Use `npm run dev:app` only when you intentionally want the frontend without
+local `/api/*` prediction submission support.
 
 ## Local URL
 
