@@ -624,7 +624,7 @@ The sponsor system also got visual polish. Desktop sponsor cards now use softer 
 
 Verification ran `npm run lint`, `npm run build`, and browser checks for `/` and `/sponsors` at 1440px and 390px. The browser confirmed zero horizontal overflow, static desktop sponsor rails, active mobile marquee motion, visible `~5.8M` total token / `~$51` estimated cost disclosure, and no fresh console errors beyond normal Vite/React development messages.
 
-### Current commit - Build sponsor onboarding flow
+### Build sponsor onboarding flow
 
 Built `sponsorship_plan.md` into the first working sponsor intake path. The `/sponsors` page now keeps the package marketplace and adds an operational application section with company/contact fields, logo upload preview, selected package, optional free-product offer, optional AI one-pager, legal consent checklist, preview cards, and a receipt panel.
 
@@ -633,6 +633,16 @@ The shared sponsor schema lives in `src/data/sponsorOnboarding.ts`, and `POST /a
 The plan, product notes, design notes, env example, AGENTS log, and build blog were updated together. The current AI build disclosure estimate was refreshed to `~6.0M` total tokens and `~$53`.
 
 Verification ran `npm run lint`, `npm run build`, browser checks for `/sponsors` desktop and 390px mobile overflow, console-error checks, and a local API smoke test through the Vite proxy. The API returned a fake sponsor application receipt with status `awaiting_payment`, package `Website Sponsor`, persistence mode `server-fallback-no-database`, and checkout mode `stripe-checkout-not-configured`.
+
+### Current commit - Repair prediction QA path
+
+The homepage prediction flow itself worked when both the Vite app and the local API shim were running, but the project structure made that easy to miss: `npm run dev` only started Vite while prediction submission depended on a separate `npm run dev:api` process. That meant the first-screen prediction UI could look healthy while `/api/prediction-entries` failed at the local proxy boundary.
+
+This pass makes the core path harder to break. `npm run dev` now starts both Vite and the local prediction API shim through `scripts/dev.mjs`, while `npm run dev:app` remains available for frontend-only work. `npm run verify:api:dev` now submits through the Vite `/api/*` proxy so local QA covers the same browser-facing API path. The React prediction submission also now builds its payload through a small helper, maps raw `Failed to fetch` errors to the localized retry copy, gives the State select an exact accessible label, and keeps the mobile receipt panel from wrapping long email and hash values into unusable one-character columns.
+
+The current AI build disclosure estimate was refreshed to `~6.2M` total tokens and `~$55`.
+
+Verification ran `npm run lint`, `npm run build`, `npm run verify:api:fallback`, `npm run verify:api:dev`, and `npx vercel build`. Browser QA covered desktop and 390px mobile prediction submission from score change through entry modal, receipt creation, no rendered address data, no horizontal overflow, and no console errors. `npm run verify:api:persisted` could not run in this shell because `PRIMARY_DB_CONNECTION_STRING` was not present.
 
 ## Next Build Steps
 

@@ -473,8 +473,8 @@ const leftSponsorAdBlocks = sponsorAdBlocks.slice(0, 4)
 const rightSponsorAdBlocks = sponsorAdBlocks.slice(4)
 
 const aiBuildMetrics = {
-  tokenTotal: '~6.0M',
-  estimatedCost: '~$53',
+  tokenTotal: '~6.2M',
+  estimatedCost: '~$55',
   costLabel: 'API-equivalent estimate',
   note: 'Estimated from Codex build activity; not a billing receipt.',
 } as const
@@ -1075,6 +1075,44 @@ function getHomepagePredictionAnalyticsProperties({
     supporter_team: supporterTeamKey,
     ...(language ? { language } : {}),
   }
+}
+
+function createPredictionEntryPayload({
+  fixture,
+  form,
+  prediction,
+  prizeBundle,
+  supporterTeamKey,
+}: {
+  fixture: TournamentFixture
+  form: PredictionEntryForm
+  prediction: FixtureScorePrediction
+  prizeBundle: MatchPrizeBundle
+  supporterTeamKey: TeamKey
+}): PredictionEntryPayload {
+  return {
+    participant: form,
+    prediction: {
+      awayScore: prediction.awayScore,
+      awayTeam: fixture.away,
+      homeScore: prediction.homeScore,
+      homeTeam: fixture.home,
+      matchId: `fixture-${fixture.matchNumber}`,
+      matchNumber: fixture.matchNumber,
+      predictedOutcome: getFixturePickLabel(fixture, prediction),
+      prizeBundleId: prizeBundle.id,
+      sponsorCampaignId: prizeBundle.sponsorCampaignId,
+      supporterTeamKey,
+    },
+  }
+}
+
+function getPredictionSubmissionErrorMessage(error: unknown, t: Translator) {
+  if (error instanceof Error && error.message !== 'Failed to fetch') {
+    return error.message
+  }
+
+  return t('modal.errorRetry')
 }
 
 function getFieldErrors(error: ReturnType<typeof predictionEntryFormSchema.safeParse>) {
@@ -1821,24 +1859,13 @@ function HeroPredictionArena({
       prizeBundle: submittedBundle,
       supporterTeamKey: selectedTeamKey,
     })
-    const payload: PredictionEntryPayload = {
-      participant: formValidation.data,
-      prediction: {
-        awayScore: submittedPrediction.awayScore,
-        awayTeam: submittedFixture.away,
-        homeScore: submittedPrediction.homeScore,
-        homeTeam: submittedFixture.home,
-        matchId: `fixture-${submittedFixture.matchNumber}`,
-        matchNumber: submittedFixture.matchNumber,
-        predictedOutcome: getFixturePickLabel(
-          submittedFixture,
-          submittedPrediction,
-        ),
-        prizeBundleId: submittedBundle.id,
-        sponsorCampaignId: submittedBundle.sponsorCampaignId,
-        supporterTeamKey: selectedTeamKey,
-      },
-    }
+    const payload = createPredictionEntryPayload({
+      fixture: submittedFixture,
+      form: formValidation.data,
+      prediction: submittedPrediction,
+      prizeBundle: submittedBundle,
+      supporterTeamKey: selectedTeamKey,
+    })
 
     setEntryFormErrors({})
     setSubmissionError(null)
@@ -1904,10 +1931,7 @@ function HeroPredictionArena({
         surface: 'homepage_prediction_hero',
       })
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : t('modal.errorRetry')
+      const message = getPredictionSubmissionErrorMessage(error, t)
 
       setSubmissionError(message)
       setSubmissionStatus('error')
@@ -2335,10 +2359,15 @@ function PredictionEntryModal({
               onChange={(value) => onChange('city', value)}
               value={entryForm.city}
             />
-            <label className={`entry-field ${errors.state ? 'has-error' : ''}`}>
+            <label
+              className={`entry-field ${errors.state ? 'has-error' : ''}`}
+              htmlFor="entry-state"
+            >
               <span>{t('modal.state')}</span>
               <select
+                aria-label={t('modal.state')}
                 autoComplete="address-level1"
+                id="entry-state"
                 onChange={(event) =>
                   onChange('state', event.target.value as PredictionEntryForm['state'])
                 }

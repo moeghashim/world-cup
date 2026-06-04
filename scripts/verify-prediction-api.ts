@@ -44,11 +44,15 @@ type EntryResponse = {
   receiptId: string
 }
 
-type VerificationMode = 'fallback' | 'persisted' | 'remote' | 'vercel'
+type VerificationMode = 'dev' | 'fallback' | 'persisted' | 'remote' | 'vercel'
 
 const mode = (process.argv[2] ?? 'fallback') as VerificationMode
 const originalConnectionString = process.env.PRIMARY_DB_CONNECTION_STRING
-const apiBaseUrl = process.env.PREDICTION_API_BASE_URL?.replace(/\/$/, '')
+const apiBaseUrl = (
+  mode === 'dev'
+    ? (process.env.PREDICTION_API_BASE_URL ?? 'http://127.0.0.1:5173')
+    : process.env.PREDICTION_API_BASE_URL
+)?.replace(/\/$/, '')
 const vercelProtectionBypassSecret = process.env.VERCEL_PROTECTION_BYPASS_SECRET
 const execFileAsync = promisify(execFile)
 
@@ -86,10 +90,10 @@ async function invokeHandler(handler: ApiHandler, request: ApiRequest) {
 }
 
 async function getFirstBundle() {
-  if (mode === 'remote' || mode === 'vercel') {
+  if (mode === 'dev' || mode === 'remote' || mode === 'vercel') {
     assert(
       apiBaseUrl,
-      'PREDICTION_API_BASE_URL is required for remote verification.',
+      'PREDICTION_API_BASE_URL is required for HTTP verification.',
     )
 
     const { body, statusCode } = await fetchJson<BundleResponse>(
@@ -216,10 +220,10 @@ async function fetchVercelJson<ResponseBody>(
 }
 
 async function submitEntry(payload: Record<string, unknown>) {
-  if (mode === 'remote' || mode === 'vercel') {
+  if (mode === 'dev' || mode === 'remote' || mode === 'vercel') {
     assert(
       apiBaseUrl,
-      'PREDICTION_API_BASE_URL is required for remote verification.',
+      'PREDICTION_API_BASE_URL is required for HTTP verification.',
     )
 
     const { body, statusCode } = await fetchJson<EntryResponse>(
@@ -298,18 +302,19 @@ async function verifyPersistedRow(entry: EntryResponse) {
 }
 
 if (
+  mode !== 'dev' &&
   mode !== 'fallback' &&
   mode !== 'persisted' &&
   mode !== 'remote' &&
   mode !== 'vercel'
 ) {
   console.error(
-    'Usage: npm run verify:api:fallback, npm run verify:api:persisted, npm run verify:api:remote, or npm run verify:api:vercel',
+    'Usage: npm run verify:api:dev, npm run verify:api:fallback, npm run verify:api:persisted, npm run verify:api:remote, or npm run verify:api:vercel',
   )
   process.exit(1)
 }
 
-if (mode === 'fallback') {
+if (mode === 'dev' || mode === 'fallback') {
   delete process.env.PRIMARY_DB_CONNECTION_STRING
 } else if (!originalConnectionString) {
   console.error(
@@ -362,8 +367,9 @@ assert(isObject(entryResult.body), 'Prediction endpoint returned a non-object bo
 const entryBody = entryResult.body as EntryResponse
 const responseText = JSON.stringify(entryResult.body)
 const addressReturned = responseText.includes(hiddenAddressLine1)
+const expectsFallbackReceipt = mode === 'dev' || mode === 'fallback'
 
-if (mode === 'fallback') {
+if (expectsFallbackReceipt) {
   assert(entryResult.statusCode === 202, 'Fallback verification expected HTTP 202.')
   assert(entryBody.persisted === false, 'Fallback verification expected persisted=false.')
   assert(
