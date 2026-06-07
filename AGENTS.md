@@ -2,6 +2,24 @@
 
 This document is the project artifact for how the product is being built. Update it after each meaningful task, then commit the code and documentation together when the work is coherent.
 
+## Reset Baseline - 2026-06-07
+
+The repository has been reset to a clean product and design slate. Older sections
+below remain as historical project context, not the current implementation map.
+
+Current implementation baseline:
+
+- Vite + React + TypeScript.
+- Static GA4 snippet for `G-RFPJRPKYQR` in `index.html`.
+- Runtime analytics fallback and env-gated PostHog setup in `src/analytics.ts`.
+- PostHog first-party `/ingest` proxy in `vite.config.ts` and `vercel.json`.
+- Stripe Projects and Vercel local state preserved in ignored `.projects/` and
+  `.vercel/` directories.
+- AI usage disclosure currently shows `~6.3M` total tokens and `~$56`
+  estimated API-equivalent cost in `src/App.tsx` and the appended
+  `BUILD_BLOG.md` reset note.
+- `BUILD_BLOG.md` remains append-only for the public build article.
+
 ## Working Agreement
 
 - Keep product logic deterministic for predictions, draws, eligibility, shipping, reviews, and compliance.

@@ -670,3 +670,34 @@ Every commit should update this file with:
 - what verification was run
 - latest total token estimate and API-equivalent estimated cost shown in the AI build disclosure
 - what the next relevant build step is
+
+## 2026-06-07 Reset - Clean slate while keeping live integrations
+
+The project is restarting from a clean product and design slate. The old
+prototype UI, generated design assets, prediction data modules, sponsor
+onboarding prototype, JSON-render catalog, local API shims, and old operational
+planning docs were removed so the next version can be designed fresh with
+Stripe Projects in mind.
+
+The reset intentionally keeps the live integration baseline:
+
+- Vercel project state remains local and ignored in `.vercel/`.
+- Stripe Projects state remains local and ignored in `.projects/`.
+- Local environment files such as `.env` and `.env.local` remain ignored and
+  were not removed.
+- Google Analytics measurement `G-RFPJRPKYQR` remains in the static
+  `index.html` head.
+- `src/analytics.ts` still provides the runtime GA fallback and env-gated
+  PostHog initialization.
+- PostHog stays wired through `posthog-js`, `VITE_POSTHOG_KEY`,
+  `VITE_POSTHOG_HOST`, and the first-party `/ingest` proxy in Vite and Vercel.
+- Stripe and database environment placeholders remain documented in
+  `.env.example`.
+
+The new visible app is a neutral reset screen that shows the preserved AI build
+usage disclosure: `~6.3M` total tokens and `~$56` estimated API-equivalent cost.
+It also fires a simple `clean_slate_viewed` analytics event when PostHog is
+configured.
+
+The next build step is to design the new homepage and prediction flow from this
+clean baseline instead of carrying forward the previous prototype structure.

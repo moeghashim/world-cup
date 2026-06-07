@@ -1,25 +1,10 @@
-# World Cup Predictor
+# winworldcup2026.com
 
-Interactive World Cup prediction and sponsor rewards prototype.
+Clean-slate Vite + React starter for the next World Cup prediction website.
 
-## What It Does
-
-- Lets users choose a supporter team and rethemes the experience around that team.
-- Lets users predict match winners and scorelines.
-- Locks predictions before a draw.
-- Runs seeded demo draws with 5-10 winners per match.
-- Shows sponsor gift, free T-shirt, fulfillment, and review-prompt workflows.
-- Previews localized fan T-shirt concepts without official team, tournament, sponsor, or player branding.
-- Documents the build and operating decisions in `AGENTS.md`.
-
-## Tech
-
-- Vite
-- React
-- TypeScript
-- JSON-render
-- Zod
-- Lucide icons
+The previous prototype UI, generated assets, product data, and old API flows
+have been removed. The repo keeps the live integration baseline for Vercel,
+Google Analytics, PostHog, Stripe Projects, and environment configuration.
 
 ## Commands
 
@@ -28,15 +13,14 @@ npm install
 npm run dev
 npm run lint
 npm run build
-npm run verify:api:dev
 ```
-
-`npm run dev` starts both the Vite app and the local prediction API shim.
-Use `npm run dev:app` only when you intentionally want the frontend without
-local `/api/*` prediction submission support.
 
 ## Local URL
 
 ```bash
 http://127.0.0.1:5173/
 ```
+
+## Integrations
+
+See `INTEGRATIONS.md` for the preserved live integration surface.
