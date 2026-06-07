@@ -701,3 +701,50 @@ configured.
 
 The next build step is to design the new homepage and prediction flow from this
 clean baseline instead of carrying forward the previous prototype structure.
+
+## 2026-06-07 — Floodlights design, rebuilt in React
+
+The team landed on a new visual direction: **Floodlights** — a neon night-match
+look (near-black pitch, electric lime/cyan/magenta glow, dot-matrix LED
+scoreboard digits, floodlight bloom). It arrived as a Claude Design handoff
+bundle: a complete four-page static HTML/CSS/JS prototype (`index`, `pickem`,
+`brackets`, `sponsors`) with a shared design system, five-language support
+(English, Español, Français, Português, العربية + RTL), light/dark themes,
+generated sponsor logos, a 48-team bracket builder with shareable links, and a
+public crowd-comparison page.
+
+We rebuilt the whole thing in the repo's own stack — **Vite + React 19 +
+TypeScript** — rather than dropping the static files in, so it lives natively in
+the codebase:
+
+- The prototype's CSS is reused near-verbatim as the design system
+  (`src/floodlights/styles/site.css`) plus one stylesheet per page. Only two
+  cross-page class clashes (`.page-head`, `.stat`) were renamed so every page
+  sheet can stay global and faithful.
+- Theme and language are React contexts that drive `data-theme`/`dir`/`lang` on
+  `<html>`, with a pre-paint script in `index.html` to avoid a flash. Picks,
+  theme, and language persist in `localStorage` under the `fl:` namespace.
+- `react-router-dom` serves the four pages at `/`, `/pickem`, `/brackets`, and
+  `/sponsors`; `vercel.json`'s existing SPA rewrite already covers deep links.
+- The 48-team bracket logic (group ranking → wildcard thirds → 32-team knockout,
+  plus the URL-hash share codec) is ported into a typed, reusable module and a
+  React state model; the public-brackets page reads the saved bracket to compute
+  the live "you vs the crowd" comparison.
+- Animation touches from the design are preserved: floodlight sweep, count-up
+  stats, animated bar fills, champion crowning, confetti, and toasts — all
+  honouring `prefers-reduced-motion`.
+
+The sponsorship page (`/sponsors`) was the headline deliverable: hero, a captive
+audience reach panel with count-up stats, "why it works" cards, four partnership
+packages, a "where your brand shows up" inventory with live mini-mockups, a
+backers logo row, and a contact form whose package selector is preset when you
+choose a tier.
+
+Verified in the browser across all four pages, both themes, English + Arabic
+RTL, with the bracket builder and public-brackets comparison working end to end
+and no console errors. `npm run lint` and `npm run build` both pass.
+
+The previous neutral reset screen and its inline AI-usage disclosure banner were
+replaced by this product surface, so the cumulative AI build estimate now lives
+in the documentation: roughly `~6.9M` total tokens and `~$60` estimated
+API-equivalent cost.

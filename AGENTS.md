@@ -20,6 +20,53 @@ Current implementation baseline:
   `BUILD_BLOG.md` reset note.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
+## Floodlights Implementation - 2026-06-07
+
+The product surface is now the **Floodlights** design (Direction C from the
+Claude Design handoff: neon night-match look — near-black pitch, lime/cyan/magenta
+glow, LED scoreboard digits, floodlight bloom), rebuilt natively in
+Vite + React 19 + TypeScript. This supersedes the neutral reset screen; the
+old prototype's routes (`/fixtures`, `/teams`, `/draws`, etc.) and the inline
+AI-usage disclosure banner are gone. The historical sections further below
+describe that previous prototype, not the current implementation.
+
+Current routes (`react-router-dom`, served by `vercel.json`'s SPA rewrite):
+
+- `/` — site hub (interactive predict scoreboard, how-to, feature teasers,
+  quick pick'em, prizes, sponsor band, CTA)
+- `/pickem` — 48-team bracket builder (group ranking → wildcard thirds →
+  32-team knockout → champion), share-link modal, group quick pick'em
+- `/brackets` — public brackets (you-vs-crowd, most-picked champion, match
+  consensus, leaderboard, head-to-head compare from the saved bracket)
+- `/sponsors` — sponsorship pitch (hero, reach stats, why-it-works, four
+  partnership packages, inventory mockups, backers, contact form)
+
+Source layout under `src/floodlights/`:
+
+- `styles/` — `site.css` is the shared design system ported near-verbatim from
+  the prototype; `home.css` / `pickem.css` / `brackets.css` / `sponsors.css` are
+  the per-page sheets. `.page-head` and `.stat` were renamed per page
+  (`.spon-head` / `.pk-head` / `.bk-head`, `.bk-stat`) to avoid global clashes.
+- `data.ts` — 48 teams (EN + AR + colour), 12 groups, R32 seeding template,
+  knockout metadata, crowd/community sample data, sponsors.
+- `i18n/` — `dictionaries.ts` (en/es/fr/pt/ar + localized country names),
+  `context.ts` + `I18nProvider.tsx` (lang, dir, `t`, `tname`, `cname`).
+- `theme/` — `context.ts` + `ThemeProvider.tsx` (dark default, light variant),
+  applied via `data-theme` on `<html>` with a pre-paint script in `index.html`.
+- `lib/` — `storage.ts` (`fl:` localStorage namespace), `confetti.ts`,
+  `useReveal.ts`, `motion.tsx` (count-up, bar fills), `bracket.ts` (resolution +
+  URL-hash share codec), `toastContext.ts` + `ToastProvider.tsx`.
+- `components/` — `SiteHeader`, `SiteFooter`, `Ticker`, `LangPicker`,
+  `ThemeToggle`, `BrandLogo`, `Flag`, `SponsorLogo` family, `HashLink`.
+- `pages/` — `HomePage`, `PickemPage`, `BracketsPage`, `SponsorsPage`.
+
+Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
+GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
+Picks, theme, and language persist in `localStorage`. The Floodlights design has
+no AI-usage disclosure banner, so the running token estimate is tracked in the
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~6.9M` total tokens and
+`~$60` estimated API-equivalent cost.
+
 ## Working Agreement
 
 - Keep product logic deterministic for predictions, draws, eligibility, shipping, reviews, and compliance.
@@ -250,6 +297,28 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 
 - Repaired the homepage prediction QA path by making `npm run dev` start both Vite and the local prediction API shim, adding `npm run dev:app` for frontend-only work, adding `npm run verify:api:dev` for Vite-proxy prediction submission smoke tests, extracting the homepage prediction payload builder, mapping raw network failures to the localized retry copy, improving the State field label, fixing mobile receipt wrapping, and refreshing the AI build estimate to `~6.2M` total tokens and `~$55`.
 
+### 2026-06-07
+
+- Adopted the **Floodlights** design from the Claude Design handoff bundle and
+  rebuilt all four pages (home hub, Pick'em, public brackets, sponsorship) in
+  Vite + React 19 + TypeScript instead of dropping the static prototype in.
+- Ported the prototype CSS near-verbatim into a shared design system plus
+  per-page sheets; renamed two clashing classes so page sheets stay global.
+- Built React contexts for theme (dark/light) and i18n (English, Español,
+  Français, Português, العربية + RTL with Alexandria/Zain fonts), driving
+  `data-theme`/`dir`/`lang` on `<html>` with a pre-paint script.
+- Ported the 48-team bracket logic and the URL-hash share codec into a typed,
+  reusable `lib/bracket.ts` and a React state model; wired the public-brackets
+  page to read the saved bracket for the live "you vs the crowd" comparison.
+- Implemented `floodlights/sponsors.html` as `/sponsors`: hero, count-up reach
+  stats, why-it-works cards, four partnership packages with a tier picker that
+  presets the contact form, inventory mockups, backers row, and contact form.
+- Preserved GA4 + PostHog initialization in `App.tsx`; added `react-router-dom`
+  for the four routes, covered by the existing `vercel.json` SPA rewrite.
+- Replaced the neutral reset screen and removed the inline AI-usage disclosure
+  banner (the Floodlights design has none); moved the running token estimate to
+  the docs at `~6.9M` total tokens and `~$60` estimated API-equivalent cost.
+
 ## Verification
 
 Latest successful commands:
@@ -357,6 +426,13 @@ Browser verification covered:
 - verifying desktop browser prediction flow: increase Mexico to 1-0, open the entry modal, submit valid US participant data, receive a prediction receipt, keep the full address out of the rendered page, avoid horizontal overflow, and report no browser console errors
 - verifying 390px mobile prediction flow: score change, modal open, exact State label access, valid entry submit, full-width receipt rows for long email/hash fields, no address rendered back, no horizontal overflow, and no browser console errors
 - noting `npm run verify:api:persisted` could not run in this shell because `PRIMARY_DB_CONNECTION_STRING` was not present
+- verifying `npm run lint` and `npm run build` pass after the Floodlights React rebuild (`tsc -b` clean, production bundle built)
+- verifying the Floodlights home hub renders the neon hero, LED predict scoreboard with working score steppers/outcome, sponsor band, and ticker
+- verifying `/sponsors` renders the hero, count-up reach stats, four partnership packages, inventory mockups (predict board + group card with sponsor logos/flags), backers row, and contact form; clicking a package's "Choose package" scrolls to the form and presets the tier select; no console errors
+- verifying `/pickem` renders the 12 group cards with per-group sponsor tags, and "Quick-fill favourites" lights all four stages (Groups 12/12, Wildcards 8/8, Knockout 31/31, Champion) with correct QUALIFIES/WILDCARD ranking
+- verifying `/brackets` reads the saved bracket and populates "you vs the crowd" (Mexico champion, 81% agreement, 13/16 R32 winners, 3 contrarian calls), champion-distribution and match-consensus bars
+- verifying the light theme flips the whole site to the high-contrast light palette and stays legible
+- verifying Arabic switches to RTL with Zain/Alexandria fonts and localized team names while LED/Doto numbers stay left-to-right
 
 Latest screenshot:
 
