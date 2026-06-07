@@ -2,6 +2,29 @@
 
 This document is the project artifact for how the product is being built. Update it after each meaningful task, then commit the code and documentation together when the work is coherent.
 
+## Development Process — Plan → Build → Sign-off
+
+Governing rule for all work from 2026-06-07 onward. Three roles, strictly separated:
+
+- **Plan & design — Claude (this agent).** The user prompts Claude. Claude runs the
+  planning interview, owns the product and architecture decisions, and writes the
+  canonical `PLAN.md` (decisions log) and per-feature `PRD.md` documents. Claude
+  does **not** write feature code.
+- **Implement — Codex.** Codex is the implementing agent. It writes all production
+  code from the locked `PLAN.md` / `PRD.md`, breaks work into per-task files,
+  follows Conventional Commits, and opens one PR per task.
+- **Review & sign-off — Claude.** Claude reviews each PR against the locked
+  decisions and acceptance criteria and gives an explicit **approve** or
+  **request-changes** verdict. Claude does **not** implement during review.
+
+Hard rules:
+
+- **No code is merged to `main` or deployed before Claude signs off.** The user
+  holds final merge authority and merges only after a Claude sign-off.
+- `PLAN.md`, each `PRD.md`, this dev-process section, and any `dev/` task files are
+  committed contracts — generated output and downstream code never overwrite them.
+- Phase discipline: planning produces no code; review produces no code.
+
 ## Reset Baseline - 2026-06-07
 
 The repository has been reset to a clean product and design slate. Older sections
