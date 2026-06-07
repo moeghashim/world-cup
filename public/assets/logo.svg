@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 64" width="256" height="64" role="img" aria-label="WIN 2026">
+  <defs>
+    <linearGradient id="flTile2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#121A2C"></stop>
+      <stop offset="1" stop-color="#0A0F1A"></stop>
+    </linearGradient>
+    <radialGradient id="flBloom2" cx="50%" cy="34%" r="62%">
+      <stop offset="0" stop-color="#C9FF3D" stop-opacity="0.22"></stop>
+      <stop offset="1" stop-color="#C9FF3D" stop-opacity="0"></stop>
+    </radialGradient>
+    <filter id="flGlow2" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.4" result="b"></feGaussianBlur>
+      <feMerge><feMergeNode in="b"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+    </filter>
+    
+  </defs>
+  
+  <g transform="translate(2,2)">
+    <rect x="0" y="0" width="60" height="60" rx="15" fill="url(#flTile2)" stroke="#C9FF3D" stroke-opacity="0.55" stroke-width="2"></rect>
+    <rect x="0" y="0" width="60" height="60" rx="15" fill="url(#flBloom2)"></rect>
+    <g filter="url(#flGlow2)">
+      <path d="M13 19 L21 42 L30 28 L39 42 L47 19" fill="none" stroke="#C9FF3D" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"></path>
+    </g>
+    <circle cx="30" cy="49.5" r="2.1" fill="#34E7FF"></circle>
+  </g>
+  
+  <text x="78" y="41" class="wm" fill="#E7ECFB">WIN<tspan fill="#C9FF3D">·</tspan>2026</text>
+</svg>

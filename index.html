@@ -1,10 +1,23 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>winworldcup2026.com</title>
+    <title>WIN World Cup 2026 — Floodlights</title>
+    <!-- apply saved theme + language before paint to avoid a flash -->
+    <script>
+      try {
+        var t = JSON.parse(localStorage.getItem('fl:theme')) || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+        var l = JSON.parse(localStorage.getItem('fl:lang')) || 'en';
+        document.documentElement.setAttribute('lang', l);
+        document.documentElement.setAttribute('dir', l === 'ar' ? 'rtl' : 'ltr');
+        if (l === 'ar') document.documentElement.classList.add('ar');
+      } catch (e) {}
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/assets/favicon-180.png" />
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RFPJRPKYQR"></script>
     <script>
