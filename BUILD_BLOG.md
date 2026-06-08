@@ -795,3 +795,19 @@ Task 005 added authenticated pick persistence:
 
 The cumulative build estimate is now roughly `~7.2M` total tokens and `~$63`
 estimated API-equivalent cost.
+
+Task 006 connected the account flow to the Floodlights UI:
+
+- an `AuthProvider` loads the WorkOS-backed session from `/api/auth/me` without
+  prompting on page load;
+- anonymous users only see the sign-in gate when they try to lock a bracket or
+  group pick'em card;
+- the gate starts `/api/auth/start` with the current return path, so WorkOS can
+  bring the fan back to the same play surface;
+- signed-in users with handles save locked picks through the Neon-backed API;
+- signed-in users without handles are sent to the profile setup path before
+  saving; and
+- sign-in/lock analytics events avoid email or token values.
+
+The cumulative build estimate is now roughly `~7.3M` total tokens and `~$64`
+estimated API-equivalent cost.

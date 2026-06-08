@@ -8,11 +8,11 @@ files: ["src/floodlights/lib/AuthProvider.tsx", "src/floodlights/components/Sign
 ---
 
 ## Acceptance criteria
-- [ ] Sign-in is prompted only at lock prediction, lock bracket, or future join-host gates, not on page load. (PRD S1: sign-in prompted at lock/join gate)
-- [ ] Lock actions redirect/start the WorkOS flow for anonymous users. (PRD S1: play anonymously then sign in to save)
-- [ ] Sign-in and lock UI works in EN/ES/FR/PT/AR and RTL Arabic. (PRD S1: sign-in/lock flow works in all 5 languages + RTL)
-- [ ] The UI respects existing Floodlights dark/light theme styles. (PRD S1: both themes)
-- [ ] GA4/PostHog sign-in and lock events fire without exposing email values. (PRD cross-cutting: Analytics and security)
+- [x] Sign-in is prompted only at lock prediction, lock bracket, or future join-host gates, not on page load. (PRD S1: sign-in prompted at lock/join gate)
+- [x] Lock actions redirect/start the WorkOS flow for anonymous users. (PRD S1: play anonymously then sign in to save)
+- [x] Sign-in and lock UI works in EN/ES/FR/PT/AR and RTL Arabic. (PRD S1: sign-in/lock flow works in all 5 languages + RTL)
+- [x] The UI respects existing Floodlights dark/light theme styles. (PRD S1: both themes)
+- [x] GA4/PostHog sign-in and lock events fire without exposing email values. (PRD cross-cutting: Analytics and security)
 
 ## Suggested approach
 Add an auth provider around the app. Intercept `lockBracket` and `gpLock` in
