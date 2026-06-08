@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~9.8M` total tokens and `~$89` estimated API-equivalent cost in
+  `~9.9M` total tokens and `~$90` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -101,8 +101,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.8M` total tokens and
-`~$89` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.9M` total tokens and
+`~$90` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -414,6 +414,13 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   gate. Re-ran `npm run verify:tournament-data`, `npm run test:v0.2`,
   `npm run test:v0.1`, `npm run lint`, and `npm run build`, then refreshed the
   documentation estimate to `~9.8M` total tokens and `~$89`.
+- Fixed the expedited v0.3 P0 production signup route mismatch: production had
+  `/api/auth/passwordless-start` and `/api/auth/passwordless-verify`, while the
+  website modal posts to `/api/auth/passwordless/start` and
+  `/api/auth/passwordless/verify`. Added slash-route wrappers, kept the legacy
+  hyphenated routes, added clearer Auth0 start failure codes with sanitized
+  Sentry capture, verified the new Vercel output functions, and refreshed the
+  documentation estimate to `~9.9M` total tokens and `~$90`.
 
 ### 2026-06-07
 

@@ -16,7 +16,10 @@ export type ApiResponse = {
 
 export type ApiErrorCode =
   | 'bad_request'
+  | 'auth_email_delivery_failed'
   | 'auth_provider_not_ready'
+  | 'auth_provider_error'
+  | 'auth_rate_limited'
   | 'invalid_code'
   | 'method_not_allowed'
   | 'not_authenticated'
