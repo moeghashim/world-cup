@@ -1357,3 +1357,28 @@ deploy-shape proof for the production route mismatch.
 
 The cumulative build estimate is now roughly `~9.9M` total tokens and `~$90`
 estimated API-equivalent cost.
+
+### Task 002 - Add Hosts Schema And API
+
+The rest of v0.3 starts with the host backbone. I added `hosts` and
+`host_members` in `db/migrations/004_hosts.sql`, then exposed:
+
+- `POST /api/hosts` for authenticated, handle-complete host creation
+- `POST /api/hosts/join` for joining by slug or six-character code
+- `GET /api/hosts/:slug` for the public host page data
+
+Host creation returns a canonical public path, a join path, and a typeable code.
+The public API response is handle-only: no email, Auth0 ID, address, or user ID
+is returned. Leaderboard points are `0` until v0.4 scoring lands; that default is
+recorded in `dev/open-questions.md` so review can judge it against the v0.4
+scoring plan.
+
+Verification ran:
+
+```bash
+npm run test:v0.3
+npm run build
+```
+
+The cumulative build estimate is now roughly `~10.0M` total tokens and `~$91`
+estimated API-equivalent cost.

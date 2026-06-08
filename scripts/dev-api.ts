@@ -18,6 +18,8 @@ const routes: Record<string, () => Promise<{ default: Handler }>> = {
   '/api/profile': () => import('../api/profile.js'),
   '/api/profile/handle': () => import('../api/profile/handle.js'),
   '/api/data/fixtures': () => import('../api/data/fixtures.js'),
+  '/api/hosts': () => import('../api/hosts/index.js'),
+  '/api/hosts/join': () => import('../api/hosts/join.js'),
   '/api/picks/bracket': () => import('../api/picks/bracket.js'),
   '/api/picks/group': () => import('../api/picks/group.js'),
   '/api/picks/predict': () => import('../api/picks/predict.js'),
@@ -77,7 +79,12 @@ const server = createServer(async (incoming, outgoing) => {
     incoming.url ?? '/',
     `http://${incoming.headers.host ?? `127.0.0.1:${port}`}`,
   )
-  const loader = routes[parsedUrl.pathname]
+  let loader = routes[parsedUrl.pathname]
+  const hostMatch = /^\/api\/hosts\/([^/]+)$/.exec(parsedUrl.pathname)
+  if (!loader && hostMatch) {
+    parsedUrl.searchParams.set('slug', hostMatch[1])
+    loader = () => import('../api/hosts/[slug].js')
+  }
 
   if (!loader) {
     outgoing.statusCode = 404

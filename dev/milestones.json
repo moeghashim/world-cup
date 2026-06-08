@@ -34,9 +34,19 @@
     },
     {
       "id": "v0.3-accounts-ux-hosts",
-      "status": "planned",
+      "status": "in_progress",
       "tasks": [
-        "001-fix-production-passwordless-signup-route"
+        "001-fix-production-passwordless-signup-route",
+        "002-add-hosts-schema-and-api",
+        "003-gate-home-match-prediction-lock",
+        "004-add-hosts-ui-and-public-page",
+        "005-fix-layout-rtl-and-bracket",
+        "006-add-v03-tests",
+        "007-run-v03-chrome-qa"
+      ],
+      "completedTasks": [
+        "001-fix-production-passwordless-signup-route",
+        "002-add-hosts-schema-and-api"
       ]
     }
   ]

@@ -25,6 +25,8 @@ export type ApiErrorCode =
   | 'not_authenticated'
   | 'handle_required'
   | 'handle_taken'
+  | 'host_not_found'
+  | 'host_slug_taken'
   | 'pick_locked'
   | 'server_error'
 

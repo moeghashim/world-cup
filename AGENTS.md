@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~9.9M` total tokens and `~$90` estimated API-equivalent cost in
+  `~10.0M` total tokens and `~$91` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -101,8 +101,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.9M` total tokens and
-`~$90` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~10.0M` total tokens and
+`~$91` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -421,6 +421,11 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   hyphenated routes, added clearer Auth0 start failure codes with sanitized
   Sentry capture, verified the new Vercel output functions, and refreshed the
   documentation estimate to `~9.9M` total tokens and `~$90`.
+- Added the v0.3 hosts backbone: `hosts` and `host_members` schema, authenticated
+  `POST /api/hosts`, authenticated `POST /api/hosts/join`, handle-only
+  `GET /api/hosts/:slug`, local dev API routing, public-response tests, and the
+  v0.4 host-points placeholder decision. Refreshed the documentation estimate to
+  `~10.0M` total tokens and `~$91`.
 
 ### 2026-06-07
 

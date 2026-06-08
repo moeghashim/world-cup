@@ -22,6 +22,15 @@
   rejected`. If present, keep Auth0 custom SMTP disabled for sign-in and use
   Auth0 built-in delivery until AgentMail/Auth0 sender acceptance is resolved.
 
+## 2026-06-08 v0.3 Host Points Placeholder
+
+- Default chosen: host leaderboard points return `0` until v0.4 scoring writes
+  real standings.
+- Rationale: PRD S3 requires the host leaderboard shape in v0.3, while PLAN
+  locks scoring/results ingestion for v0.4. Returning a stable numeric
+  placeholder lets the public host page and API contract ship without
+  fabricating scores.
+
 ## 2026-06-08 v0.2 QA Time Override
 
 - Default chosen: server pick-lock helpers accept `x-worldcup-now` only outside
