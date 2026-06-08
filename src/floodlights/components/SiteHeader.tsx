@@ -39,14 +39,19 @@ export function SiteHeader({ wide = false, cta }: { wide?: boolean; cta: HeaderC
           <NavLink to="/profile" className={navClass} onClick={closeMenu}>
             {auth.user?.handle ?? t('nav_profile')}
           </NavLink>
+          {ctaHash ? (
+            <a href={cta.to} className={`${ctaClass} mobile-menu-cta`} onClick={closeMenu}>{t(cta.key)}</a>
+          ) : (
+            <Link to={cta.to} className={`${ctaClass} mobile-menu-cta`} onClick={closeMenu}>{t(cta.key)}</Link>
+          )}
         </nav>
         <div className="nav-tools">
           <LangPicker />
           <ThemeToggle />
           {ctaHash ? (
-            <a href={cta.to} className={ctaClass}>{t(cta.key)}</a>
+            <a href={cta.to} className={`${ctaClass} desktop-header-cta`}>{t(cta.key)}</a>
           ) : (
-            <Link to={cta.to} className={ctaClass}>{t(cta.key)}</Link>
+            <Link to={cta.to} className={`${ctaClass} desktop-header-cta`}>{t(cta.key)}</Link>
           )}
           <button className="burger" aria-label="Menu" onClick={() => setMenuOpen((o) => !o)}>
             <span></span><span></span><span></span>

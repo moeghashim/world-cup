@@ -116,6 +116,7 @@ body>*{position:relative;z-index:1}
 .navlinks a{font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:13px;letter-spacing:.03em;padding:9px 13px;border-radius:9px;color:var(--mut);transition:.15s}
 .navlinks a:hover{color:var(--txt);background:var(--panel)}
 .navlinks a.active{color:var(--lime-ink);background:var(--panel)}
+.navlinks .mobile-menu-cta{display:none}
 .nav-tools{display:flex;align-items:center;gap:10px}
 
 /* theme toggle */
@@ -227,10 +228,20 @@ html.anim .reveal.in{transform:none}
 .mt-auto{margin-top:auto}
 
 @media(max-width:880px){
+  .wrap,.wrap-wide{padding-inline:16px}
+  .nav{gap:8px}
+  .logo .logo-svg{width:132px;height:34px}
   .navlinks{display:none}
-  .burger{display:flex}
-  .navlinks.open{display:flex;position:absolute;top:74px;left:0;right:0;flex-direction:column;gap:4px;
-    background:var(--bg-2);border-bottom:1px solid var(--line);padding:14px 20px}
+  .desktop-header-cta{display:none}
+  .nav-tools{gap:6px;flex:0 0 auto}
+  .lang-picker .lp-btn{width:38px;height:36px;padding:0;justify-content:center}
+  .lang-picker .lp-cur,.lang-picker .lp-caret{display:none}
+  .theme-toggle button{width:29px;height:28px;font-size:13px}
+  .burger{display:flex;width:38px;height:36px;flex:0 0 auto}
+  .navlinks.open{display:flex;position:absolute;top:74px;left:0;right:0;max-width:100vw;flex-direction:column;gap:4px;
+    background:var(--bg-2);border-bottom:1px solid var(--line);padding:14px 16px;overflow-x:hidden}
+  .navlinks.open a{width:100%;max-width:100%;padding:11px 12px}
+  .navlinks.open .mobile-menu-cta{display:inline-flex;margin-top:8px}
   .grid-2{grid-template-columns:1fr}
 }
 

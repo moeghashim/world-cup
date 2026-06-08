@@ -109,5 +109,7 @@
 @media(max-width:880px){
   .hero-grid{grid-template-columns:1fr;gap:34px}
   .steps{grid-template-columns:1fr} .feat{grid-template-columns:1fr}
-  .prize{grid-template-columns:1fr} .prize-photo{border-right:none;border-bottom:1px solid var(--line);min-height:300px}
+  .prize{grid-template-columns:minmax(0,1fr);max-width:100%;overflow:hidden}
+  .prize-photo{border-right:none;border-bottom:1px solid var(--line);min-height:300px;width:100%;max-width:100%}
+  .prize-photo img{max-width:100%}
 }

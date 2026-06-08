@@ -52,6 +52,20 @@
         "005-fix-layout-rtl-and-bracket",
         "006-add-v03-tests"
       ]
+    },
+    {
+      "id": "v0.3.1-mobile-ux",
+      "status": "ready_for_review",
+      "tasks": [
+        "001-add-mobile-playwright-harness",
+        "002-fix-mobile-header-and-prize-overflow",
+        "003-run-mobile-qa-and-pr"
+      ],
+      "completedTasks": [
+        "001-add-mobile-playwright-harness",
+        "002-fix-mobile-header-and-prize-overflow",
+        "003-run-mobile-qa-and-pr"
+      ]
     }
   ]
 }
