@@ -25,6 +25,20 @@ Hard rules:
   committed contracts — generated output and downstream code never overwrite them.
 - Phase discipline: planning produces no code; review produces no code.
 
+### Review cadence — milestone autonomy
+
+- **Codex implements the entire milestone end-to-end and returns only for final review/sign-off.**
+  It does not pause for intermediate or per-task approvals.
+- When Codex hits a decision gap, it picks a sensible default, records it (with rationale) in
+  `dev/open-questions.md`, and keeps going. Claude reviews those defaults at final sign-off.
+- Codex pauses mid-milestone **only** for a genuinely blocking or irreversible situation:
+  required data/credentials unavailable, a destructive/irreversible action, or a hard conflict
+  with a locked Decisions-log value.
+- Before opening the milestone PR, Codex runs a full end-to-end QA in a real browser (Chrome skill)
+  and records the evidence.
+- Claude's single sign-off (against the Decisions log + PRD acceptance criteria) gates the merge;
+  the user holds merge authority.
+
 ## Reset Baseline - 2026-06-07
 
 The repository has been reset to a clean product and design slate. Older sections

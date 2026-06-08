@@ -122,7 +122,8 @@ worldcup/
 - **Secrets server-side only** (Neon URL, Auth0 + AgentMail keys, data-provider keys) — never in the bundle.
 - **Cache-then-serve:** clients read fixtures/results from **our** Neon/cache, never the provider.
 - **Idempotent scoring:** re-running the scorer on the same results yields the same standings.
-- **Pick locks are server-enforced** at each match's kickoff (client UI mirrors it).
+- **Pick locks are server-enforced** at each match's kickoff for group picks + score predictions; the
+  **whole knockout bracket locks at the first tournament match's kickoff** (client UI mirrors it).
 - **Geo from edge**, not client IP libraries. **i18n/theme/RTL parity** on every new surface.
 - Conventional Commits; one PR per task; no secrets or generated artifacts committed.
 
@@ -198,7 +199,7 @@ worldcup/
 | Login threshold | **Play first, sign in to lock** | Recommended, accepted |
 | Prize eligibility | **US-only**; everyone plays/competes | Recommended, accepted |
 | Address timing | **At win-time** only | Recommended, accepted |
-| Pick lock | **Per-match at kickoff** | Recommended, accepted |
+| Pick lock | Per-match at kickoff for group picks + score predictions; the **whole knockout bracket locks at the first tournament match's kickoff** | Recommended, accepted (bracket-lock clarified 2026-06-08) |
 | Handle | **Chosen at sign-in** | Recommended, accepted |
 | Scoring | Round weighting (10/20/40/80/160) + flat group winner | Recommended, accepted |
 | Email delivery | **AgentMail** (provisioned) | Updated 2026-06-07 (Resend not provisioned) |
