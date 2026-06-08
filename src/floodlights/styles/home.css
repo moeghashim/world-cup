@@ -68,6 +68,8 @@
 .crow .bar{flex:1;height:9px;background:var(--panel-2);border:1px solid var(--line);border-radius:50px;overflow:hidden}
 .crow .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--lime),var(--cyan));border-radius:50px}
 .crow .pct{font-family:'Doto',monospace;font-weight:900;font-size:14px;color:var(--txt-2);min-width:38px;text-align:right}
+.other-flag{display:grid;place-items:center;border-radius:50%;font-family:'Doto',monospace;font-weight:900;background:var(--panel-3);color:var(--mut)}
+.crowd-empty{border:1px dashed var(--line-2);border-radius:12px;padding:16px;text-align:center;font-family:'Chakra Petch',sans-serif;font-weight:700;color:var(--mut);background:var(--panel-2)}
 
 .qp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;margin-bottom:26px}
 .qp{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;transition:.18s}

@@ -174,8 +174,9 @@ body>*{position:relative;z-index:1}
 .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(140%);z-index:9000;
   background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:13px 18px;
   font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:14px;box-shadow:var(--shadow-card);
-  display:flex;align-items:center;gap:10px;transition:transform .4s cubic-bezier(.3,1.4,.5,1)}
-.toast.show{transform:translateX(-50%) translateY(0)}
+  display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;
+  transition:transform .4s cubic-bezier(.3,1.4,.5,1),opacity .18s ease}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .toast .ic{color:var(--lime-ink)}
 
 /* ---------------- auth gate ---------------- */

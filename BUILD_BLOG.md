@@ -1598,3 +1598,38 @@ dark and light themes, and closed/open menu states.
 
 The cumulative build estimate is now roughly `~11.1M` total tokens and `~$102`
 estimated API-equivalent cost.
+
+### v0.3.2 - Real Community Stats
+
+The v0.3.2 pre-v0.4 milestone removes the remaining fabricated community
+figures from the active app. A new cached, read-only
+`GET /api/data/community` endpoint reads existing Neon tables and serves only
+aggregate or handle-only data:
+
+- active players with at least one locked bracket, group pick, or score
+  prediction;
+- locked bracket count, now used where the old sponsor-facing "bracket views"
+  placeholder appeared;
+- distinct host members;
+- top champion distribution and Round-of-32 consensus from locked brackets;
+- public comparison samples only when a locked bracket has both a public handle
+  and a champion.
+
+The homepage, public brackets page, and sponsorship page now consume that
+response through a small client hook. Prize winners stay as a named prize
+configuration constant rather than pretending to be a live stat. The old
+The old crowd-distribution, community-sample, joined-count, and audience/view
+sample values are gone from active app source.
+
+The current Neon data is intentionally low volume: 2 active players, 1 locked
+bracket, 0 host members, no champion distribution yet, and one real R32
+consensus pick. The UI uses that honestly: live counts render where data exists,
+and polished empty states appear where the data set is not mature enough yet.
+No points, ranks, standings, scores, or host leaderboard scoring were added.
+
+Evidence now lives in `tests/e2e/v0.3.2-stats-qa.md`, with screenshots under
+`tests/e2e/screenshots/v0.3.2/` for home, brackets, and sponsors in English and
+Arabic RTL.
+
+The cumulative build estimate is now roughly `~11.3M` total tokens and `~$104`
+estimated API-equivalent cost.

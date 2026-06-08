@@ -1,5 +1,24 @@
 # Open Questions
 
+## 2026-06-08 v0.3.2 Bracket Views Metric
+
+- Default chosen: replace the old hardcoded bracket-views sponsor tile
+  with `bracketsLocked`, because views are not tracked in Neon and v0.3.2 is
+  scoped to existing-table aggregates only.
+- Rationale: this avoids inventing analytics numbers while preserving a real
+  sponsor-facing engagement signal. Claude/Moe can later decide whether to
+  source actual view counts from PostHog.
+
+## 2026-06-08 v0.3.2 Public Bracket Scope
+
+- Context: the current `brackets` table has `locked` but no explicit
+  `public`/`private` flag.
+- Default chosen: community aggregates use locked brackets only, and the sample
+  comparison board exposes only brackets that have a public handle. The API
+  response never includes email, Auth0 IDs, addresses, or raw user IDs.
+- Rationale: this preserves the v0.3 handle-only privacy discipline without
+  introducing a schema migration before v0.4.
+
 ## 2026-06-08 v0.3 P0 Production Signup Diagnosis
 
 - Resolved in code: the public sign-in modal posts to

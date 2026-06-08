@@ -57,8 +57,9 @@
 .lb-name{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:15px} .lb-handle{font-size:12px;color:var(--mut)}
 .lb-champ{display:flex;align-items:center;gap:8px;font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:13px;color:var(--txt-2)}
 .lb-semis{display:flex;gap:4px}
-.lb-pts{display:flex;align-items:baseline;gap:4px;font-family:'Chakra Petch',sans-serif;color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
-.lb-pts b{font-family:'Doto',monospace;font-size:20px;color:var(--amber-ink)}
+.lb-status{justify-self:end;font-family:'Chakra Petch',sans-serif;font-weight:700;color:var(--lime-ink);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;border:1px solid rgba(201,255,61,.35);border-radius:999px;padding:5px 9px;background:rgba(201,255,61,.08)}
+.other-flag{display:grid;place-items:center;border-radius:50%;font-family:'Doto',monospace;font-weight:900;background:var(--panel-3);color:var(--mut)}
+.stats-empty,.community-empty{background:var(--panel-2);border:1px dashed var(--line-2);border-radius:14px}
 @media(max-width:760px){.lb-card{grid-template-columns:24px 36px 1fr auto;gap:10px}.lb-champ,.lb-semis,.lb-cmp{display:none}}
 
 .compare{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px;position:sticky;top:90px}

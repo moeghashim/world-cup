@@ -4,12 +4,11 @@ function reducedMotion(): boolean {
   return typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-/** count-up number that animates 0 → value when scrolled into view (ported from site.js countUp) */
-export function CountUp({ value, suffix = '', className }: { value: number; suffix?: string; className?: string }) {
+/** count-up number that animates 0 -> value when scrolled into view (ported from site.js countUp) */
+export function CountUp({ value, suffix = '', className, locale = 'en-US' }: { value: number; suffix?: string; className?: string; locale?: string }) {
   const ref = useRef<HTMLSpanElement>(null)
   // start at the final value when motion is reduced (no animation), otherwise 0
   const [display, setDisplay] = useState(() => (reducedMotion() || document.hidden ? value : 0))
-  const comma = value >= 1000
 
   useEffect(() => {
     if (reducedMotion() || document.hidden) return
@@ -44,7 +43,7 @@ export function CountUp({ value, suffix = '', className }: { value: number; suff
 
   return (
     <span ref={ref} className={className}>
-      {comma ? display.toLocaleString('en-US') : display}
+      {display.toLocaleString(locale)}
       {suffix}
     </span>
   )

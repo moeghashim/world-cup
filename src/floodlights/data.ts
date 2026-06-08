@@ -56,33 +56,12 @@ export const KO_ROUNDS = [16, 8, 4, 2, 1]            // R32, R16, QF, SF, Final
 export const KO_PTS = [10, 20, 40, 80, 160]
 export const MAX_KO_PICKS = 16 + 8 + 4 + 2 + 1       // 31
 
-/** crowd consensus (% backing the FIRST slot of each R32 match) */
-export const CROWD_R32 = [74, 63, 68, 57, 71, 49, 80, 77, 66, 72, 61, 58, 44, 52, 53, 47]
-
-/** most-picked champions (community sample) */
-export interface ChampPick { code: string; pct: number }
-export const CROWD_CHAMPION: ChampPick[] = [
-  { code: 'ARG', pct: 21 }, { code: 'BRA', pct: 18 }, { code: 'FRA', pct: 15 }, { code: 'ESP', pct: 12 },
-  { code: 'ENG', pct: 10 }, { code: 'POR', pct: 8 }, { code: 'GER', pct: 7 }, { code: 'NED', pct: 5 }, { code: 'Other', pct: 4 },
-]
-
-/** sample community brackets for compare */
-export interface CommunityBracket { name: string; ar: string; handle: string; pts: number; champ: string; semis: string[]; color: string }
-export const COMMUNITY: CommunityBracket[] = [
-  { name: 'Sofia R.', ar: 'صوفيا ر.', handle: '@sofiastrikes', pts: 560, champ: 'ARG', semis: ['ARG', 'BRA', 'ESP', 'ENG'], color: '#5C9CE6' },
-  { name: 'Diego M.', ar: 'دييغو م.', handle: '@diego10', pts: 535, champ: 'BRA', semis: ['BRA', 'FRA', 'ARG', 'POR'], color: '#F4D300' },
-  { name: 'Amara K.', ar: 'أمارة ك.', handle: '@amara_k', pts: 510, champ: 'FRA', semis: ['FRA', 'ENG', 'ESP', 'NED'], color: '#2A4BC6' },
-  { name: 'Liam O.', ar: 'ليام أو.', handle: '@coolhandliam', pts: 486, champ: 'ENG', semis: ['ENG', 'ARG', 'BRA', 'GER'], color: '#E8203A' },
-  { name: 'Yuki T.', ar: 'يوكي ت.', handle: '@yukit', pts: 454, champ: 'ESP', semis: ['ESP', 'POR', 'FRA', 'ARG'], color: '#D81E2C' },
-  { name: 'Noah B.', ar: 'نواه ب.', handle: '@noahb', pts: 441, champ: 'POR', semis: ['POR', 'NED', 'ENG', 'BRA'], color: '#0E8A5F' },
-]
-
 /** group-stage quick pick'em (landing teaser) */
-export interface Match { id: string; a: string; b: string; g: string; d: string; j: number; kickoffAt: string; venue: string; matchNumber: number; live?: boolean }
+export interface Match { id: string; a: string; b: string; g: string; d: string; kickoffAt: string; venue: string; matchNumber: number; live?: boolean }
 export const MATCHES: Match[] = [
-  { id: 'match-1', a: 'MEX', b: 'RSA', g: 'A', d: 'Jun 11', j: 317, kickoffAt: '2026-06-11T19:00:00.000Z', venue: 'Mexico City', matchNumber: 1, live: true },
-  { id: 'match-2', a: 'KOR', b: 'CZE', g: 'A', d: 'Jun 11', j: 317, kickoffAt: '2026-06-12T02:00:00.000Z', venue: 'Guadalajara (Zapopan)', matchNumber: 2 },
-  { id: 'match-7', a: 'CAN', b: 'BIH', g: 'B', d: 'Jun 12', j: 317, kickoffAt: '2026-06-12T19:00:00.000Z', venue: 'Toronto', matchNumber: 7 },
+  { id: 'match-1', a: 'MEX', b: 'RSA', g: 'A', d: 'Jun 11', kickoffAt: '2026-06-11T19:00:00.000Z', venue: 'Mexico City', matchNumber: 1, live: true },
+  { id: 'match-2', a: 'KOR', b: 'CZE', g: 'A', d: 'Jun 11', kickoffAt: '2026-06-12T02:00:00.000Z', venue: 'Guadalajara (Zapopan)', matchNumber: 2 },
+  { id: 'match-7', a: 'CAN', b: 'BIH', g: 'B', d: 'Jun 12', kickoffAt: '2026-06-12T19:00:00.000Z', venue: 'Toronto', matchNumber: 7 },
 ]
 
 /** sponsors (with generated logo marks + roles) */

@@ -18,6 +18,7 @@ const routes: Record<string, () => Promise<{ default: Handler }>> = {
   '/api/profile': () => import('../api/profile.js'),
   '/api/profile/handle': () => import('../api/profile/handle.js'),
   '/api/data/fixtures': () => import('../api/data/fixtures.js'),
+  '/api/data/community': () => import('../api/data/community.js'),
   '/api/hosts': () => import('../api/hosts/index.js'),
   '/api/hosts/join': () => import('../api/hosts/join.js'),
   '/api/picks/bracket': () => import('../api/picks/bracket.js'),

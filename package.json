@@ -17,6 +17,7 @@
     "test:v0.1": "tsx --test tests/v0.1-accounts-persistence.test.ts",
     "test:v0.2": "tsx --test tests/v0.2-real-tournament-data.test.ts",
     "test:v0.3": "tsx --test tests/v0.3-accounts-ux-hosts.test.ts",
+    "test:v0.3.2": "tsx --test tests/v0.3.2-real-stats.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {
