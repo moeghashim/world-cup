@@ -1574,3 +1574,27 @@ stay untouched so existing database history remains auditable.
 
 The cumulative build estimate is now roughly `~10.9M` total tokens and `~$100`
 estimated API-equivalent cost.
+
+### v0.3.1 - Mobile Header And Viewport QA
+
+The v0.3.1 pre-v0.4 cleanup starts by making the mobile bug executable. A new
+Playwright mobile harness runs the primary pages at 360px and 390px, checks that
+the document has no horizontal scroll, verifies the burger stays inside the
+viewport, opens the menu, checks all seven navigation links plus the mobile CTA,
+and confirms navigation closes the menu. The first run failed red across the
+shared header pages, with the homepage reporting a 534px document width on a
+360px viewport.
+
+The fix keeps desktop unchanged while making the mobile header fit for real: the
+standalone CTA leaves the compact tool row and appears inside the dropdown, the
+language picker becomes globe-only on mobile, the mobile logo footprint and gaps
+are tightened, and the burger is fully reachable. The homepage prize image and
+the `/brackets` champion/consensus panels also received mobile min-width rules
+so they do not create page-level overflow.
+
+Evidence now lives in `tests/e2e/v0.3.1-mobile-qa.md`, with before/after
+screenshots under `tests/e2e/screenshots/v0.3.1/` covering English and Arabic,
+dark and light themes, and closed/open menu states.
+
+The cumulative build estimate is now roughly `~11.1M` total tokens and `~$102`
+estimated API-equivalent cost.
