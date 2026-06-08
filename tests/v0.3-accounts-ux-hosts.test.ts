@@ -84,3 +84,36 @@ test('home prediction migration only accepts locked prediction payloads', () => 
     true,
   )
 })
+
+test('host public shape allows one handle across multiple hosts with placeholder points', () => {
+  const joinedAt = '2026-06-08T01:00:00.000Z'
+  const firstHost = shapeHostForPublicApi({
+    id: 'host-1',
+    name: 'Office Pool',
+    slug: 'office-pool',
+    code: 'AB12C3',
+    publicPath: '/h/office-pool',
+    joinPath: '/h/office-pool?join=AB12C3',
+    memberCount: 1,
+    mostPickedChampion: 'BRA',
+    matchConsensus: [],
+    members: [{ handle: 'moe2026', champion: 'BRA', points: 0, joinedAt }],
+  })
+  const secondHost = shapeHostForPublicApi({
+    id: 'host-2',
+    name: 'Watch Party',
+    slug: 'watch-party',
+    code: 'ZX98QW',
+    publicPath: '/h/watch-party',
+    joinPath: '/h/watch-party?join=ZX98QW',
+    memberCount: 1,
+    mostPickedChampion: 'BRA',
+    matchConsensus: [],
+    members: [{ handle: 'moe2026', champion: 'BRA', points: 0, joinedAt }],
+  })
+
+  assert.equal(firstHost.members[0].handle, secondHost.members[0].handle)
+  assert.equal(firstHost.members[0].points, 0)
+  assert.equal(secondHost.members[0].points, 0)
+  assert.notEqual(firstHost.slug, secondHost.slug)
+})

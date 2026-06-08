@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~10.3M` total tokens and `~$94` estimated API-equivalent cost in
+  `~10.4M` total tokens and `~$95` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -101,8 +101,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~10.3M` total tokens and
-`~$94` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~10.4M` total tokens and
+`~$95` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -442,6 +442,11 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   knockout bracket with the existing scrollable bracket preserved for narrower
   screens. Refreshed the documentation estimate to `~10.3M` total tokens and
   `~$94`.
+- Expanded the v0.3 test coverage with a pure multi-host membership default
+  check, fixed React lint findings in the host effect resume paths, verified the
+  production slash passwordless start route still returns `sent: true`, applied
+  the additive hosts schema to Neon, and refreshed the documentation estimate
+  to `~10.4M` total tokens and `~$95`.
 
 ### 2026-06-07
 

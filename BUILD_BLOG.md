@@ -1455,3 +1455,33 @@ npm run build
 
 The cumulative build estimate is now roughly `~10.3M` total tokens and `~$94`
 estimated API-equivalent cost.
+
+### Task 006 - Add v0.3 Tests And Verification
+
+The v0.3 unit test file now covers the remaining host default that can be tested
+without calling production services: the same public handle can appear in
+multiple host rooms, and points stay at the v0.4 placeholder value of `0` on
+each public host shape. While running lint, React flagged effect-triggered host
+resume calls because the helper functions set loading state before awaiting the
+API. Those effect calls now defer into microtasks, keeping the resume behavior
+while satisfying the hook lint rule.
+
+The production P0 route was also rechecked with the slash path
+`/api/auth/passwordless/start`; it returned `200` with `{"sent":true}`. The
+database schema runner applied all migrations through `004_hosts.sql`, so the
+Neon-backed hosts tables are present for host create/join QA.
+
+Verification ran:
+
+```bash
+npm run test:v0.1
+npm run test:v0.2
+npm run test:v0.3
+npm run lint
+npm run build
+npx vercel build
+npm run db:apply
+```
+
+The cumulative build estimate is now roughly `~10.4M` total tokens and `~$95`
+estimated API-equivalent cost.

@@ -85,13 +85,13 @@ export function HostPage() {
   }
 
   useEffect(() => {
-    void loadHost()
+    void Promise.resolve().then(() => loadHost())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug])
 
   useEffect(() => {
     if (!joinCode || joined || !host || !auth.authenticated || auth.needsHandle) return
-    void joinHost('link')
+    void Promise.resolve().then(() => joinHost('link'))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.authenticated, auth.needsHandle, host, joinCode, joined])
 

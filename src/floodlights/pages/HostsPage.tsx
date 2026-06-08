@@ -137,13 +137,13 @@ export function HostsPage() {
 
     const pendingCreate = load<string | null>(pendingCreateKey, null)
     if (pendingCreate) {
-      void createHost(pendingCreate)
+      void Promise.resolve().then(() => createHost(pendingCreate))
       return
     }
 
     const pendingJoin = load<string | null>(pendingJoinKey, null)
     if (pendingJoin) {
-      void joinHost(pendingJoin)
+      void Promise.resolve().then(() => joinHost(pendingJoin))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.authenticated, auth.needsHandle])
