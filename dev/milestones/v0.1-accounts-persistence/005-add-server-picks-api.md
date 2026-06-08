@@ -8,10 +8,10 @@ files: ["api/picks/bracket.ts", "api/picks/group.ts", "api/picks/predict.ts", "a
 ---
 
 ## Acceptance criteria
-- [ ] Authenticated users can save and load bracket state from Neon. (PRD S1: bracket persists to Neon and reloads after sign-in)
-- [ ] Authenticated users can save and load group picks from Neon. (PRD S1: group picks persist to Neon and reload after sign-in)
-- [ ] Authenticated users can save and load score predictions from Neon. (PRD S1: score predictions persist to Neon and reload after sign-in)
-- [ ] Writes fail until the user has a handle. (PRD S1: handle is required before first save)
+- [x] Authenticated users can save and load bracket state from Neon. (PRD S1: bracket persists to Neon and reloads after sign-in)
+- [x] Authenticated users can save and load group picks from Neon. (PRD S1: group picks persist to Neon and reload after sign-in)
+- [x] Authenticated users can save and load score predictions from Neon. (PRD S1: score predictions persist to Neon and reload after sign-in)
+- [x] Writes fail until the user has a handle. (PRD S1: handle is required before first save)
 
 ## Suggested approach
 Keep v0.1 compatible with the existing sample data and `BracketState` shape.

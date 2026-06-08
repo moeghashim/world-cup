@@ -782,3 +782,16 @@ Task 004 added the account profile API surface:
 
 The cumulative build estimate is now roughly `~7.1M` total tokens and `~$62`
 estimated API-equivalent cost.
+
+Task 005 added authenticated pick persistence:
+
+- `/api/picks/bracket` loads and saves the bracket JSON payload in Neon.
+- `/api/picks/group` loads and saves the group-stage pick'em card.
+- `/api/picks/predict` loads score predictions and upserts match-level score
+  picks.
+- writes use the WorkOS session plus local handle requirement, while read
+  responses stay scoped to pick data and do not include email or token/session
+  fields.
+
+The cumulative build estimate is now roughly `~7.2M` total tokens and `~$63`
+estimated API-equivalent cost.
