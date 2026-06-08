@@ -38,7 +38,7 @@ Current implementation baseline:
 - PostHog first-party `/ingest` proxy in `vite.config.ts` and `vercel.json`.
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
-- AI usage disclosure currently shows `~8.7M` total tokens and `~$78`
+- AI usage disclosure currently shows `~8.8M` total tokens and `~$79`
   estimated API-equivalent cost in `src/App.tsx` and the appended
   `BUILD_BLOG.md` reset note.
 - `BUILD_BLOG.md` remains append-only for the public build article.
@@ -87,8 +87,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~8.7M` total tokens and
-`~$78` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~8.8M` total tokens and
+`~$79` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -344,6 +344,12 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   `moe@babanuj.com` is delivered, switched Auth0 sign-in back to built-in email
   delivery, documented the remaining human-assisted code-entry QA step, and
   refreshed the documentation estimate to `~8.7M` total tokens and `~$78`.
+- Verified the first real Auth0 OTP session with `moe@babanuj.com`: accepted a
+  fresh human-supplied code, confirmed `/api/auth/passwordless/verify` sets an
+  authenticated app session, confirmed `/api/auth/me`, saved first handle
+  `moe2026`, verified authenticated group-pick, prediction, and bracket
+  save/reload paths, and refreshed the documentation estimate to `~8.8M` total
+  tokens and `~$79`.
 
 ### 2026-06-07
 
@@ -499,6 +505,12 @@ Browser verification covered:
   built-in delivery logs `Code/Link Sent` to `moe@babanuj.com` without a new
   `Failed Sending Notification`; AgentMail QA inbox polling did not receive the
   Auth0 built-in email in the test window
+- verifying the first real Auth0 OTP session: local
+  `/api/auth/passwordless/verify` accepted a human-supplied code for
+  `moe@babanuj.com`, returned an authenticated session and handle-setup
+  redirect, `/api/auth/me` read the signed session cookie, handle `moe2026` was
+  saved, and authenticated group-pick, prediction, and bracket data each
+  saved/reloaded successfully
 
 Latest screenshot:
 

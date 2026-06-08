@@ -1,7 +1,7 @@
 ---
 id: 012-add-auth0-passwordless-email-flow
 title: Add Auth0 email-code sign-in flow
-status: waiting-on-human-code-qa
+status: api-session-verified
 files: ["api/auth/passwordless-start.ts", "api/auth/passwordless-verify.ts", "api/_lib/auth0.ts", "src/floodlights/components/SignInGate.tsx", "src/floodlights/lib/AuthProvider.tsx", "tests/v0.1-accounts-persistence.test.ts"]
 ---
 
@@ -12,7 +12,7 @@ files: ["api/auth/passwordless-start.ts", "api/auth/passwordless-verify.ts", "ap
 - [x] Server route verifies the OTP through Auth0, maps the Auth0 subject to `users.auth0_user_id`, and sets the same signed httpOnly app session.
 - [x] Hosted Auth0 Universal Login remains available as a fallback.
 - [x] Tests cover successful passwordless start request shaping and the provider-not-ready failure branch.
-- [ ] Human-assisted QA verifies the live Auth0 code from `moe@babanuj.com` and completes an app session.
+- [x] Human-assisted QA verifies the live Auth0 code from `moe@babanuj.com` and completes an app session.
 
 ## Notes
 
@@ -30,5 +30,9 @@ verification-code-template From values are set to the AgentMail inbox. Direct
 AgentMail SMTP with the same inbox and API key sends successfully, and the user
 confirmed receiving the direct SMTP test.
 
-Remaining QA step: enter a fresh six-digit Auth0 code from `moe@babanuj.com`
-and verify that `/api/auth/passwordless/verify` sets the signed app session.
+Human-assisted OTP QA passed with a fresh code from `moe@babanuj.com`:
+`/api/auth/passwordless/verify` returned an authenticated session,
+`/api/auth/me` read the signed app session cookie, and the account entered the
+expected first-sign-in handle setup state. The follow-on authenticated API check
+set handle `moe2026` and verified group picks, one score prediction, and one
+bracket save/reload cycle for the mapped Auth0 user.

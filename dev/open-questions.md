@@ -11,10 +11,13 @@
 - Evidence: direct AgentMail SMTP using `world-cup-agent@agentmail.to` as the
   authenticated user and sender queued successfully to `moe@babanuj.com`, and
   the user confirmed receiving that direct SMTP test.
-- Remaining QA dependency: a fresh six-digit code from `moe@babanuj.com` is
-  needed to complete `/api/auth/passwordless/verify` in the real browser flow.
-  The AgentMail QA inbox did not receive Auth0 built-in delivery during polling,
-  so it is not reliable for this sign-off run.
+- Resolved: a fresh code from `moe@babanuj.com` completed
+  `/api/auth/passwordless/verify`, set the signed app session, and allowed
+  authenticated API persistence checks for handle, group picks, predictions,
+  and bracket data.
+- Remaining QA limitation: the AgentMail QA inbox did not receive Auth0 built-in
+  delivery during polling, so a browser-owned session from the email-code modal
+  still needs a human-assisted code if full visual E2E is required.
 
 ## 2026-06-08 Provider Swap
 

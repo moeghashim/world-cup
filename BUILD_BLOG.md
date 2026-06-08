@@ -1023,3 +1023,27 @@ Arabic RTL, and both themes.
 
 The cumulative build estimate is now roughly `~8.7M` total tokens and `~$78`
 estimated API-equivalent cost.
+
+## First Real Auth0 OTP Session
+
+The first human-assisted Auth0 email-code session passed. The user supplied a
+fresh six-digit code from `moe@babanuj.com`; the local passwordless verify route
+accepted it, returned an authenticated session, set the signed app cookie, and
+redirected to first-sign-in handle setup.
+
+The follow-on authenticated API check confirmed the account was mapped in Neon
+by Auth0 user id. Because the account had no existing picks, the QA run safely
+used it to verify the v0.1 persistence path:
+
+- handle setup saved `moe2026`
+- group picks saved and reloaded
+- one score prediction saved and reloaded
+- one locked bracket saved and reloaded
+
+This validates the server-side account and persistence contract. The remaining
+browser-specific QA still needs a fresh human-assisted code if we want the
+browser itself to own the session cookie from the email-code modal and complete
+authenticated visual checks in English, Arabic RTL, dark theme, and light theme.
+
+The cumulative build estimate is now roughly `~8.8M` total tokens and `~$79`
+estimated API-equivalent cost.
