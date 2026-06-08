@@ -8,6 +8,7 @@ type JsonRecord = Record<string, unknown>
 type HostMemberQueryRow = {
   handle: string | null
   bracket_data: unknown
+  points: string | number | null
   joined_at: string
 }
 
@@ -257,13 +258,15 @@ export async function loadPublicHost(slugInput: unknown): Promise<PublicHost> {
       select
         users.handle,
         brackets.data as bracket_data,
+        standings.points,
         host_members.joined_at
       from host_members
       join users on users.id = host_members.user_id
       left join brackets on brackets.user_id = users.id
+      left join standings on standings.user_id = users.id
       where host_members.host_id = $1
         and users.handle is not null
-      order by host_members.joined_at asc
+      order by coalesce(standings.points, 0) desc, host_members.joined_at asc
     `,
     [host.id],
   )) as HostMemberQueryRow[]
@@ -271,7 +274,7 @@ export async function loadPublicHost(slugInput: unknown): Promise<PublicHost> {
   const members = memberRows.map<HostLeaderboardMember>((row) => ({
     handle: row.handle ?? 'player',
     champion: championFromBracket(row.bracket_data),
-    points: 0,
+    points: Number(row.points ?? 0),
     joinedAt: row.joined_at,
   }))
 

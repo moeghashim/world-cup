@@ -11,6 +11,7 @@ import { ApiClientError, apiRequest } from '../lib/apiClient'
 import type { PublicHost } from '../lib/accountTypes'
 import { useToast } from '../lib/toastContext'
 import { useI18n } from '../i18n/context'
+import { useStandings } from '../lib/standings'
 import { captureAnalyticsEvent } from '../../analytics'
 
 function fullUrl(path: string): string {
@@ -24,6 +25,7 @@ export function HostPage() {
   const joinCode = searchParams.get('join') ?? ''
   const auth = useAuth()
   const { t, tname } = useI18n()
+  const standings = useStandings()
   const { toast } = useToast()
   const [host, setHost] = useState<PublicHost | null>(null)
   const [loading, setLoading] = useState(true)
@@ -167,6 +169,9 @@ export function HostPage() {
                   </div>
                 ) : (
                   <p className="host-empty">{t('hosts_empty')}</p>
+                )}
+                {standings.source.attribution && (
+                  <p className="host-empty attribution">{t('standings_attribution')}</p>
                 )}
               </div>
 

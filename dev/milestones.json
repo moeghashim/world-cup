@@ -82,6 +82,28 @@
         "003-add-v032-tests",
         "004-run-v032-qa-and-pr"
       ]
+    },
+    {
+      "id": "v0.4-live-results-scoring",
+      "status": "ready_for_review",
+      "tasks": [
+        "001-add-live-results-schema",
+        "002-add-provider-interface",
+        "003-add-cron-cache-routes",
+        "004-add-scoring-engine",
+        "005-surface-standings",
+        "006-add-v04-tests",
+        "007-run-v04-chrome-qa-and-pr"
+      ],
+      "completedTasks": [
+        "001-add-live-results-schema",
+        "002-add-provider-interface",
+        "003-add-cron-cache-routes",
+        "004-add-scoring-engine",
+        "005-surface-standings",
+        "006-add-v04-tests",
+        "007-run-v04-chrome-qa-and-pr"
+      ]
     }
   ]
 }

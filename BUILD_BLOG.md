@@ -1633,3 +1633,48 @@ Arabic RTL.
 
 The cumulative build estimate is now roughly `~11.3M` total tokens and `~$104`
 estimated API-equivalent cost.
+
+### v0.4 - Live Results And Scoring
+
+The v0.4 milestone adds the first real scoring layer. A new additive migration
+creates two cache tables: `results` for provider-ingested match scores and
+`standings` for computed user points. The live-results provider is pluggable:
+`football-data` is the default, and `api-football` can take over with
+`LIVE_RESULTS_PROVIDER=api-football` without changing the UI or scoring engine.
+
+All provider access stays server-side. Vercel Cron now has three protected
+routes: a daily fixture-cache refresh, result polling during active match
+windows, and an idempotent score job. Result polling also runs the scorer after
+new results are cached, while the standalone score route remains safe to rerun.
+
+The scorer applies only the locked v0.4 rules:
+
+- group-stage outcome picks get the flat 10-point value used by the Pick'em UI;
+- knockout advancement pays 10, 20, 40, 80, and 160 points from Round of 32 to
+  Final;
+- score predictions do not award points yet.
+
+The public host leaderboard now reads real standings points instead of the old
+`0` placeholder. The profile page shows the signed-in user's points and current
+public rank. When `football-data` is active, the app renders the required
+Football-Data.org attribution.
+
+Verification ran:
+
+- `npm run lint`
+- `npm run test:v0.1`
+- `npm run test:v0.2`
+- `npm run test:v0.3`
+- `npm run test:v0.3.2`
+- `npm run test:v0.4`
+- `npm run build`
+- `npm run db:apply`
+- `npx vercel build`
+
+Browser evidence lives in `tests/e2e/v0.4-chrome-qa.md`, with screenshots under
+`tests/e2e/screenshots/v0.4/` for host and profile points in English and Arabic.
+The QA pass spot-checked all five active languages and both themes with no
+console errors.
+
+The cumulative build estimate is now roughly `~11.8M` total tokens and `~$109`
+estimated API-equivalent cost.

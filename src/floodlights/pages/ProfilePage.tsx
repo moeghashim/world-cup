@@ -5,6 +5,8 @@ import { ApiClientError } from '../lib/apiClient'
 import { useAuth } from '../lib/authContext'
 import { useToast } from '../lib/toastContext'
 import { useI18n } from '../i18n/context'
+import { formatStatNumber } from '../lib/communityStats'
+import { useStandings } from '../lib/standings'
 import { SiteHeader } from '../components/SiteHeader'
 import { SiteFooter } from '../components/SiteFooter'
 import { SignInGate } from '../components/SignInGate'
@@ -15,9 +17,10 @@ function safeReturnTo(value: string | null): string {
 }
 
 export function ProfilePage() {
-  const { t } = useI18n()
+  const { lang, t } = useI18n()
   const { toast } = useToast()
   const auth = useAuth()
+  const standings = useStandings()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [handle, setHandleInput] = useState('')
@@ -99,6 +102,22 @@ export function ProfilePage() {
               >
                 {t('profile_signout')}
               </button>
+            </section>
+
+            <section className="profile-card profile-points-card">
+              <h2>{t('profile_points_h')}</h2>
+              <p className="profile-muted">{t('profile_points_p')}</p>
+              <div className="profile-points-value">
+                {formatStatNumber(lang, standings.me?.points ?? 0)}
+              </div>
+              <p className="profile-muted small">
+                {standings.me
+                  ? t('profile_points_rank', standings.me.rank)
+                  : t('profile_points_empty')}
+              </p>
+              {standings.source.attribution && (
+                <p className="profile-attribution">{t('standings_attribution')}</p>
+              )}
             </section>
 
             {setupMode && (
