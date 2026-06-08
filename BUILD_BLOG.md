@@ -770,3 +770,15 @@ Task 003 added the server-side WorkOS auth flow:
 
 The cumulative build estimate is now roughly `~7.0M` total tokens and `~$61`
 estimated API-equivalent cost.
+
+Task 004 added the account profile API surface:
+
+- `/api/auth/me` reports whether a sealed WorkOS session is authenticated and
+  whether the user still needs to choose a handle.
+- `/api/profile` returns only the current user's email, handle, and signup
+  country, never session or token material.
+- `/api/profile/handle` validates and stores the first public handle, rejecting
+  duplicates with a clear `handle_taken` response.
+
+The cumulative build estimate is now roughly `~7.1M` total tokens and `~$62`
+estimated API-equivalent cost.
