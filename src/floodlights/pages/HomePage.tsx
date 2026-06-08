@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/home.css'
 import { CROWD_CHAMPION, SPONSORS } from '../data'
@@ -13,7 +13,18 @@ import { SiteFooter } from '../components/SiteFooter'
 import { HashLink } from '../components/HashLink'
 import { Flag } from '../components/Flag'
 import { SponsorBand, SponsorCard, PresentingLogo, PrizeSponsor } from '../components/SponsorLogo'
+import { SignInGate } from '../components/SignInGate'
 import { formatKickoffUtc, getQuickPickMatches, useTournamentData } from '../lib/tournamentData'
+import { ApiClientError, apiRequest } from '../lib/apiClient'
+import { useAuth } from '../lib/authContext'
+import {
+  clearHomePrediction,
+  loadHomePrediction,
+  migrateAnonymousPicks,
+  saveHomePrediction,
+} from '../lib/accountMigration'
+import { captureAnalyticsEvent } from '../../analytics'
+import type { PredictionPayload } from '../lib/accountTypes'
 
 const SEP = '  ·  '
 const MINI_COLS: string[][] = [['ARG', 'FRA', 'ESP', 'BRA'], ['ARG', 'BRA'], ['ARG']]
@@ -21,27 +32,100 @@ const MINI_COLS: string[][] = [['ARG', 'FRA', 'ESP', 'BRA'], ['ARG', 'BRA'], ['A
 export function HomePage() {
   const { t, tname } = useI18n()
   const { toast } = useToast()
+  const auth = useAuth()
   useReveal()
 
   const tournamentData = useTournamentData()
   const quickMatches = getQuickPickMatches(tournamentData?.matches)
   const featuredMatch = quickMatches[0]
-  const [scores, setScores] = useState({ home: 0, away: 0 })
-  const [locked, setLocked] = useState(false)
+  const storedHomePrediction = loadHomePrediction()
+  const [scores, setScores] = useState(() =>
+    storedHomePrediction?.matchId === featuredMatch.id
+      ? {
+          home: storedHomePrediction.homeScore,
+          away: storedHomePrediction.awayScore,
+        }
+      : { home: 0, away: 0 },
+  )
+  const [locked, setLocked] = useState(
+    () => storedHomePrediction?.matchId === featuredMatch.id,
+  )
   const [qp, setQp] = useState<Record<string, string>>({})
+  const [gateOpen, setGateOpen] = useState(false)
+  const [savingPrediction, setSavingPrediction] = useState(false)
   const homeRef = useRef<HTMLDivElement>(null)
   const awayRef = useRef<HTMLDivElement>(null)
   const lockRef = useRef<HTMLButtonElement>(null)
+
+  const returnTo =
+    typeof window === 'undefined'
+      ? '/'
+      : `${window.location.pathname}${window.location.search}#predict`
 
   const step = (team: 'home' | 'away', dir: number) => {
     setScores((s) => ({ ...s, [team]: Math.max(0, Math.min(9, s[team] + dir)) }))
     pop(team === 'home' ? homeRef.current : awayRef.current)
   }
+  const sendToHandleSetup = () => {
+    toast(t('auth_handle_needed'), '✦')
+    window.location.assign(`/profile?setup=handle&returnTo=${encodeURIComponent(returnTo)}`)
+  }
+
+  const currentPrediction = (): PredictionPayload => ({
+    matchId: featuredMatch.id,
+    homeScore: scores.home,
+    awayScore: scores.away,
+    locked: true,
+  })
+
+  const persistPrediction = async (prediction: PredictionPayload) => {
+    setSavingPrediction(true)
+    try {
+      if (auth.user) {
+        await migrateAnonymousPicks(auth.user.id)
+      }
+      await apiRequest('/api/picks/predict', {
+        method: 'PUT',
+        body: prediction,
+      })
+      clearHomePrediction()
+      setLocked(true)
+      confetti(lockRef.current)
+      toast(t('toast_pred'), '🎟')
+      captureAnalyticsEvent('match_prediction_locked', {
+        match_id: prediction.matchId,
+        has_handle: true,
+      })
+    } catch (error) {
+      if (error instanceof ApiClientError && error.code === 'handle_required') {
+        sendToHandleSetup()
+      } else if (error instanceof ApiClientError && error.code === 'pick_locked') {
+        toast(t('toast_pick_locked'), '🔒')
+      } else {
+        toast(t('auth_save_failed'), '!')
+      }
+    } finally {
+      setSavingPrediction(false)
+    }
+  }
+
   const lock = () => {
     if (locked) return
-    setLocked(true)
-    confetti(lockRef.current)
-    toast(t('toast_pred'), '🎟')
+    const prediction = currentPrediction()
+    saveHomePrediction(prediction)
+
+    if (!auth.authenticated) {
+      captureAnalyticsEvent('lock_gate_opened', { surface: 'home_prediction' })
+      setGateOpen(true)
+      return
+    }
+
+    if (auth.needsHandle) {
+      sendToHandleSetup()
+      return
+    }
+
+    void persistPrediction(prediction)
   }
   const pickQp = (id: string, p: string, el: Element) => {
     setQp((s) => ({ ...s, [id]: p }))
@@ -52,6 +136,60 @@ export function HomePage() {
     scores.home === scores.away
       ? `${t('outcome_draw')} · ${scores.home}–${scores.away}`
       : `${tname(scores.home > scores.away ? featuredMatch.a : featuredMatch.b)} ${t('outcome_win')} · ${scores.home}–${scores.away}`
+
+  useEffect(() => {
+    if (!auth.authenticated || auth.needsHandle || !auth.user) return
+
+    let active = true
+
+    async function syncHomePrediction() {
+      const pending = loadHomePrediction()
+      try {
+        await migrateAnonymousPicks(auth.user!.id)
+        if (pending?.matchId === featuredMatch.id) {
+          await apiRequest('/api/picks/predict', {
+            method: 'PUT',
+            body: pending,
+          })
+          clearHomePrediction()
+          if (!active) return
+          setScores({ home: pending.homeScore, away: pending.awayScore })
+          setLocked(true)
+          toast(t('toast_pred'), '🎟')
+          captureAnalyticsEvent('match_prediction_locked', {
+            match_id: pending.matchId,
+            migrated_after_sign_in: true,
+          })
+          return
+        }
+
+        const response = await apiRequest<{ predictions: PredictionPayload[] }>(
+          '/api/picks/predict',
+        )
+        const savedPrediction = response.predictions.find(
+          (prediction) => prediction.matchId === featuredMatch.id,
+        )
+        if (!active || !savedPrediction) return
+        setScores({
+          home: savedPrediction.homeScore,
+          away: savedPrediction.awayScore,
+        })
+        setLocked(savedPrediction.locked)
+      } catch (error) {
+        if (error instanceof ApiClientError && error.code === 'pick_locked') {
+          toast(t('toast_pick_locked'), '🔒')
+        } else {
+          toast(t('auth_save_failed'), '!')
+        }
+      }
+    }
+
+    void syncHomePrediction()
+
+    return () => {
+      active = false
+    }
+  }, [auth.authenticated, auth.needsHandle, auth.user, featuredMatch.id, t, toast])
 
   return (
     <>
@@ -127,8 +265,8 @@ export function HomePage() {
                 </div>
               </div>
               <div className="outcome"><span>{t('board_call')}</span> <b>{outcome}</b></div>
-              <button className={`btn btn-lime lockb ${locked ? 'locked' : ''}`} onClick={lock} ref={lockRef}>
-                {locked ? t('lock_done') : t('lock_pred')}
+              <button className={`btn btn-lime lockb ${locked ? 'locked' : ''}`} onClick={lock} ref={lockRef} disabled={savingPrediction}>
+                {savingPrediction ? t('auth_saving') : locked ? t('lock_done') : t('lock_pred')}
               </button>
             </div>
           </div>
@@ -292,6 +430,12 @@ export function HomePage() {
           <Link to="/pickem" className="btn btn-lime btn-lg reveal">{t('hero_cta1')}</Link>
         </div>
       </section>
+
+      <SignInGate
+        open={gateOpen}
+        onClose={() => setGateOpen(false)}
+        returnTo={returnTo}
+      />
 
       <SiteFooter noteKey="footer_note">
         <Link to="/pickem">{t('nav_pickem')}</Link>

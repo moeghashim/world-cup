@@ -11,6 +11,7 @@ const {
   shapeHostForPublicApi,
   slugifyHostName,
 } = await import('../api/_lib/hosts.js')
+const accountMigration = await import('../src/floodlights/lib/accountMigration.js')
 
 test('host slugs and codes normalize to shareable public identifiers', () => {
   assert.equal(slugifyHostName('  Moe’s Match Cafe 2026! '), 'moes-match-cafe-2026')
@@ -60,4 +61,26 @@ test('public host response keeps member data handle-only', () => {
   assert.doesNotMatch(serialized, /address/i)
   assert.doesNotMatch(serialized, /auth0/i)
   assert.doesNotMatch(serialized, /user_id/i)
+})
+
+test('home prediction migration only accepts locked prediction payloads', () => {
+  assert.equal(accountMigration.hasPredictionForMigration(null), false)
+  assert.equal(
+    accountMigration.hasPredictionForMigration({
+      matchId: 'match-1',
+      homeScore: 1,
+      awayScore: 0,
+      locked: false,
+    }),
+    false,
+  )
+  assert.equal(
+    accountMigration.hasPredictionForMigration({
+      matchId: 'match-1',
+      homeScore: 1,
+      awayScore: 0,
+      locked: true,
+    }),
+    true,
+  )
 })

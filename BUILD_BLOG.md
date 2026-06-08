@@ -1382,3 +1382,27 @@ npm run build
 
 The cumulative build estimate is now roughly `~10.0M` total tokens and `~$91`
 estimated API-equivalent cost.
+
+### Task 003 - Gate Home Match Prediction Lock
+
+The homepage match board now follows the same account threshold as Pick'em:
+visitors can set a score anonymously, but clicking `Lock my prediction` stores
+that pending prediction locally and opens the Auth0 email-code gate. Once the
+user is authenticated and has a handle, the app runs the existing anonymous
+bracket/group-pick migration, persists the home match score through
+`/api/picks/predict`, and reloads saved account predictions on return visits.
+
+The account migration helpers now include a small typed home-prediction storage
+path and a validator for locked prediction payloads. The storage helper also has
+a `remove` utility so successfully persisted pending predictions do not keep
+replaying for later sessions.
+
+Verification ran:
+
+```bash
+npm run test:v0.3
+npm run build
+```
+
+The cumulative build estimate is now roughly `~10.1M` total tokens and `~$92`
+estimated API-equivalent cost.

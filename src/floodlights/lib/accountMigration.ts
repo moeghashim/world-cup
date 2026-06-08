@@ -2,10 +2,11 @@ import { captureAnalyticsEvent } from '../../analytics'
 import type {
   BracketPayload,
   GroupPicksPayload,
+  PredictionPayload,
 } from './accountTypes'
 import { apiRequest } from './apiClient'
 import { normalize } from './bracket'
-import { load, save } from './storage'
+import { load, remove, save } from './storage'
 
 type BracketResponse = {
   bracket: BracketPayload | null
@@ -19,6 +20,8 @@ export type AccountMigrationResult = {
   bracketMigrated: boolean
   groupPicksMigrated: boolean
 }
+
+const homePredictionKey = 'homeprediction'
 
 const markerPrefix = 'account_migrated:'
 
@@ -37,6 +40,31 @@ export function hasBracketPicksForMigration(bracket: BracketPayload): boolean {
 
 export function hasGroupPicksForMigration(groupPicks: GroupPicksPayload): boolean {
   return Object.keys(groupPicks.picks).length > 0 || groupPicks.locked
+}
+
+export function hasPredictionForMigration(
+  prediction: PredictionPayload | null,
+): prediction is PredictionPayload {
+  return Boolean(
+    prediction &&
+      prediction.locked &&
+      prediction.matchId &&
+      Number.isInteger(prediction.homeScore) &&
+      Number.isInteger(prediction.awayScore),
+  )
+}
+
+export function loadHomePrediction(): PredictionPayload | null {
+  const prediction = load<PredictionPayload | null>(homePredictionKey, null)
+  return hasPredictionForMigration(prediction) ? prediction : null
+}
+
+export function saveHomePrediction(prediction: PredictionPayload): void {
+  save(homePredictionKey, prediction)
+}
+
+export function clearHomePrediction(): void {
+  remove(homePredictionKey)
 }
 
 export async function migrateAnonymousPicks(

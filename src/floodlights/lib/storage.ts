@@ -15,3 +15,11 @@ export function save(key: string, value: unknown): void {
     /* storage unavailable — ignore */
   }
 }
+
+export function remove(key: string): void {
+  try {
+    localStorage.removeItem('fl:' + key)
+  } catch {
+    /* storage unavailable — ignore */
+  }
+}
