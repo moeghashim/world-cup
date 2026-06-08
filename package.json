@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "db:apply": "tsx scripts/apply-schema.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -32,6 +33,7 @@
     "globals": "^17.6.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
+    "tsx": "^4.22.4",
     "vite": "^8.0.12"
   }
 }
