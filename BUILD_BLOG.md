@@ -1485,3 +1485,27 @@ npm run db:apply
 
 The cumulative build estimate is now roughly `~10.4M` total tokens and `~$95`
 estimated API-equivalent cost.
+
+### Follow-up - Align Pick'em Sections
+
+Chrome QA caught a layout regression after the shared-width change: the Pick'em
+hero and header were centered at the new 1280px content width, but the `Group
+stage` section started at the far left. The cause was `.pk-sec{margin:30px 0}`,
+which overrode `.wrap-wide`'s horizontal `auto` margins whenever both classes
+were on the same element. The fix changes it to `margin:30px auto`, so group,
+wildcard, knockout, and quick-pick sections all stay centered with the same
+desktop width as the header and hero.
+
+Verification ran:
+
+```bash
+npm run test:v0.3
+npm run lint
+npm run build
+```
+
+Chrome measured the Pick'em nav, hero, and every `.wrap-wide.pk-sec` section at
+the same `left=320`, `right=1600`, and `width=1280` desktop alignment.
+
+The cumulative build estimate is now roughly `~10.5M` total tokens and `~$96`
+estimated API-equivalent cost.
