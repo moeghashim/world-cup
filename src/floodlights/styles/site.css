@@ -183,9 +183,16 @@ body>*{position:relative;z-index:1}
 .auth-gate-kicker{display:inline-flex;margin-bottom:12px;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan-ink)}
 .auth-gate-card h2{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:clamp(26px,5vw,38px);line-height:1;margin-bottom:10px}
 .auth-gate-card p{color:var(--txt-2);font-size:15px;line-height:1.55;margin-bottom:22px}
+.auth-code-form{display:grid;gap:10px;margin:18px 0}
+.auth-code-form label{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.auth-code-form input{width:100%;background:var(--inset);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:13px 14px;font:inherit}
+.auth-code-form input:focus{outline:2px solid rgba(52,231,255,.35);border-color:var(--cyan)}
+.auth-code-form input:disabled{opacity:.68}
+.auth-code-note{margin:2px 0 0!important;color:var(--lime-ink)!important;font-family:'Chakra Petch',sans-serif;font-size:13px!important}
+.auth-code-error{margin:2px 0 0!important;color:var(--amber-ink)!important;font-family:'Chakra Petch',sans-serif;font-size:13px!important}
 .auth-gate-actions{display:flex;gap:10px;flex-wrap:wrap}
 .auth-gate-actions .btn{flex:1;min-width:150px}
-html.ar .auth-gate-kicker{letter-spacing:0}
+html.ar .auth-gate-kicker,html.ar .auth-code-form label{letter-spacing:0}
 
 /* ---------------- profile ---------------- */
 .profile-page{padding:54px 28px 84px}

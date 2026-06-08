@@ -11,6 +11,10 @@ const routes: Record<string, () => Promise<{ default: Handler }>> = {
   '/api/auth/callback': () => import('../api/auth/callback.js'),
   '/api/auth/logout': () => import('../api/auth/logout.js'),
   '/api/auth/me': () => import('../api/auth/me.js'),
+  '/api/auth/passwordless/start': () =>
+    import('../api/auth/passwordless-start.js'),
+  '/api/auth/passwordless/verify': () =>
+    import('../api/auth/passwordless-verify.js'),
   '/api/profile': () => import('../api/profile.js'),
   '/api/profile/handle': () => import('../api/profile/handle.js'),
   '/api/picks/bracket': () => import('../api/picks/bracket.js'),

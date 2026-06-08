@@ -7,6 +7,7 @@ import { useToast } from '../lib/toastContext'
 import { useI18n } from '../i18n/context'
 import { SiteHeader } from '../components/SiteHeader'
 import { SiteFooter } from '../components/SiteFooter'
+import { SignInGate } from '../components/SignInGate'
 
 function safeReturnTo(value: string | null): string {
   if (!value || !value.startsWith('/') || value.startsWith('//')) return '/pickem'
@@ -20,6 +21,7 @@ export function ProfilePage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [handle, setHandleInput] = useState('')
+  const [signInOpen, setSignInOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const returnTo = safeReturnTo(searchParams.get('returnTo'))
   const setupMode = searchParams.get('setup') === 'handle' || auth.needsHandle
@@ -67,7 +69,7 @@ export function ProfilePage() {
             <button
               className="btn btn-lime"
               type="button"
-              onClick={() => auth.startSignIn(returnTo)}
+              onClick={() => setSignInOpen(true)}
             >
               {t('profile_signin')}
             </button>
@@ -131,6 +133,11 @@ export function ProfilePage() {
         <Link to="/brackets">{t('nav_brackets')}</Link>
         <Link to="/sponsors">{t('nav_sponsor')}</Link>
       </SiteFooter>
+      <SignInGate
+        open={signInOpen}
+        onClose={() => setSignInOpen(false)}
+        returnTo={returnTo}
+      />
     </>
   )
 }

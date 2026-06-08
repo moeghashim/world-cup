@@ -9,6 +9,13 @@ implementation uses Auth0 Universal Login, server-side code exchange, verified
 ID tokens, a signed httpOnly app session cookie, and `users.auth0_user_id` as the
 local account mapping.
 
+## 2026-06-08 Passwordless Update
+
+Task `012-add-auth0-passwordless-email-flow` adds a first-party email-code sign
+in path that calls Auth0 Passwordless Email. The code path is ready, but live
+email delivery is blocked until the Auth0 tenant has a Passwordless Email
+connection named `email` enabled for the World Cup application.
+
 ## Definition of Done
 
 v0.1 is done when Floodlights preserves anonymous play until a lock gate, then
@@ -17,7 +24,8 @@ the player's bracket, group picks, and score predictions server-side.
 
 Derived from PLAN §10 and PRD S1 after the 2026-06-07 provider reconciliation:
 
-- Auth0 starts the hosted Universal Login flow.
+- Auth0 starts the email-code flow in the website design. Hosted Universal Login
+  remains as a server route fallback, not as the normal public UI.
 - The callback maps the Auth0 user to a local `users` row by `auth0_user_id`.
 - No custom `magic_link_tokens` or `sessions` tables/endpoints are created.
 - Refreshing the app keeps the user authenticated through the signed httpOnly

@@ -16,6 +16,8 @@ export type ApiResponse = {
 
 export type ApiErrorCode =
   | 'bad_request'
+  | 'auth_provider_not_ready'
+  | 'invalid_code'
   | 'method_not_allowed'
   | 'not_authenticated'
   | 'handle_required'

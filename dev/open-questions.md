@@ -16,6 +16,19 @@
 
 No open questions after the 2026-06-07 provider reconciliation.
 
+## 2026-06-08 Auth0 Passwordless Email Connection
+
+- Open provider step: Auth0 Passwordless Email connection `email` must be
+  created/enabled in the Auth0 tenant and enabled for the World Cup application.
+- Evidence: Auth0 Universal Login still renders the username/password database
+  form, adding `connection=email` does not change that screen, and direct
+  `POST /passwordless/start` returned `bad.connection` with
+  `Connection does not exist`.
+- Projects.dev limitation: `stripe projects catalog auth0 --json` exposes only
+  Auth0 plans and the `client` deployable, not connection management. The web
+  app's Auth0 client also cannot request the Management API token because Auth0
+  requires a client grant for `https://worldcup2026.us.auth0.com/api/v2/`.
+
 Resolved decisions for v0.1:
 
 - Env names come from Stripe Projects via `stripe projects env --pull`.

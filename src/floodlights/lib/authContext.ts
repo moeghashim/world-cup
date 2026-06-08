@@ -6,9 +6,15 @@ export interface AuthValue {
   loading: boolean
   needsHandle: boolean
   user: AccountUser | null
+  requestEmailCode: (email: string) => Promise<void>
   refreshSession: () => Promise<SessionPayload>
   setHandle: (handle: string) => Promise<SessionPayload>
   startSignIn: (returnTo?: string) => void
+  verifyEmailCode: (
+    email: string,
+    code: string,
+    returnTo?: string,
+  ) => Promise<{ redirectTo: string; session: SessionPayload }>
   signOut: (returnTo?: string) => Promise<void>
 }
 
@@ -19,4 +25,3 @@ export function useAuth(): AuthValue {
   if (!value) throw new Error('useAuth must be used within <AuthProvider>')
   return value
 }
-

@@ -14,7 +14,8 @@
         "008-add-profile-page",
         "009-wire-sentry-monitoring",
         "010-add-v01-tests-and-qa",
-        "011-replace-workos-with-auth0"
+        "011-replace-workos-with-auth0",
+        "012-add-auth0-passwordless-email-flow"
       ]
     }
   ]

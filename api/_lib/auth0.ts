@@ -10,6 +10,11 @@ type Auth0TokenResponse = {
   id_token?: unknown
 }
 
+type Auth0ErrorResponse = {
+  error?: unknown
+  error_description?: unknown
+}
+
 export type Auth0Profile = {
   id: string
   email: string
@@ -18,6 +23,17 @@ export type Auth0Profile = {
 type VerifiedAuth0Claims = {
   id: string
   email: string | null
+}
+
+export class Auth0PasswordlessError extends Error {
+  status: number
+  code: string
+
+  constructor(status: number, code: string, message: string) {
+    super(message)
+    this.status = status
+    this.code = code
+  }
 }
 
 export type AppSessionClaims = {
@@ -73,6 +89,28 @@ function readString(value: unknown): string | null {
   return typeof value === 'string' && value ? value : null
 }
 
+async function readAuth0ErrorResponse(
+  response: Response,
+): Promise<Auth0ErrorResponse | null> {
+  try {
+    return (await response.json()) as Auth0ErrorResponse
+  } catch {
+    return null
+  }
+}
+
+async function parseAuth0Error(
+  response: Response,
+): Promise<Auth0PasswordlessError> {
+  const parsed = await readAuth0ErrorResponse(response)
+
+  const code = readString(parsed?.error) ?? 'auth0_error'
+  const description =
+    readString(parsed?.error_description) ??
+    'Auth0 passwordless request failed.'
+  return new Auth0PasswordlessError(response.status, code, description)
+}
+
 export function getAuth0AuthorizationUrl({
   redirectUri,
   state,
@@ -108,6 +146,70 @@ async function fetchUserInfo(accessToken: string): Promise<Auth0Profile | null> 
   const id = readString(userInfo.sub)
   const email = readString(userInfo.email)
   return id && email ? { id, email } : null
+}
+
+export async function startAuth0PasswordlessEmail(email: string): Promise<void> {
+  const response = await fetch(new URL('passwordless/start', getAuth0Issuer()), {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      client_id: getAuth0ClientId(),
+      client_secret: getAuth0ClientSecret(),
+      connection: 'email',
+      email,
+      send: 'code',
+      authParams: {
+        scope: 'openid profile email',
+      },
+    }),
+  })
+
+  if (!response.ok) {
+    throw await parseAuth0Error(response)
+  }
+}
+
+export async function exchangeAuth0PasswordlessCode({
+  email,
+  otp,
+}: {
+  email: string
+  otp: string
+}): Promise<Auth0Profile> {
+  const body = new URLSearchParams({
+    grant_type: 'http://auth0.com/oauth/grant-type/passwordless/otp',
+    client_id: getAuth0ClientId(),
+    client_secret: getAuth0ClientSecret(),
+    username: email,
+    otp,
+    realm: 'email',
+    scope: 'openid profile email',
+  })
+
+  const response = await fetch(new URL('oauth/token', getAuth0Issuer()), {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+    },
+    body,
+  })
+
+  if (!response.ok) {
+    throw await parseAuth0Error(response)
+  }
+
+  const tokenResponse = (await response.json()) as Auth0TokenResponse
+  const idToken = readString(tokenResponse.id_token)
+  if (!idToken) {
+    throw new Error('Auth0 did not return an ID token.')
+  }
+
+  const claims = await verifyAuth0IdTokenClaims(idToken)
+  if (claims.email) return { id: claims.id, email: claims.email }
+
+  throw new Error('Auth0 did not return a verified email profile.')
 }
 
 export async function exchangeAuth0Code({

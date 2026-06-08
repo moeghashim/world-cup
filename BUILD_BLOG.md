@@ -930,3 +930,63 @@ profile verification remain the next QA step.
 
 The cumulative build estimate is now roughly `~8.2M` total tokens and `~$73`
 estimated API-equivalent cost.
+
+## Auth0 Email-Code Sign-In Follow-Up
+
+The hosted Auth0 page still asked for a password when tested with
+`moe@babanuj.com`, so the app now has a first-party email-code sign-in path on
+top of Auth0 Passwordless Email.
+
+What changed:
+
+- `/api/auth/passwordless/start` validates the email server-side and asks Auth0
+  to send a one-time code with `connection: "email"` and `send: "code"`.
+- `/api/auth/passwordless/verify` exchanges the code through Auth0, verifies the
+  ID token, maps the Auth0 subject to `users.auth0_user_id`, and sets the same
+  signed httpOnly `wwc_session` cookie used by the hosted callback flow.
+- The lock gate and signed-out profile page now show an inline email-code form
+  instead of sending the player directly to a password form.
+- Hosted Auth0 Universal Login remains available as a server route fallback, but
+  it is no longer exposed as a public button in the normal sign-in modal.
+- The dev API shim routes the new passwordless endpoints locally, and the v0.1
+  test suite covers both a successful Auth0 request shape and the current
+  missing-provider-connection failure.
+
+The provider blocker is now precise: Auth0 returned `bad.connection` /
+`Connection does not exist` from `POST /passwordless/start`, and adding
+`connection=email` to Universal Login still rendered the username/password
+database form. Projects.dev exposes the Auth0 `client` deployable but not Auth0
+connection management, and the web app client cannot get a Management API token
+without an Auth0 client grant. The remaining provider step is to create/enable
+the Passwordless Email connection named `email` in Auth0 and enable it for the
+World Cup application.
+
+Verification:
+
+- `npm run test:v0.1`
+- `npm run lint`
+- `npm run build`
+- local `POST /api/auth/passwordless/start` with `moe@babanuj.com`, returning
+  `auth_provider_not_ready` while the Auth0 email connection is missing
+- Auth0 Dashboard fallback opened through `stripe projects open auth0`, which
+  reached an Auth0 Dashboard login screen for `moe@10claws.com`
+- in-app browser check that `/profile` opens the email-code modal with no
+  password field
+
+The cumulative build estimate is now roughly `~8.4M` total tokens and `~$75`
+estimated API-equivalent cost.
+
+## Same-Design Sign-In Adjustment
+
+After testing the hosted Auth0 path, the product direction is clearer: players
+should not leave the Floodlights visual system just to sign in. The public
+sign-in modal now keeps the same website design and only shows the email-code
+form plus the cancel/change-email controls. The hosted Auth0 route still exists
+for fallback/debug use, but the normal player UI no longer offers a button that
+switches into the Auth0-branded screen.
+
+Verification confirmed that `/profile` opens the Floodlights email-code modal
+with `Send email code`, no password field, and no hosted Auth0 button.
+
+The cumulative build estimate is now roughly `~8.5M` total tokens and `~$76`
+estimated API-equivalent cost.

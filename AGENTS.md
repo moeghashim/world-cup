@@ -38,7 +38,7 @@ Current implementation baseline:
 - PostHog first-party `/ingest` proxy in `vite.config.ts` and `vercel.json`.
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
-- AI usage disclosure currently shows `~8.2M` total tokens and `~$73`
+- AI usage disclosure currently shows `~8.5M` total tokens and `~$76`
   estimated API-equivalent cost in `src/App.tsx` and the appended
   `BUILD_BLOG.md` reset note.
 - `BUILD_BLOG.md` remains append-only for the public build article.
@@ -87,8 +87,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~8.2M` total tokens and
-`~$73` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~8.5M` total tokens and
+`~$76` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -112,6 +112,8 @@ docs (`BUILD_BLOG.md`) rather than in the UI: currently `~8.2M` total tokens and
 - Google Analytics gtag for page-view tracking, with the static homepage snippet using `G-RFPJRPKYQR` and `VITE_GA_MEASUREMENT_ID` reserved for the runtime fallback path.
 - `posthog-js` for env-gated product analytics through the first-party `/ingest` proxy.
 - Auth0 by Okta for account identity through Projects.dev resource `auth0`.
+- Auth0 Passwordless Email API routes for email-code sign-in, blocked on the
+  Auth0 tenant connection named `email` being enabled.
 - `jose` for Auth0 ID-token verification in Vercel serverless callbacks.
 - Optimized raster stadium hero loaded from `src/assets/world-cup-hero.jpg`.
 
@@ -325,6 +327,15 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 ### 2026-06-08
 
 - Replaced WorkOS with Auth0 by Okta for the v0.1 account flow: provisioned Projects.dev resource `auth0`, detached the old WorkOS `auth` resource from the default environment, added Auth0 Authorization Code Flow handlers, verified ID tokens with `jose`, mapped local users by `auth0_user_id`, added a signed httpOnly app session, fixed Auth0 callback/logout/web-origin config through Projects.dev, added Auth0 env vars to Vercel Development/Preview/Production, removed WorkOS env vars from Vercel, and refreshed the documentation estimate to `~8.2M` total tokens and `~$73`.
+- Added first-party Auth0 email-code sign-in: `/api/auth/passwordless/start`,
+  `/api/auth/passwordless/verify`, inline lock-gate/profile email-code UI,
+  localized copy, dev API shim routes, tests for passwordless start and the
+  current missing Auth0 email connection, documented the provider blocker, and
+  refreshed the documentation estimate to `~8.4M` total tokens and `~$75`.
+- Removed the visible hosted Auth0 fallback from the public sign-in modal so the
+  player-facing account flow keeps the Floodlights website design and no longer
+  switches into the Auth0-branded screen from the normal UI. Refreshed the
+  documentation estimate to `~8.5M` total tokens and `~$76`.
 
 ### 2026-06-07
 
@@ -463,6 +474,16 @@ Browser verification covered:
 - verifying the light theme flips the whole site to the high-contrast light palette and stays legible
 - verifying Arabic switches to RTL with Zain/Alexandria fonts and localized team names while LED/Doto numbers stay left-to-right
 - verifying Auth0 provider swap with `npm run lint`, `npm run test:v0.1`, `npm run build`, `npm run db:apply`, `npx vercel build`, local `/api/auth/start` 302 redirect, Auth0 `/authorize` -> `/u/login`, Vercel env list showing Auth0 env vars and no WorkOS env vars, and in-app browser smoke check from `/pickem` lock gate to Auth0 Universal Login
+- verifying Auth0 passwordless follow-up with `npm run test:v0.1`, `npm run
+  lint`, `npm run build`, a direct local
+  `POST /api/auth/passwordless/start` using `moe@babanuj.com` returning
+  `auth_provider_not_ready`, Auth0 Authentication API returning
+  `bad.connection`, Projects.dev Auth0 catalog showing only `client` as the
+  deployable resource, and the in-app browser rendering the email-code modal
+  without a password field
+- verifying the same-design sign-in adjustment in the in-app browser: `/profile`
+  opens the Floodlights email-code modal with `Send email code`, no `Password`
+  field, and no `Use hosted Auth0` button
 
 Latest screenshot:
 

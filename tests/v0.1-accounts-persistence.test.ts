@@ -32,6 +32,9 @@ const {
   hasGroupPicksForMigration,
 } = await import('../src/floodlights/lib/accountMigration.js')
 const { default: startHandler } = await import('../api/auth/start.js')
+const { default: passwordlessStartHandler } = await import(
+  '../api/auth/passwordless-start.js'
+)
 const { default: bracketHandler } = await import('../api/picks/bracket.js')
 
 type CapturedResponse = {
@@ -117,6 +120,67 @@ test('auth start redirects to Auth0 and binds a nonce cookie', () => {
   const cookie = String(response.captured.headers['set-cookie'])
   assert.match(cookie, /wwc_auth_state=/)
   assert.match(cookie, /HttpOnly/)
+})
+
+test('passwordless start asks Auth0 to send an email code', async () => {
+  const originalFetch = globalThis.fetch
+  let capturedUrl = ''
+  let capturedBody: Record<string, unknown> = {}
+  globalThis.fetch = (async (input, init) => {
+    capturedUrl = String(input)
+    capturedBody = JSON.parse(String(init?.body)) as Record<string, unknown>
+    return new Response(JSON.stringify({ sent: true }), { status: 200 })
+  }) as typeof fetch
+
+  try {
+    const response = createResponse()
+    await passwordlessStartHandler(
+      request({
+        method: 'POST',
+        body: { email: ' Moe@Babanuj.com ' },
+      }),
+      response,
+    )
+
+    assert.equal(response.captured.statusCode, 200)
+    assert.equal(capturedUrl, 'https://worldcup2026.us.auth0.com/passwordless/start')
+    assert.equal(capturedBody.connection, 'email')
+    assert.equal(capturedBody.email, 'moe@babanuj.com')
+    assert.equal(capturedBody.send, 'code')
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('passwordless start reports missing Auth0 email connection cleanly', async () => {
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async () =>
+    new Response(
+      JSON.stringify({
+        error: 'bad.connection',
+        error_description: 'Connection does not exist',
+      }),
+      { status: 400 },
+    )) as typeof fetch
+
+  try {
+    const response = createResponse()
+    await passwordlessStartHandler(
+      request({
+        method: 'POST',
+        body: { email: 'moe@babanuj.com' },
+      }),
+      response,
+    )
+
+    const serialized = JSON.stringify(response.captured.body)
+    assert.equal(response.captured.statusCode, 503)
+    assert.match(serialized, /auth_provider_not_ready/)
+    assert.doesNotMatch(serialized, /moe@babanuj.com/)
+    assert.doesNotMatch(serialized, /Connection does not exist/)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
 })
 
 test('session cookies are httpOnly and secure only off localhost', () => {
