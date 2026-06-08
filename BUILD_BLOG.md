@@ -1559,3 +1559,18 @@ trailing hyphens.
 
 The cumulative build estimate is now roughly `~10.8M` total tokens and `~$99`
 estimated API-equivalent cost.
+
+### Follow-up - Drop WorkOS User Id
+
+The Auth0 provider swap left one compatibility field behind: the nullable
+`users.workos_user_id` column from the earlier WorkOS pass. Nothing in the app
+reads or writes that field now that account identity is keyed by
+`auth0_user_id`, so the cleanup is intentionally schema-only and type-only.
+
+A forward migration now drops `workos_user_id` with `if exists`, `db/schema.sql`
+includes that migration after the hosts migration, and `db/types.ts` no longer
+exposes the stale `UserRow.workos_user_id` field. Historical applied migrations
+stay untouched so existing database history remains auditable.
+
+The cumulative build estimate is now roughly `~10.9M` total tokens and `~$100`
+estimated API-equivalent cost.

@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~10.8M` total tokens and `~$99` estimated API-equivalent cost in
+  `~10.9M` total tokens and `~$100` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -101,8 +101,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~10.8M` total tokens and
-`~$99` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~10.9M` total tokens and
+`~$100` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -456,6 +456,10 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   one- and two-character slugs are reachable at `/h/:slug`, adding the short
   slug round-trip test, and refreshing the documentation estimate to `~10.8M`
   total tokens and `~$99`.
+- Dropped the dead nullable `workos_user_id` account column with a forward
+  migration, removed the stale `UserRow` field, kept historical applied
+  migrations untouched, and refreshed the documentation estimate to `~10.9M`
+  total tokens and `~$100`.
 
 ### 2026-06-07
 
