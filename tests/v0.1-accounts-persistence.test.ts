@@ -35,6 +35,9 @@ const { default: startHandler } = await import('../api/auth/start.js')
 const { default: passwordlessStartHandler } = await import(
   '../api/auth/passwordless-start.js'
 )
+const { default: nestedPasswordlessStartHandler } = await import(
+  '../api/auth/passwordless/start.js'
+)
 const { default: bracketHandler } = await import('../api/picks/bracket.js')
 
 type CapturedResponse = {
@@ -178,6 +181,91 @@ test('passwordless start reports missing Auth0 email connection cleanly', async 
     assert.match(serialized, /auth_provider_not_ready/)
     assert.doesNotMatch(serialized, /moe@babanuj.com/)
     assert.doesNotMatch(serialized, /Connection does not exist/)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('nested passwordless start route matches the frontend path', async () => {
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async () =>
+    new Response(JSON.stringify({ sent: true }), { status: 200 })) as typeof fetch
+
+  try {
+    const response = createResponse()
+    await nestedPasswordlessStartHandler(
+      request({
+        method: 'POST',
+        body: { email: 'moe@babanuj.com' },
+      }),
+      response,
+    )
+
+    assert.equal(response.captured.statusCode, 200)
+    assert.deepEqual(response.captured.body, { sent: true })
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('passwordless start reports Auth0 delivery failures without leaking details', async () => {
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async () =>
+    new Response(
+      JSON.stringify({
+        error: 'auth0_error',
+        error_description:
+          'Failed Sending Notification: 550 5.1.8 Sender address rejected for moe@babanuj.com',
+      }),
+      { status: 500 },
+    )) as typeof fetch
+
+  try {
+    const response = createResponse()
+    await passwordlessStartHandler(
+      request({
+        method: 'POST',
+        body: { email: 'moe@babanuj.com' },
+      }),
+      response,
+    )
+
+    const serialized = JSON.stringify(response.captured.body)
+    assert.equal(response.captured.statusCode, 502)
+    assert.match(serialized, /auth_email_delivery_failed/)
+    assert.doesNotMatch(serialized, /moe@babanuj.com/)
+    assert.doesNotMatch(serialized, /550 5\.1\.8/)
+    assert.doesNotMatch(serialized, /Sender address rejected/)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('passwordless start reports Auth0 rate limits clearly', async () => {
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async () =>
+    new Response(
+      JSON.stringify({
+        error: 'too_many_attempts',
+        error_description: 'Too many attempts.',
+      }),
+      { status: 429 },
+    )) as typeof fetch
+
+  try {
+    const response = createResponse()
+    await passwordlessStartHandler(
+      request({
+        method: 'POST',
+        body: { email: 'moe@babanuj.com' },
+      }),
+      response,
+    )
+
+    const serialized = JSON.stringify(response.captured.body)
+    assert.equal(response.captured.statusCode, 429)
+    assert.match(serialized, /auth_rate_limited/)
+    assert.doesNotMatch(serialized, /moe@babanuj.com/)
   } finally {
     globalThis.fetch = originalFetch
   }

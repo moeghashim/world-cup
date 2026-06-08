@@ -31,6 +31,13 @@
         "007-add-v02-tests",
         "008-run-v02-e2e-qa"
       ]
+    },
+    {
+      "id": "v0.3-accounts-ux-hosts",
+      "status": "planned",
+      "tasks": [
+        "001-fix-production-passwordless-signup-route"
+      ]
     }
   ]
 }

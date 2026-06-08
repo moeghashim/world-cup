@@ -66,6 +66,17 @@ export function SignInGate({
         setError(t('auth_gate_not_ready'))
       } else if (
         caught instanceof ApiClientError &&
+        caught.code === 'auth_rate_limited'
+      ) {
+        setError(t('auth_gate_rate_limited'))
+      } else if (
+        caught instanceof ApiClientError &&
+        (caught.code === 'auth_email_delivery_failed' ||
+          caught.code === 'auth_provider_error')
+      ) {
+        setError(t('auth_gate_delivery_error'))
+      } else if (
+        caught instanceof ApiClientError &&
         caught.code === 'invalid_code'
       ) {
         setError(t('auth_gate_code_error'))

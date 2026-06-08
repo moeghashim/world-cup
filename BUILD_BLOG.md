@@ -1318,3 +1318,42 @@ npm run build
 
 The cumulative build estimate is now roughly `~9.8M` total tokens and `~$89`
 estimated API-equivalent cost.
+
+## v0.3 P0: Production Passwordless Signup Route
+
+Before starting the rest of v0.3, I investigated the production signup failure
+as an expedited unblocker. The diagnostic split was useful:
+
+- `POST https://winworldcup2026.com/api/auth/passwordless/start` returned `405`.
+- `POST https://winworldcup2026.com/api/auth/passwordless-start` returned
+  `200 {"sent":true}`.
+- `/api/health` and `/api/data/fixtures` both returned live JSON, so production
+  API functions were working in general.
+- `vercel inspect winworldcup2026.com` showed deployed functions for
+  `api/auth/passwordless-start` and `api/auth/passwordless-verify`, but not the
+  slash-style paths the frontend actually calls.
+
+The P0 fix adds Vercel functions at `/api/auth/passwordless/start` and
+`/api/auth/passwordless/verify` while leaving the hyphenated routes in place for
+compatibility. The API now also maps Auth0 start failures into clearer codes:
+provider not ready, rate-limited, email delivery failing, or generic provider
+failure. Start-call failures are captured in Sentry through a sanitized
+diagnostic error that does not include the submitted email or raw Auth0 delivery
+description.
+
+Verification ran:
+
+```bash
+npm run test:v0.1
+npm run lint
+npm run build
+npx vercel build
+```
+
+The Vercel build output includes
+`.vercel/output/functions/api/auth/passwordless/start.func` and
+`.vercel/output/functions/api/auth/passwordless/verify.func`, which is the
+deploy-shape proof for the production route mismatch.
+
+The cumulative build estimate is now roughly `~9.9M` total tokens and `~$90`
+estimated API-equivalent cost.

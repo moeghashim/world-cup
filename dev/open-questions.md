@@ -1,5 +1,27 @@
 # Open Questions
 
+## 2026-06-08 v0.3 P0 Production Signup Diagnosis
+
+- Resolved in code: the public sign-in modal posts to
+  `/api/auth/passwordless/start`, but the production deployment only had the
+  hyphenated Vercel function `api/auth/passwordless-start`. Production returned
+  `405` for the slash route while `POST /api/auth/passwordless-start` returned
+  `200 {"sent":true}`.
+- Vercel Production env vars for `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`,
+  `AUTH0_CLIENT_SECRET`, `AUTH0_COOKIE_SECRET`, and `SENTRY_DSN` are present.
+- Stripe Projects shows Auth0 app type `regular_web`, production callback
+  `https://winworldcup2026.com/api/auth/callback`, production logout URL
+  `https://winworldcup2026.com/`, and production web origin
+  `https://winworldcup2026.com`.
+- Added slash-style compatibility functions for
+  `/api/auth/passwordless/start` and `/api/auth/passwordless/verify`, while
+  keeping the old hyphenated functions available.
+- If a post-merge production attempt returns `sent: true` but the email does not
+  arrive, inspect Auth0 Dashboard -> Monitoring -> Logs for that timestamp. Look
+  specifically for `Failed Sending Notification` / `550 5.1.8 Sender address
+  rejected`. If present, keep Auth0 custom SMTP disabled for sign-in and use
+  Auth0 built-in delivery until AgentMail/Auth0 sender acceptance is resolved.
+
 ## 2026-06-08 v0.2 QA Time Override
 
 - Default chosen: server pick-lock helpers accept `x-worldcup-now` only outside
