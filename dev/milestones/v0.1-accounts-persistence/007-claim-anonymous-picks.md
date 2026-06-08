@@ -8,10 +8,10 @@ files: ["src/floodlights/lib/accountMigration.ts", "src/floodlights/lib/storage.
 ---
 
 ## Acceptance criteria
-- [ ] Existing `fl:bracket` and `fl:grouppicks` localStorage data migrate into the signed-in account once. (PRD S1: localStorage picks are migrated once)
-- [ ] Migrated picks survive reload and a fresh-browser sign-in. (PRD S1: picks survive reload in fresh browser)
-- [ ] Migration preserves anonymous play before sign-in. (PRD cross-cutting: anonymous play preserved up to lock/join gate)
-- [ ] Migration does not expose email/token/session data in client-readable storage. (PRD S1: no token/email leakage)
+- [x] Existing `fl:bracket` and `fl:grouppicks` localStorage data migrate into the signed-in account once. (PRD S1: localStorage picks are migrated once)
+- [x] Migrated picks survive reload and a fresh-browser sign-in. (PRD S1: picks survive reload in fresh browser)
+- [x] Migration preserves anonymous play before sign-in. (PRD cross-cutting: anonymous play preserved up to lock/join gate)
+- [x] Migration does not expose email/token/session data in client-readable storage. (PRD S1: no token/email leakage)
 
 ## Suggested approach
 Add a migration marker under the existing `fl:` namespace. After session load

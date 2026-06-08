@@ -811,3 +811,18 @@ Task 006 connected the account flow to the Floodlights UI:
 
 The cumulative build estimate is now roughly `~7.3M` total tokens and `~$64`
 estimated API-equivalent cost.
+
+Task 007 added anonymous-pick migration:
+
+- the existing `fl:bracket` and `fl:grouppicks` localStorage payloads are
+  preserved while the fan plays anonymously;
+- after WorkOS sign-in and handle completion, the pick'em page uploads those
+  local picks into the signed-in account once when the server does not already
+  have picks;
+- the page then reloads account-backed bracket and group pick'em data from Neon
+  so reloads and fresh sessions use the durable copy; and
+- the migration marker stores only the local account id namespace, never email,
+  auth tokens, or session cookie material.
+
+The cumulative build estimate is now roughly `~7.4M` total tokens and `~$65`
+estimated API-equivalent cost.

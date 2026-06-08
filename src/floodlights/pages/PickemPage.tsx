@@ -28,6 +28,7 @@ import { SignInGate } from '../components/SignInGate'
 import { captureAnalyticsEvent } from '../../analytics'
 import { ApiClientError, apiRequest } from '../lib/apiClient'
 import { useAuth } from '../lib/authContext'
+import { migrateAnonymousPicks } from '../lib/accountMigration'
 
 const SEP = '  ·  '
 const R_KEYS = ['r_r32', 'r_r16', 'r_qf', 'r_sf', 'r_final']
@@ -87,6 +88,43 @@ export function PickemPage() {
     popTarget.current = null
     pop(document.querySelector(`.slot.sel[data-r="${tgt.r}"][data-m="${tgt.m}"]`))
   }, [state])
+
+  useEffect(() => {
+    if (!auth.authenticated || auth.needsHandle || !auth.user || viewing) return
+
+    let active = true
+
+    async function loadAccountPicks() {
+      try {
+        await migrateAnonymousPicks(auth.user!.id)
+        const [bracketResponse, groupPicksResponse] = await Promise.all([
+          apiRequest<{ bracket: BracketState | null }>('/api/picks/bracket'),
+          apiRequest<{ groupPicks: GroupPicks | null }>('/api/picks/group'),
+        ])
+
+        if (!active) return
+
+        if (bracketResponse.bracket) {
+          const nextBracket = normalize(bracketResponse.bracket)
+          setState(nextBracket)
+          save('bracket', nextBracket)
+        }
+
+        if (groupPicksResponse.groupPicks) {
+          setGp(groupPicksResponse.groupPicks)
+          save('grouppicks', groupPicksResponse.groupPicks)
+        }
+      } catch {
+        toast(t('auth_save_failed'), '!')
+      }
+    }
+
+    void loadAccountPicks()
+
+    return () => {
+      active = false
+    }
+  }, [auth.authenticated, auth.needsHandle, auth.user, t, toast, viewing])
 
   /* ---------------- groups ---------------- */
   const chooseGroup = (g: string, code: string) => {
