@@ -348,6 +348,67 @@ export function PickemPage() {
     { label: t('finalists'), codes: teamsFor(state, 4, 0), accent: 'var(--mag-ink)' },
     { label: t('semifinalists'), codes: teamsFor(state, 3, 0).concat(teamsFor(state, 3, 1)), accent: 'var(--cyan-ink)' },
   ]
+  const desktopBracket = {
+    left: [
+      { r: 0, label: t('r_r32'), matches: Array.from({ length: 8 }, (_, m) => m) },
+      { r: 1, label: t('r_r16'), matches: Array.from({ length: 4 }, (_, m) => m) },
+      { r: 2, label: t('r_qf'), matches: [0, 1] },
+      { r: 3, label: t('r_sf'), matches: [0] },
+    ],
+    right: [
+      { r: 3, label: t('r_sf'), matches: [1] },
+      { r: 2, label: t('r_qf'), matches: [2, 3] },
+      { r: 1, label: t('r_r16'), matches: [4, 5, 6, 7] },
+      { r: 0, label: t('r_r32'), matches: Array.from({ length: 8 }, (_, m) => m + 8) },
+    ],
+  }
+  const renderKoMatch = (r: number, m: number, keyPrefix = 'ko') => {
+    const adv = koPick(state, r, m)
+    return (
+      <div className={`match stub ${r > 0 ? 'lstub' : ''} ${adv ? 'advanced' : ''}`.trim()} key={`${keyPrefix}-${r}-${m}`}>
+        {[0, 1].map((side) => {
+          const code = teamsFor(state, r, m)[side]
+          if (!code) {
+            return <div className="slot empty" key={side}>{r === 0 ? '·' : t('not_picked')}</div>
+          }
+          const sel = adv === code ? 'sel' : adv ? 'dim' : ''
+          return (
+            <div
+              className={`slot ${sel}`.trim()}
+              key={side}
+              data-r={r}
+              data-m={m}
+              role="button"
+              tabIndex={0}
+              onClick={() => chooseKo(r, m, code)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  chooseKo(r, m, code)
+                }
+              }}
+            >
+              <Flag code={code} size={22} />
+              <span className="snm">{tname(code)}</span>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+  const renderChampionCard = (variant = '') => (
+    <div className={`champ ${champ ? 'has' : ''} ${variant}`.trim()}>
+      <div className="champ-cap">🏆 {t('r_champ')}</div>
+      {champ ? (
+        <>
+          <Flag code={champ} size={54} />
+          <div className="champ-nm">{tname(champ)}</div>
+        </>
+      ) : (
+        <div className="champ-empty" dangerouslySetInnerHTML={{ __html: t('champ_empty') }} />
+      )}
+    </div>
+  )
 
   return (
     <>
@@ -505,64 +566,48 @@ export function PickemPage() {
         <div className="pk-sec-head reveal"><div><h2>{t('knockout_h')}</h2></div></div>
         <div className="pick-layout">
           <div className="bracket-wrap reveal">
-            <div className="bracket-labels">
-              {R_KEYS.map((k) => <div className="rl" key={k}>{t(k)}</div>)}
-              <div className="rl champ">{t('r_champ')}</div>
-            </div>
-            <div className={`bracket ${bracketLocked ? 'locked' : ''}`.trim()}>
+            <div className={`bracket-stage ${bracketLocked ? 'locked' : ''}`.trim()}>
               {!wildReady(state) ? (
                 <div className="ko-lock">🔒 {t('knockout_locked_hint')}</div>
               ) : (
                 <>
-                  {KO_ROUNDS.map((count, r) => (
-                    <div className="round" key={r}>
-                      {Array.from({ length: count }, (_, m) => {
-                        const adv = koPick(state, r, m)
-                        return (
-                          <div className={`match stub ${r > 0 ? 'lstub' : ''} ${adv ? 'advanced' : ''}`.trim()} key={m}>
-                            {[0, 1].map((side) => {
-                              const code = teamsFor(state, r, m)[side]
-                              if (!code) {
-                                return <div className="slot empty" key={side}>{r === 0 ? '·' : t('not_picked')}</div>
-                              }
-                              const sel = adv === code ? 'sel' : adv ? 'dim' : ''
-                              return (
-                                <div
-                                  className={`slot ${sel}`.trim()}
-                                  key={side}
-                                  data-r={r}
-                                  data-m={m}
-                                  role="button"
-                                  tabIndex={0}
-                                  onClick={() => chooseKo(r, m, code)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                      e.preventDefault()
-                                      chooseKo(r, m, code)
-                                    }
-                                  }}
-                                >
-                                  <Flag code={code} size={22} />
-                                  <span className="snm">{tname(code)}</span>
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )
-                      })}
+                  <div className="bracket-desktop">
+                    <div className="bracket-side bracket-side-left">
+                      {desktopBracket.left.map((round) => (
+                        <div className="round" key={`desktop-left-${round.r}`}>
+                          <div className="rl">{round.label}</div>
+                          {round.matches.map((m) => renderKoMatch(round.r, m, 'desktop-left'))}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                  <div className="round round-champ">
-                    <div className={`champ ${champ ? 'has' : ''}`.trim()}>
-                      <div className="champ-cap">🏆 {t('r_champ')}</div>
-                      {champ ? (
-                        <>
-                          <Flag code={champ} size={54} />
-                          <div className="champ-nm">{tname(champ)}</div>
-                        </>
-                      ) : (
-                        <div className="champ-empty" dangerouslySetInnerHTML={{ __html: t('champ_empty') }} />
-                      )}
+                    <div className="bracket-final-column">
+                      <div className="rl champ">{t('r_final')}</div>
+                      {renderKoMatch(4, 0, 'desktop-final')}
+                      {renderChampionCard('desktop-champ')}
+                    </div>
+                    <div className="bracket-side bracket-side-right">
+                      {desktopBracket.right.map((round) => (
+                        <div className="round" key={`desktop-right-${round.r}`}>
+                          <div className="rl">{round.label}</div>
+                          {round.matches.map((m) => renderKoMatch(round.r, m, 'desktop-right'))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="bracket-mobile">
+                    <div className="bracket-labels">
+                      {R_KEYS.map((k) => <div className="rl" key={k}>{t(k)}</div>)}
+                      <div className="rl champ">{t('r_champ')}</div>
+                    </div>
+                    <div className="bracket">
+                      {KO_ROUNDS.map((count, r) => (
+                        <div className="round" key={r}>
+                          {Array.from({ length: count }, (_, m) => renderKoMatch(r, m, 'mobile'))}
+                        </div>
+                      ))}
+                      <div className="round round-champ">
+                        {renderChampionCard()}
+                      </div>
                     </div>
                   </div>
                 </>

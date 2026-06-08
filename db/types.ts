@@ -76,3 +76,19 @@ export type MatchRow = {
   source: unknown
   updated_at: string
 }
+
+export type HostRow = {
+  id: string
+  slug: string
+  join_code: string
+  name: string
+  owner_user_id: string
+  created_at: string
+  updated_at: string
+}
+
+export type HostMemberRow = {
+  host_id: string
+  user_id: string
+  joined_at: string
+}

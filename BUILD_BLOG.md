@@ -1357,3 +1357,205 @@ deploy-shape proof for the production route mismatch.
 
 The cumulative build estimate is now roughly `~9.9M` total tokens and `~$90`
 estimated API-equivalent cost.
+
+### Task 002 - Add Hosts Schema And API
+
+The rest of v0.3 starts with the host backbone. I added `hosts` and
+`host_members` in `db/migrations/004_hosts.sql`, then exposed:
+
+- `POST /api/hosts` for authenticated, handle-complete host creation
+- `POST /api/hosts/join` for joining by slug or six-character code
+- `GET /api/hosts/:slug` for the public host page data
+
+Host creation returns a canonical public path, a join path, and a typeable code.
+The public API response is handle-only: no email, Auth0 ID, address, or user ID
+is returned. Leaderboard points are `0` until v0.4 scoring lands; that default is
+recorded in `dev/open-questions.md` so review can judge it against the v0.4
+scoring plan.
+
+Verification ran:
+
+```bash
+npm run test:v0.3
+npm run build
+```
+
+The cumulative build estimate is now roughly `~10.0M` total tokens and `~$91`
+estimated API-equivalent cost.
+
+### Task 003 - Gate Home Match Prediction Lock
+
+The homepage match board now follows the same account threshold as Pick'em:
+visitors can set a score anonymously, but clicking `Lock my prediction` stores
+that pending prediction locally and opens the Auth0 email-code gate. Once the
+user is authenticated and has a handle, the app runs the existing anonymous
+bracket/group-pick migration, persists the home match score through
+`/api/picks/predict`, and reloads saved account predictions on return visits.
+
+The account migration helpers now include a small typed home-prediction storage
+path and a validator for locked prediction payloads. The storage helper also has
+a `remove` utility so successfully persisted pending predictions do not keep
+replaying for later sessions.
+
+Verification ran:
+
+```bash
+npm run test:v0.3
+npm run build
+```
+
+The cumulative build estimate is now roughly `~10.1M` total tokens and `~$92`
+estimated API-equivalent cost.
+
+### Task 004 - Add Hosts UI And Public Page
+
+The host feature is now reachable from the main navigation. `/hosts` lets a
+signed-in user create a room, or lets an anonymous user start the flow and finish
+after Auth0 sign-in plus handle setup. Created hosts show their public page,
+join link, short join code, and a QR code. The same page also lets fans join a
+host by code without losing the account gate.
+
+The public `/h/:slug` page loads from the hosts API and keeps the privacy
+boundary tight: member rows show handles, champion picks, and placeholder
+points only. It also shows member count, most-picked champion, match consensus,
+the typeable join code, and a QR-backed join link. English and Arabic copy were
+added for the required v0.3 QA languages; other languages fall back to English
+for the new host strings until a later localization pass.
+
+Verification ran:
+
+```bash
+npm run test:v0.3
+npm run build
+```
+
+The cumulative build estimate is now roughly `~10.2M` total tokens and `~$93`
+estimated API-equivalent cost.
+
+### Task 005 - Fix Layout, RTL Logo, And Desktop Bracket
+
+The shared layout now uses one `--content-max` width for both `.wrap` and
+`.wrap-wide`, so the homepage and inner pages land on the same desktop rhythm.
+The header logo is also isolated from page direction with an explicit LTR SVG
+wordmark and a fixed flex footprint; that prevents Arabic RTL pages from
+squeezing or reordering the `WIN·2026` lockup.
+
+The Pick'em knockout section now renders a desktop two-sided bracket: the left
+and right halves converge on a central Final and Champion column while reusing
+the same pick handler and state model as the existing bracket. The original
+horizontal bracket remains as the mobile/tablet fallback, so small screens stay
+scrollable instead of forcing a dense two-sided view.
+
+Verification ran:
+
+```bash
+npm run test:v0.3
+npm run build
+```
+
+The cumulative build estimate is now roughly `~10.3M` total tokens and `~$94`
+estimated API-equivalent cost.
+
+### Task 006 - Add v0.3 Tests And Verification
+
+The v0.3 unit test file now covers the remaining host default that can be tested
+without calling production services: the same public handle can appear in
+multiple host rooms, and points stay at the v0.4 placeholder value of `0` on
+each public host shape. While running lint, React flagged effect-triggered host
+resume calls because the helper functions set loading state before awaiting the
+API. Those effect calls now defer into microtasks, keeping the resume behavior
+while satisfying the hook lint rule.
+
+The production P0 route was also rechecked with the slash path
+`/api/auth/passwordless/start`; it returned `200` with `{"sent":true}`. The
+database schema runner applied all migrations through `004_hosts.sql`, so the
+Neon-backed hosts tables are present for host create/join QA.
+
+Verification ran:
+
+```bash
+npm run test:v0.1
+npm run test:v0.2
+npm run test:v0.3
+npm run lint
+npm run build
+npx vercel build
+npm run db:apply
+```
+
+The cumulative build estimate is now roughly `~10.4M` total tokens and `~$95`
+estimated API-equivalent cost.
+
+### Follow-up - Align Pick'em Sections
+
+Chrome QA caught a layout regression after the shared-width change: the Pick'em
+hero and header were centered at the new 1280px content width, but the `Group
+stage` section started at the far left. The cause was `.pk-sec{margin:30px 0}`,
+which overrode `.wrap-wide`'s horizontal `auto` margins whenever both classes
+were on the same element. The fix changes it to `margin:30px auto`, so group,
+wildcard, knockout, and quick-pick sections all stay centered with the same
+desktop width as the header and hero.
+
+Verification ran:
+
+```bash
+npm run test:v0.3
+npm run lint
+npm run build
+```
+
+Chrome measured the Pick'em nav, hero, and every `.wrap-wide.pk-sec` section at
+the same `left=320`, `right=1600`, and `width=1280` desktop alignment.
+
+The cumulative build estimate is now roughly `~10.5M` total tokens and `~$96`
+estimated API-equivalent cost.
+
+### Task 007 - Chrome QA Progress
+
+The v0.3 QA pass moved to a clean extension-free Chrome profile after the
+user's main Chrome window kept exposing extension UI over the page. The clean
+profile reached the website-styled Auth0 email-code modal, submitted
+`moe@babanuj.com`, and displayed the one-time-code entry step. Relayed codes
+were rejected by Auth0 as `invalid_code`, so the user requested that Claude
+review that single real email-code confirmation against the deployed/preview
+link instead of continuing the local OTP path.
+
+The protected app flows were still exercised in clean Chrome with a disposable
+signed QA account and then cleaned up from Neon. The homepage prediction stayed
+locked after reload, `/hosts` created a host with a join link, QR code, and
+short code, a second host was joined by typed code, and the public host pages
+showed handle-only leaderboards with no email or private identifiers. Arabic
+light and dark host pages rendered with `dir="rtl"`, Arabic navigation, the
+fixed 148px logo footprint, and no horizontal overflow.
+
+Evidence now lives in:
+
+```text
+tests/e2e/v0.3-chrome-qa.md
+tests/e2e/screenshots/v0.3/home-authenticated-lock-en-dark.png
+tests/e2e/screenshots/v0.3/hosts-create-en-dark.png
+tests/e2e/screenshots/v0.3/hosts-join-code-en-dark.png
+tests/e2e/screenshots/v0.3/host-public-joined-en-dark.png
+tests/e2e/screenshots/v0.3/host-public-owner-en-dark.png
+tests/e2e/screenshots/v0.3/host-public-ar-light.png
+tests/e2e/screenshots/v0.3/host-public-ar-dark.png
+```
+
+The cumulative build estimate is now roughly `~10.7M` total tokens and `~$98`
+estimated API-equivalent cost.
+
+### Follow-up - Hosts i18n And Short Slugs
+
+The Hosts surface now has full Spanish, French, and Portuguese parity for all 43
+host-related keys, including the `Hosts` nav label, `/hosts`, and public
+`/h/:slug` pages. The translations use each locale's existing Floodlights voice
+instead of falling back to English.
+
+The host slug validator now accepts the same one- and two-character slugs that
+`slugifyHostName` can generate from valid short host names, so a host named
+`EY` produces a reachable `/h/ey` public page and slug-based join path. The
+validator still rejects empty values, spaces, punctuation, and leading or
+trailing hyphens.
+
+The cumulative build estimate is now roughly `~10.8M` total tokens and `~$99`
+estimated API-equivalent cost.

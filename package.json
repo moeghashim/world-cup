@@ -15,6 +15,7 @@
     "lint": "eslint .",
     "test:v0.1": "tsx --test tests/v0.1-accounts-persistence.test.ts",
     "test:v0.2": "tsx --test tests/v0.2-real-tournament-data.test.ts",
+    "test:v0.3": "tsx --test tests/v0.3-accounts-ux-hosts.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "@sentry/react": "^10.56.0",
     "jose": "^6.2.3",
     "posthog-js": "^1.379.0",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.17.0"

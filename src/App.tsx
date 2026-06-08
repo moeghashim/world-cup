@@ -9,7 +9,10 @@ import { PickemPage } from './floodlights/pages/PickemPage'
 import { BracketsPage } from './floodlights/pages/BracketsPage'
 import { SponsorsPage } from './floodlights/pages/SponsorsPage'
 import { ProfilePage } from './floodlights/pages/ProfilePage'
+import { HostsPage } from './floodlights/pages/HostsPage'
+import { HostPage } from './floodlights/pages/HostPage'
 import { initializeGoogleAnalytics, initializePostHog } from './analytics'
+import './floodlights/styles/hosts.css'
 
 /** scroll to top on navigation, or to an in-page anchor when the URL has a hash */
 function ScrollToHash() {
@@ -42,6 +45,8 @@ function App() {
               <Route path="/pickem" element={<PickemPage />} />
               <Route path="/brackets" element={<BracketsPage />} />
               <Route path="/sponsors" element={<SponsorsPage />} />
+              <Route path="/hosts" element={<HostsPage />} />
+              <Route path="/h/:slug" element={<HostPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="*" element={<HomePage />} />
             </Routes>

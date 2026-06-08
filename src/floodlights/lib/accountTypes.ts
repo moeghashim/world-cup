@@ -36,6 +36,35 @@ export type PicksPayload = {
   predictions: PredictionPayload[]
 }
 
+export type HostSummary = {
+  id: string
+  name: string
+  slug: string
+  code: string
+  publicPath: string
+  joinPath: string
+  memberCount: number
+}
+
+export type HostLeaderboardMember = {
+  handle: string
+  champion: string | null
+  points: number
+  joinedAt: string
+}
+
+export type HostConsensusItem = {
+  matchId: string
+  pick: string
+  count: number
+}
+
+export type PublicHost = HostSummary & {
+  members: HostLeaderboardMember[]
+  mostPickedChampion: string | null
+  matchConsensus: HostConsensusItem[]
+}
+
 export type ApiErrorBody = {
   error?: {
     code: string

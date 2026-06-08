@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~9.9M` total tokens and `~$90` estimated API-equivalent cost in
+  `~10.8M` total tokens and `~$99` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -101,8 +101,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.9M` total tokens and
-`~$90` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~10.8M` total tokens and
+`~$99` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -421,6 +421,41 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   hyphenated routes, added clearer Auth0 start failure codes with sanitized
   Sentry capture, verified the new Vercel output functions, and refreshed the
   documentation estimate to `~9.9M` total tokens and `~$90`.
+- Added the v0.3 hosts backbone: `hosts` and `host_members` schema, authenticated
+  `POST /api/hosts`, authenticated `POST /api/hosts/join`, handle-only
+  `GET /api/hosts/:slug`, local dev API routing, public-response tests, and the
+  v0.4 host-points placeholder decision. Refreshed the documentation estimate to
+  `~10.0M` total tokens and `~$91`.
+- Gated the homepage match-prediction lock with the same Auth0 email-code modal
+  used by Pick'em, added pending home-prediction local storage, persisted locked
+  home scores through `/api/picks/predict` after sign-in/handle setup, loaded
+  saved account predictions on return visits, and refreshed the documentation
+  estimate to `~10.1M` total tokens and `~$92`.
+- Added the host user interface and public host page: `/hosts` now supports
+  self-serve host creation, join-code entry, share links, QR codes, and
+  sign-in/handle gates; `/h/:slug` shows a handle-only leaderboard, member
+  count, most-picked champion, and consensus. Refreshed the documentation
+  estimate to `~10.2M` total tokens and `~$93`.
+- Fixed the v0.3 layout issues: isolated the SVG wordmark from RTL direction,
+  gave the header logo a fixed non-shrinking footprint, unified `.wrap` and
+  `.wrap-wide` through one `--content-max` value, and added a desktop two-sided
+  knockout bracket with the existing scrollable bracket preserved for narrower
+  screens. Refreshed the documentation estimate to `~10.3M` total tokens and
+  `~$94`.
+- Expanded the v0.3 test coverage with a pure multi-host membership default
+  check, fixed React lint findings in the host effect resume paths, verified the
+  production slash passwordless start route still returns `sent: true`, applied
+  the additive hosts schema to Neon, and refreshed the documentation estimate
+  to `~10.4M` total tokens and `~$95`.
+- Fixed a Pick'em alignment regression where `.pk-sec` overrode the shared
+  `.wrap-wide` auto margins. Group, wildcard, knockout, and quick-pick sections
+  now align with the header and hero at the shared 1280px content width.
+  Refreshed the documentation estimate to `~10.5M` total tokens and `~$96`.
+- Completed the scoped v0.3 follow-up by localizing all 43 Hosts keys across
+  Spanish, French, and Portuguese, relaxing host slug validation so generated
+  one- and two-character slugs are reachable at `/h/:slug`, adding the short
+  slug round-trip test, and refreshing the documentation estimate to `~10.8M`
+  total tokens and `~$99`.
 
 ### 2026-06-07
 
@@ -591,6 +626,16 @@ Browser verification covered:
   stale-code modal; the extension-free in-app browser verified `/pickem` in
   English dark, English light, Arabic RTL light, and Arabic RTL dark with no
   console errors
+- verifying v0.3 clean Chrome QA progress: the extension-free Chrome profile
+  reached the website-styled Auth0 code-entry step for `moe@babanuj.com`, but
+  relayed OTPs were rejected as `invalid_code`, so the user requested Claude
+  review that single email-code confirmation on the deployed/preview link; a
+  disposable signed QA session then verified authenticated `/profile`, homepage
+  prediction lock persistence after reload, `/hosts` create with join
+  link/QR/code, typed-code join, multi-host membership, public `/h/:slug`
+  handle-only leaderboard/no-PII rendering, and Arabic RTL light/dark host pages
+  with a fixed 148px logo and no horizontal overflow; disposable QA users and
+  cascade-owned host data were deleted from Neon after evidence capture
 
 Latest screenshot:
 
@@ -609,6 +654,13 @@ Latest screenshot:
 `artifacts/team-saudi-detail-page.png`
 `artifacts/sponsor-onboarding-form.png`
 `artifacts/sponsor-onboarding-mobile.png`
+`tests/e2e/screenshots/v0.3/home-authenticated-lock-en-dark.png`
+`tests/e2e/screenshots/v0.3/hosts-create-en-dark.png`
+`tests/e2e/screenshots/v0.3/hosts-join-code-en-dark.png`
+`tests/e2e/screenshots/v0.3/host-public-joined-en-dark.png`
+`tests/e2e/screenshots/v0.3/host-public-owner-en-dark.png`
+`tests/e2e/screenshots/v0.3/host-public-ar-light.png`
+`tests/e2e/screenshots/v0.3/host-public-ar-dark.png`
 
 ## Next Tasks
 
