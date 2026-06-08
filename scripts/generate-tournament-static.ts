@@ -5,7 +5,11 @@ import { normalizeOpenfootballData } from './tournament-normalize.js'
 const OUTPUT_FILE = new URL('../api/_lib/tournament-static.ts', import.meta.url)
 
 const tournament = await normalizeOpenfootballData()
-const matches = tournament.matches.map(({ source: _source, ...match }) => match)
+const matches = tournament.matches.map((match) => {
+  const publicMatch = { ...match }
+  delete (publicMatch as { source?: unknown }).source
+  return publicMatch
+})
 const payload = {
   groups: tournament.groups,
   teams: tournament.teams,

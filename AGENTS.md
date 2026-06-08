@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~9.6M` total tokens and `~$87` estimated API-equivalent cost in
+  `~9.7M` total tokens and `~$88` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -101,8 +101,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.6M` total tokens and
-`~$87` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.7M` total tokens and
+`~$88` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -403,6 +403,11 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   all real fixtures are still upcoming on 2026-06-08, localized the UI lock
   toast, verified build and lock-helper behavior, and refreshed the
   documentation estimate to `~9.6M` total tokens and `~$87`.
+- Added `tests/v0.2-real-tournament-data.test.ts` and `npm run test:v0.2` for
+  tournament normalization, client data integrity, fixtures fallback, per-match
+  locks, bracket locks, and invalid group-pick IDs. Re-ran `npm run test:v0.1`,
+  `npm run build`, and `npm run lint`, then refreshed the documentation estimate
+  to `~9.7M` total tokens and `~$88`.
 
 ### 2026-06-07
 

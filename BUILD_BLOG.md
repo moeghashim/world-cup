@@ -1252,3 +1252,33 @@ at kickoff rejects both with `pick_locked`.
 
 The cumulative build estimate is now roughly `~9.6M` total tokens and `~$87`
 estimated API-equivalent cost.
+
+### Task 007 - Add v0.2 Tests
+
+The milestone now has focused test coverage in
+`tests/v0.2-real-tournament-data.test.ts`.
+
+It verifies:
+
+- openfootball normalization counts: 104 total fixtures, 72 group fixtures, 12
+  groups, and 48 teams
+- UTC conversion for the first kickoff
+- Floodlights client constants: 48 teams, 12 groups, 16 Round-of-32 pairs, and
+  eight wildcard slots
+- `/api/data/fixtures` static fallback shape when Neon is unavailable
+- per-match lock behavior: match 1 closes at kickoff while match 2 remains open
+  until its own kickoff
+- bracket lock behavior at the tournament opener
+- group-pick rejection for unknown or knockout match IDs
+
+Verification for this task ran:
+
+```bash
+npm run test:v0.2
+npm run test:v0.1
+npm run build
+npm run lint
+```
+
+The cumulative build estimate is now roughly `~9.7M` total tokens and `~$88`
+estimated API-equivalent cost.

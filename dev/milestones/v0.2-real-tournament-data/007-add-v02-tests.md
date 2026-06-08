@@ -7,14 +7,14 @@ files: ["tests/v0.2-real-tournament-data.test.ts", "package.json", "BUILD_BLOG.m
 
 ## Acceptance Criteria
 
-- [ ] Integration test validates the seed parser counts: 48 teams, 12 groups,
+- [x] Integration test validates the seed parser counts: 48 teams, 12 groups,
   72 group fixtures, and 104 total fixtures.
-- [ ] Unit/API tests verify past-kickoff group and score-prediction writes are
+- [x] Unit/API tests verify past-kickoff group and score-prediction writes are
   rejected.
-- [ ] Unit/API tests verify upcoming fixture writes still pass.
-- [ ] Unit/API tests verify bracket writes reject after the first tournament
+- [x] Unit/API tests verify upcoming fixture writes still pass.
+- [x] Unit/API tests verify bracket writes reject after the first tournament
   kickoff.
-- [ ] Existing v0.1 tests, lint, and build keep passing.
+- [x] Existing v0.1 tests, lint, and build keep passing.
 
 ## Notes
 
