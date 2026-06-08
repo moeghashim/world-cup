@@ -8,10 +8,10 @@ files: ["src/floodlights/pages/ProfilePage.tsx", "src/floodlights/components/Sit
 ---
 
 ## Acceptance criteria
-- [ ] `/profile` shows the signed-in user's email, handle, and country. (PRD S1: `/profile` shows email, handle, country)
-- [ ] `/profile` lets the user sign out through WorkOS logout. (PRD S1: `/profile` lets the user sign out)
-- [ ] Signed-out users are guided to sign in without losing anonymous picks. (PRD cross-cutting: anonymous play preserved)
-- [ ] The page works in all 5 languages, RTL Arabic, and both themes. (PRD S1: all languages + RTL + themes)
+- [x] `/profile` shows the signed-in user's email, handle, and country. (PRD S1: `/profile` shows email, handle, country)
+- [x] `/profile` lets the user sign out through WorkOS logout. (PRD S1: `/profile` lets the user sign out)
+- [x] Signed-out users are guided to sign in without losing anonymous picks. (PRD cross-cutting: anonymous play preserved)
+- [x] The page works in all 5 languages, RTL Arabic, and both themes. (PRD S1: all languages + RTL + themes)
 
 ## Suggested approach
 Reuse existing Floodlights layout, `SiteHeader`, `SiteFooter`, theme, and i18n

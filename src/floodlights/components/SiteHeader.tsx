@@ -5,6 +5,7 @@ import { BrandLogo } from './BrandLogo'
 import { LangPicker } from './LangPicker'
 import { ThemeToggle } from './ThemeToggle'
 import { HashLink } from './HashLink'
+import { useAuth } from '../lib/authContext'
 
 export interface HeaderCta {
   key: string
@@ -16,6 +17,7 @@ const navClass = ({ isActive }: { isActive: boolean }) => (isActive ? 'active' :
 
 export function SiteHeader({ wide = false, cta }: { wide?: boolean; cta: HeaderCta }) {
   const { t } = useI18n()
+  const auth = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const closeMenu = () => setMenuOpen(false)
   const ctaHash = cta.to.startsWith('#')
@@ -33,6 +35,9 @@ export function SiteHeader({ wide = false, cta }: { wide?: boolean; cta: HeaderC
           <NavLink to="/brackets" className={navClass} onClick={closeMenu}>{t('nav_brackets')}</NavLink>
           <HashLink to="/" hash="prizes" onNavigate={closeMenu}>{t('nav_prizes')}</HashLink>
           <NavLink to="/sponsors" className={navClass} onClick={closeMenu}>{t('nav_sponsor')}</NavLink>
+          <NavLink to="/profile" className={navClass} onClick={closeMenu}>
+            {auth.user?.handle ?? t('nav_profile')}
+          </NavLink>
         </nav>
         <div className="nav-tools">
           <LangPicker />

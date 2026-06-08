@@ -826,3 +826,17 @@ Task 007 added anonymous-pick migration:
 
 The cumulative build estimate is now roughly `~7.4M` total tokens and `~$65`
 estimated API-equivalent cost.
+
+Task 008 added the localized profile surface:
+
+- `/profile` shows the signed-in account email, public handle, and signup
+  country;
+- first sign-in can land on `/profile?setup=handle` so the fan chooses a handle
+  before account-bound pick saves;
+- duplicate/invalid handle responses are translated into clear UI toasts;
+- signed-out fans can start sign-in without losing the anonymous bracket already
+  stored on the device; and
+- sign-out clears the sealed WorkOS session through the server logout route.
+
+The cumulative build estimate is now roughly `~7.5M` total tokens and `~$66`
+estimated API-equivalent cost.
