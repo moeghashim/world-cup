@@ -1543,3 +1543,19 @@ tests/e2e/screenshots/v0.3/host-public-ar-dark.png
 
 The cumulative build estimate is now roughly `~10.7M` total tokens and `~$98`
 estimated API-equivalent cost.
+
+### Follow-up - Hosts i18n And Short Slugs
+
+The Hosts surface now has full Spanish, French, and Portuguese parity for all 43
+host-related keys, including the `Hosts` nav label, `/hosts`, and public
+`/h/:slug` pages. The translations use each locale's existing Floodlights voice
+instead of falling back to English.
+
+The host slug validator now accepts the same one- and two-character slugs that
+`slugifyHostName` can generate from valid short host names, so a host named
+`EY` produces a reachable `/h/ey` public page and slug-based join path. The
+validator still rejects empty values, spaces, punctuation, and leading or
+trailing hyphens.
+
+The cumulative build estimate is now roughly `~10.8M` total tokens and `~$99`
+estimated API-equivalent cost.

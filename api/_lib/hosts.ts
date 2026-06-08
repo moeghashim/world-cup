@@ -100,7 +100,7 @@ export function normalizeHostSlug(value: unknown): string {
     .replace(/^\/?h\//, '')
     .replace(/[?#].*$/, '')
 
-  if (!/^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$/.test(slug)) {
+  if (!/^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/.test(slug)) {
     throw new HttpError(400, 'bad_request', 'Enter a valid host link.')
   }
 

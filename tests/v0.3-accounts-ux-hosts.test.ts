@@ -15,12 +15,17 @@ const accountMigration = await import('../src/floodlights/lib/accountMigration.j
 
 test('host slugs and codes normalize to shareable public identifiers', () => {
   assert.equal(slugifyHostName('  Moe’s Match Cafe 2026! '), 'moes-match-cafe-2026')
+  assert.equal(slugifyHostName('EY'), 'ey')
+  assert.equal(normalizeHostSlug('ey'), 'ey')
+  assert.equal(normalizeHostSlug('/h/ey'), 'ey')
   assert.equal(normalizeHostSlug('/h/moes-match-cafe-2026?join=ABC123'), 'moes-match-cafe-2026')
   assert.equal(normalizeJoinCode(' ab-12 c3 '), 'AB12C3')
   assert.equal(normalizeHostName('  Match   Night  '), 'Match Night')
 
   assert.throws(() => normalizeHostName('x'), HttpError)
   assert.throws(() => normalizeHostSlug('bad slug!'), HttpError)
+  assert.throws(() => normalizeHostSlug('-x'), HttpError)
+  assert.throws(() => normalizeHostSlug('x-'), HttpError)
   assert.throws(() => normalizeJoinCode('abc'), HttpError)
 })
 
