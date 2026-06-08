@@ -7,12 +7,12 @@ files: ["db/migrations/*.sql", "db/types.ts", "api/_lib/tournament-data.ts", "BU
 
 ## Acceptance Criteria
 
-- [ ] Add or extend Neon schema for seeded `teams` and `matches`.
-- [ ] Team rows support stable codes, names, group, seed order, colors, and
+- [x] Add or extend Neon schema for seeded `teams` and `matches`.
+- [x] Team rows support stable codes, names, group, seed order, colors, and
   localized display metadata when available.
-- [ ] Match rows support stable IDs, match number, stage, group, teams/placeholders,
+- [x] Match rows support stable IDs, match number, stage, group, teams/placeholders,
   kickoff UTC, venue, status, and raw source metadata.
-- [ ] Schema is idempotent and safe to reapply.
+- [x] Schema is idempotent and safe to reapply.
 
 ## Notes
 

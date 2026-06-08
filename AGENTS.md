@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~9.1M` total tokens and `~$82` estimated API-equivalent cost in
+  `~9.2M` total tokens and `~$83` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -101,8 +101,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.1M` total tokens and
-`~$82` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.2M` total tokens and
+`~$83` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -377,6 +377,11 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   the CC0 source metadata, and confirming 104 total fixtures, 72 group fixtures,
   12 groups, and 48 group-stage teams. Refreshed the documentation estimate to
   `~9.1M` total tokens and `~$82`.
+- Added `db/migrations/003_real_tournament_data.sql` with idempotent
+  `tournament_groups`, `teams`, and `matches` tables, extended `db/schema.sql`
+  and `db/types.ts`, added the normalized tournament API shape in
+  `api/_lib/tournament-data.ts`, verified with `npm run build`, and refreshed
+  the documentation estimate to `~9.2M` total tokens and `~$83`.
 
 ### 2026-06-07
 

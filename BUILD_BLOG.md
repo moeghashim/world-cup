@@ -1116,3 +1116,27 @@ the remaining v0.2 tasks wire the Neon/cache layer.
 
 The cumulative build estimate is now roughly `~9.1M` total tokens and `~$82`
 estimated API-equivalent cost.
+
+### Task 002 - Add Tournament Data Schema
+
+The database now has a dedicated v0.2 tournament-data migration:
+`db/migrations/003_real_tournament_data.sql`.
+
+It adds:
+
+- `tournament_groups` for the 12 group labels and ordering
+- `teams` for stable team codes, names, slugs, group assignment, seed order,
+  colors, and localized display metadata
+- `matches` for stable match IDs, match numbers, stages, groups, team codes or
+  knockout placeholders, UTC kickoff timestamps, local kickoff fields, venues,
+  status, and raw source metadata
+
+The schema is idempotent and indexed for group schedules, stage/kickoff reads,
+and team lookups. `db/schema.sql` now includes the new migration, and
+`db/types.ts` plus `api/_lib/tournament-data.ts` define the normalized row and
+API shapes that the seed script and fixtures endpoint will share.
+
+Verification for this task ran `npm run build`.
+
+The cumulative build estimate is now roughly `~9.2M` total tokens and `~$83`
+estimated API-equivalent cost.
