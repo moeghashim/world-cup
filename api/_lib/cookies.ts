@@ -1,8 +1,10 @@
 import type { ApiRequest, ApiResponse } from './http.js'
 
 export const sessionCookieName = 'wwc_session'
+export const authStateCookieName = 'wwc_auth_state'
 
 const oneMonthSeconds = 60 * 60 * 24 * 30
+const authStateSeconds = 60 * 10
 
 type CookieOptions = {
   httpOnly?: boolean
@@ -48,6 +50,10 @@ export function getSessionCookie(request: ApiRequest): string | undefined {
   return parseCookies(request)[sessionCookieName]
 }
 
+export function getAuthStateCookie(request: ApiRequest): string | undefined {
+  return parseCookies(request)[authStateCookieName]
+}
+
 function serializeCookie(
   name: string,
   value: string,
@@ -79,17 +85,18 @@ export function isSecureRequest(request: ApiRequest): boolean {
 export function setSessionCookie(
   response: ApiResponse,
   request: ApiRequest,
-  sealedSession: string,
+  sessionValue: string,
+  additionalCookies: string[] = [],
 ) {
-  response.setHeader(
-    'Set-Cookie',
-    serializeCookie(sessionCookieName, sealedSession, {
+  response.setHeader('Set-Cookie', [
+    serializeCookie(sessionCookieName, sessionValue, {
       httpOnly: true,
       maxAge: oneMonthSeconds,
       sameSite: 'Lax',
       secure: isSecureRequest(request),
     }),
-  )
+    ...additionalCookies,
+  ])
 }
 
 export function clearSessionCookie(response: ApiResponse, request: ApiRequest) {
@@ -104,3 +111,27 @@ export function clearSessionCookie(response: ApiResponse, request: ApiRequest) {
   )
 }
 
+export function clearedAuthStateCookie(request: ApiRequest): string {
+  return serializeCookie(authStateCookieName, '', {
+    httpOnly: true,
+    maxAge: 0,
+    sameSite: 'Lax',
+    secure: isSecureRequest(request),
+  })
+}
+
+export function setAuthStateCookie(
+  response: ApiResponse,
+  request: ApiRequest,
+  nonce: string,
+) {
+  response.setHeader(
+    'Set-Cookie',
+    serializeCookie(authStateCookieName, nonce, {
+      httpOnly: true,
+      maxAge: authStateSeconds,
+      sameSite: 'Lax',
+      secure: isSecureRequest(request),
+    }),
+  )
+}

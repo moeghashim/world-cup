@@ -3,6 +3,10 @@ import assert from 'node:assert/strict'
 import type { ApiRequest, ApiResponse } from '../api/_lib/http.js'
 
 process.env.PRIMARY_DB_CONNECTION_STRING ||= 'postgres://user:pass@localhost/db'
+process.env.AUTH0_CLIENT_ID ||= 'auth0-client-id'
+process.env.AUTH0_CLIENT_SECRET ||= 'auth0-client-secret'
+process.env.AUTH0_COOKIE_SECRET ||= 'test-auth0-cookie-secret-32-characters'
+process.env.AUTH0_DOMAIN ||= 'worldcup2026.us.auth0.com'
 
 const { HttpError, sendError } = await import('../api/_lib/http.js')
 const {
@@ -10,6 +14,7 @@ const {
   getSessionCookie,
   setSessionCookie,
 } = await import('../api/_lib/cookies.js')
+const { createAppSession, verifyAppSession } = await import('../api/_lib/auth0.js')
 const {
   decodeAuthState,
   encodeAuthState,
@@ -26,6 +31,7 @@ const {
   hasBracketPicksForMigration,
   hasGroupPicksForMigration,
 } = await import('../src/floodlights/lib/accountMigration.js')
+const { default: startHandler } = await import('../api/auth/start.js')
 const { default: bracketHandler } = await import('../api/picks/bracket.js')
 
 type CapturedResponse = {
@@ -77,15 +83,40 @@ function request(overrides: Partial<ApiRequest> = {}): ApiRequest {
 test('auth redirect state keeps only safe local return paths', () => {
   const safe = request({ query: { returnTo: '/pickem#group' } })
   const unsafe = request({ query: { returnTo: 'https://example.com' } })
-  const encoded = encodeAuthState('/profile?setup=handle')
+  const encoded = encodeAuthState('/profile?setup=handle', 'state-nonce')
 
   assert.equal(getReturnTo(safe), '/pickem#group')
   assert.equal(getReturnTo(unsafe), '/pickem')
   assert.equal(decodeAuthState(encoded).returnTo, '/profile?setup=handle')
+  assert.equal(decodeAuthState(encoded).nonce, 'state-nonce')
   assert.equal(
     getAuthRedirectUri(safe),
     'http://localhost:5173/api/auth/callback',
   )
+})
+
+test('auth start redirects to Auth0 and binds a nonce cookie', () => {
+  const response = createResponse()
+  startHandler(request({ query: { returnTo: '/pickem#group' } }), response)
+
+  assert.equal(response.captured.statusCode, 302)
+  const location = String(response.captured.headers.location)
+  const redirectUrl = new URL(location)
+  assert.equal(redirectUrl.hostname, 'worldcup2026.us.auth0.com')
+  assert.equal(redirectUrl.pathname, '/authorize')
+  assert.equal(redirectUrl.searchParams.get('client_id'), 'auth0-client-id')
+  assert.equal(
+    redirectUrl.searchParams.get('redirect_uri'),
+    'http://localhost:5173/api/auth/callback',
+  )
+
+  const state = decodeAuthState(redirectUrl.searchParams.get('state'))
+  assert.equal(state.returnTo, '/pickem#group')
+  assert.ok(state.nonce)
+
+  const cookie = String(response.captured.headers['set-cookie'])
+  assert.match(cookie, /wwc_auth_state=/)
+  assert.match(cookie, /HttpOnly/)
 })
 
 test('session cookies are httpOnly and secure only off localhost', () => {
@@ -99,7 +130,7 @@ test('session cookies are httpOnly and secure only off localhost', () => {
   setSessionCookie(secureResponse, secureRequest, 'sealed session value')
 
   const secureCookie = secureResponse.captured.headers['set-cookie']
-  assert.equal(typeof secureCookie, 'string')
+  assert.equal(Array.isArray(secureCookie), true)
   assert.match(String(secureCookie), /wwc_session=sealed%20session%20value/)
   assert.match(String(secureCookie), /HttpOnly/)
   assert.match(String(secureCookie), /SameSite=Lax/)
@@ -116,6 +147,15 @@ test('session cookies are httpOnly and secure only off localhost', () => {
   const localCookie = String(localResponse.captured.headers['set-cookie'])
   assert.match(localCookie, /Max-Age=0/)
   assert.doesNotMatch(localCookie, /Secure/)
+})
+
+test('app session cookie contains only a signed Auth0 subject', () => {
+  const session = createAppSession('auth0|user-123', 1_800_000_000)
+  const verified = verifyAppSession(session)
+
+  assert.equal(verified?.sub, 'auth0|user-123')
+  assert.doesNotMatch(session, /email/i)
+  assert.equal(verifyAppSession(`${session}tampered`), null)
 })
 
 test('handle validation accepts public handles and rejects invalid shapes', () => {

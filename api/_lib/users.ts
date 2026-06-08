@@ -3,7 +3,7 @@ import { HttpError } from './http.js'
 import { sql } from './db.js'
 import type { UserRow } from '../../db/types.js'
 
-type WorkOSUserLike = {
+type Auth0UserLike = {
   id: string
   email: string
 }
@@ -49,35 +49,35 @@ export function getSignupCountry(
   return country || null
 }
 
-export async function getLocalUserByWorkOSId(
-  workosUserId: string,
+export async function getLocalUserByAuth0Id(
+  auth0UserId: string,
 ): Promise<AccountUser | null> {
   const rows = (await sql.query(
-    'select * from users where workos_user_id = $1 limit 1',
-    [workosUserId],
+    'select * from users where auth0_user_id = $1 limit 1',
+    [auth0UserId],
   )) as UserRow[]
   return rows[0] ? mapUser(rows[0]) : null
 }
 
-export async function upsertLocalUserFromWorkOS(
-  workosUser: WorkOSUserLike,
+export async function upsertLocalUserFromAuth0(
+  auth0User: Auth0UserLike,
   countryAtSignup: string | null,
 ): Promise<AccountUser> {
   try {
     const rows = (await sql.query(
       `
-        insert into users (workos_user_id, email, country_at_signup)
+        insert into users (auth0_user_id, email, country_at_signup)
         values ($1, $2, $3)
-        on conflict (workos_user_id) do update
+        on conflict (auth0_user_id) do update
           set email = excluded.email,
               country_at_signup = coalesce(users.country_at_signup, excluded.country_at_signup),
               updated_at = now()
         returning *
       `,
-      [workosUser.id, workosUser.email, countryAtSignup],
+      [auth0User.id, auth0User.email, countryAtSignup],
     )) as UserRow[]
 
-    if (!rows[0]) throw new Error('WorkOS user mapping did not return a row')
+    if (!rows[0]) throw new Error('Auth0 user mapping did not return a row')
     return mapUser(rows[0])
   } catch (error) {
     if (
@@ -89,13 +89,13 @@ export async function upsertLocalUserFromWorkOS(
       const rows = (await sql.query(
         `
           update users
-            set workos_user_id = $1,
+            set auth0_user_id = $1,
                 email = $2,
                 updated_at = now()
           where lower(email) = lower($2)
           returning *
         `,
-        [workosUser.id, workosUser.email],
+        [auth0User.id, auth0User.email],
       )) as UserRow[]
 
       if (rows[0]) return mapUser(rows[0])

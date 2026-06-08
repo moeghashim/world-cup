@@ -38,7 +38,7 @@ Current implementation baseline:
 - PostHog first-party `/ingest` proxy in `vite.config.ts` and `vercel.json`.
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
-- AI usage disclosure currently shows `~6.3M` total tokens and `~$56`
+- AI usage disclosure currently shows `~8.2M` total tokens and `~$73`
   estimated API-equivalent cost in `src/App.tsx` and the appended
   `BUILD_BLOG.md` reset note.
 - `BUILD_BLOG.md` remains append-only for the public build article.
@@ -87,8 +87,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~6.9M` total tokens and
-`~$60` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~8.2M` total tokens and
+`~$73` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -111,6 +111,8 @@ docs (`BUILD_BLOG.md`) rather than in the UI: currently `~6.9M` total tokens and
 - `@neondatabase/serverless` for Vercel server-side prediction entry writes to Neon.
 - Google Analytics gtag for page-view tracking, with the static homepage snippet using `G-RFPJRPKYQR` and `VITE_GA_MEASUREMENT_ID` reserved for the runtime fallback path.
 - `posthog-js` for env-gated product analytics through the first-party `/ingest` proxy.
+- Auth0 by Okta for account identity through Projects.dev resource `auth0`.
+- `jose` for Auth0 ID-token verification in Vercel serverless callbacks.
 - Optimized raster stadium hero loaded from `src/assets/world-cup-hero.jpg`.
 
 ## Architecture Notes
@@ -320,6 +322,10 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 
 - Repaired the homepage prediction QA path by making `npm run dev` start both Vite and the local prediction API shim, adding `npm run dev:app` for frontend-only work, adding `npm run verify:api:dev` for Vite-proxy prediction submission smoke tests, extracting the homepage prediction payload builder, mapping raw network failures to the localized retry copy, improving the State field label, fixing mobile receipt wrapping, and refreshing the AI build estimate to `~6.2M` total tokens and `~$55`.
 
+### 2026-06-08
+
+- Replaced WorkOS with Auth0 by Okta for the v0.1 account flow: provisioned Projects.dev resource `auth0`, detached the old WorkOS `auth` resource from the default environment, added Auth0 Authorization Code Flow handlers, verified ID tokens with `jose`, mapped local users by `auth0_user_id`, added a signed httpOnly app session, fixed Auth0 callback/logout/web-origin config through Projects.dev, added Auth0 env vars to Vercel Development/Preview/Production, removed WorkOS env vars from Vercel, and refreshed the documentation estimate to `~8.2M` total tokens and `~$73`.
+
 ### 2026-06-07
 
 - Adopted the **Floodlights** design from the Claude Design handoff bundle and
@@ -456,6 +462,7 @@ Browser verification covered:
 - verifying `/brackets` reads the saved bracket and populates "you vs the crowd" (Mexico champion, 81% agreement, 13/16 R32 winners, 3 contrarian calls), champion-distribution and match-consensus bars
 - verifying the light theme flips the whole site to the high-contrast light palette and stays legible
 - verifying Arabic switches to RTL with Zain/Alexandria fonts and localized team names while LED/Doto numbers stay left-to-right
+- verifying Auth0 provider swap with `npm run lint`, `npm run test:v0.1`, `npm run build`, `npm run db:apply`, `npx vercel build`, local `/api/auth/start` 302 redirect, Auth0 `/authorize` -> `/u/login`, Vercel env list showing Auth0 env vars and no WorkOS env vars, and in-app browser smoke check from `/pickem` lock gate to Auth0 Universal Login
 
 Latest screenshot:
 

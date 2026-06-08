@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import { neon } from '@neondatabase/serverless'
 
 const connectionString = process.env.PRIMARY_DB_CONNECTION_STRING
@@ -8,15 +8,21 @@ if (!connectionString) {
 }
 
 const sql = neon(connectionString)
-const schema = await readFile('db/migrations/001_accounts_persistence.sql', 'utf8')
+const migrations = (await readdir('db/migrations'))
+  .filter((name) => name.endsWith('.sql'))
+  .sort()
 
-const statements = schema
-  .split(';')
-  .map((statement) => statement.trim())
-  .filter(Boolean)
+for (const migration of migrations) {
+  const migrationPath = `db/migrations/${migration}`
+  const schema = await readFile(migrationPath, 'utf8')
+  const statements = schema
+    .split(';')
+    .map((statement) => statement.trim())
+    .filter(Boolean)
 
-for (const statement of statements) {
-  await sql.query(statement, [])
+  for (const statement of statements) {
+    await sql.query(statement, [])
+  }
+
+  console.log(`Applied ${migrationPath}`)
 }
-
-console.log('Applied db/migrations/001_accounts_persistence.sql')

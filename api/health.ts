@@ -13,7 +13,7 @@ export default function handler(_request: unknown, response: HealthResponse) {
       posthog: Boolean(process.env.WORLDCUP_API_KEY),
       stripeProjects: true,
       primaryDatabase: Boolean(process.env.PRIMARY_DB_CONNECTION_STRING),
-      workos: Boolean(process.env.WORKOS_CLIENT_ID),
+      auth0: Boolean(process.env.AUTH0_CLIENT_ID),
       sentry: Boolean(process.env.SENTRY_DSN),
     },
   })

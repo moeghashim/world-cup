@@ -874,3 +874,59 @@ session also has another extension UI blocking automation on the AuthKit page.
 
 The cumulative build estimate is now roughly `~7.8M` total tokens and `~$69`
 estimated API-equivalent cost.
+
+## Provider Swap: Auth0 By Okta Replaces WorkOS
+
+WorkOS was removed from the active implementation after its Magic Auth setting
+blocked the required passwordless QA path. The replacement provider is Auth0 by
+Okta, provisioned through Stripe Projects as a new resource named `auth0`.
+
+What changed:
+
+- Projects.dev now has `auth0` active in the default environment and the old
+  WorkOS `auth` resource detached from that environment.
+- Vercel now has `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_DOMAIN`, and
+  `AUTH0_COOKIE_SECRET` in Development, Preview, and Production. The old
+  WorkOS env vars were removed from Vercel.
+- The app now uses Auth0 Universal Login with the Authorization Code Flow.
+- `/api/auth/start` creates an auth-state nonce, stores it in an httpOnly cookie,
+  and redirects to Auth0.
+- `/api/auth/callback` validates the nonce, exchanges the code server-side,
+  verifies the Auth0 ID token, maps the user into Neon by `users.auth0_user_id`,
+  and sets a signed httpOnly `wwc_session` cookie.
+- `/api/auth/logout` clears the app cookie and redirects through Auth0 logout.
+- The local session stores only a signed Auth0 subject. Auth0 tokens are not
+  stored in client-readable state and are not returned from non-auth APIs.
+- A new migration adds `auth0_user_id` while keeping the old `workos_user_id`
+  column nullable for databases that already ran the prior WorkOS migration.
+
+The Auth0 client initially rejected localhost with `Callback URL mismatch`.
+Projects.dev accepted an `auth0` update for callback, logout, and web-origin
+URLs covering local development and `https://winworldcup2026.com`. After that,
+Auth0 `/authorize` redirected to `/u/login`, confirming the callback mismatch
+was fixed.
+
+Verification:
+
+- `npm run lint`
+- `npm run test:v0.1`
+- `npm run build`
+- `npm run db:apply` after updating it to load local `.env`
+- `npx vercel build`
+- local HTTP check for `/api/auth/start`
+- external Auth0 authorize check to `/u/login`
+- `vercel env ls` confirming Auth0 env vars are present and WorkOS env vars are
+  absent
+- in-app browser smoke check from `/pickem` quick-fill → `Lock my bracket` →
+  Auth0 lock gate → Auth0 Universal Login
+
+The database migration was applied to Neon with
+`db/migrations/002_auth0_provider.sql`, adding `auth0_user_id`, making the old
+WorkOS column nullable, and creating the Auth0 user-id uniqueness index.
+
+Full human-assisted account E2E is still pending a completed Auth0 login session,
+so handle setup, anonymous-pick migration after callback, reload persistence, and
+profile verification remain the next QA step.
+
+The cumulative build estimate is now roughly `~8.2M` total tokens and `~$73`
+estimated API-equivalent cost.

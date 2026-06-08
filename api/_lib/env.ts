@@ -1,8 +1,9 @@
 type RequiredEnvName =
   | 'PRIMARY_DB_CONNECTION_STRING'
-  | 'WORKOS_API_KEY'
-  | 'WORKOS_CLIENT_ID'
-  | 'WORKOS_COOKIE_PASSWORD'
+  | 'AUTH0_CLIENT_ID'
+  | 'AUTH0_CLIENT_SECRET'
+  | 'AUTH0_COOKIE_SECRET'
+  | 'AUTH0_DOMAIN'
 
 export function getRequiredEnv(name: RequiredEnvName): string {
   const value = process.env[name]

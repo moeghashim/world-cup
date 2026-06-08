@@ -1,19 +1,27 @@
 # v0.1 Accounts + Persistence
 
+## 2026-06-08 Provider Update
+
+Auth0 by Okta replaces WorkOS for v0.1 account identity. The historical WorkOS
+task files remain in this folder as the original task contract, and task
+`011-replace-workos-with-auth0` records the approved provider swap. The current
+implementation uses Auth0 Universal Login, server-side code exchange, verified
+ID tokens, a signed httpOnly app session cookie, and `users.auth0_user_id` as the
+local account mapping.
+
 ## Definition of Done
 
 v0.1 is done when Floodlights preserves anonymous play until a lock gate, then
-uses WorkOS passwordless/magic-link auth and WorkOS-managed sessions to persist
+uses Auth0 Universal Login and an app httpOnly session to persist
 the player's bracket, group picks, and score predictions server-side.
 
 Derived from PLAN §10 and PRD S1 after the 2026-06-07 provider reconciliation:
 
-- WorkOS starts the hosted magic-link sign-in flow and handles sign-in email.
-- The callback maps the WorkOS user to a local `users` row by
-  `workos_user_id`.
+- Auth0 starts the hosted Universal Login flow.
+- The callback maps the Auth0 user to a local `users` row by `auth0_user_id`.
 - No custom `magic_link_tokens` or `sessions` tables/endpoints are created.
-- Refreshing the app keeps the user authenticated through the WorkOS sealed
-  session cookie.
+- Refreshing the app keeps the user authenticated through the signed httpOnly
+  app session cookie.
 - First sign-in requires a unique handle before the first account-bound save.
 - Anonymous localStorage bracket and group picks are claimed into the account
   once after sign-in.
@@ -26,15 +34,14 @@ Derived from PLAN §10 and PRD S1 after the 2026-06-07 provider reconciliation:
   exposed through the client bundle or non-auth API responses.
 - The sign-in and lock flow honors the existing Floodlights i18n system
   (EN/ES/FR/PT/AR), RTL for Arabic, and dark/light themes.
-- Full E2E QA runs in Chrome before PR handoff: WorkOS sign-in, play-to-lock,
+- Full E2E QA runs in Chrome before PR handoff: Auth0 sign-in, play-to-lock,
   handle-at-first-sign-in, anonymous-pick migration, persistence across reload
   and fresh session, and `/profile`, in English and Arabic across both themes.
 
 ## Out of Scope
 
 - Custom magic-link token/session code.
-- AgentMail usage; AgentMail is for v0.5 prize emails unless WorkOS requires
-  app-sent email.
+- AgentMail usage; AgentMail is for v0.5 prize emails.
 - Real fixtures and real bracket structure.
 - Live results, scoring jobs, and standings.
 - Hosts and public host pages.

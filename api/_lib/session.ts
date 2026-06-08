@@ -1,17 +1,12 @@
-import type { AuthenticateWithSessionCookieSuccessResponse } from '@workos-inc/node'
 import type { ApiRequest } from './http.js'
 import { HttpError } from './http.js'
 import { getSessionCookie } from './cookies.js'
-import { getWorkOS, getWorkOSCookiePassword } from './workos.js'
-import {
-  getLocalUserByWorkOSId,
-  getSignupCountry,
-  upsertLocalUserFromWorkOS,
-} from './users.js'
+import { verifyAppSession } from './auth0.js'
+import { getLocalUserByAuth0Id } from './users.js'
 import type { AccountUser } from './types.js'
 
 export type AuthContext = {
-  workosSession: AuthenticateWithSessionCookieSuccessResponse
+  auth0UserId: string
   user: AccountUser
 }
 
@@ -21,24 +16,14 @@ export async function getAuthContext(
   const sessionData = getSessionCookie(request)
   if (!sessionData) return null
 
-  const workos = getWorkOS()
-  const result = await workos.userManagement.authenticateWithSessionCookie({
-    sessionData,
-    cookiePassword: getWorkOSCookiePassword(),
-  })
+  const claims = verifyAppSession(sessionData)
+  if (!claims) return null
 
-  if (!result.authenticated) return null
-
-  const existing = await getLocalUserByWorkOSId(result.user.id)
-  const user =
-    existing ??
-    (await upsertLocalUserFromWorkOS(
-      result.user,
-      getSignupCountry(request.headers),
-    ))
+  const user = await getLocalUserByAuth0Id(claims.sub)
+  if (!user) return null
 
   return {
-    workosSession: result,
+    auth0UserId: claims.sub,
     user,
   }
 }
@@ -60,28 +45,3 @@ export async function requireHandle(request: ApiRequest): Promise<AuthContext> {
   }
   return context
 }
-
-export async function getWorkOSLogoutUrl(
-  request: ApiRequest,
-  returnTo: string,
-): Promise<string | null> {
-  const sessionData = getSessionCookie(request)
-  if (!sessionData) return null
-
-  try {
-    const sealedSession = getWorkOS().userManagement.loadSealedSession({
-      sessionData,
-      cookiePassword: getWorkOSCookiePassword(),
-    })
-    return await sealedSession.getLogoutUrl({ returnTo })
-  } catch {
-    const context = await getAuthContext(request)
-    if (!context) return null
-
-    return getWorkOS().userManagement.getLogoutUrl({
-      sessionId: context.workosSession.sessionId,
-      returnTo,
-    })
-  }
-}
-

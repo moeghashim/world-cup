@@ -1,5 +1,19 @@
 # Open Questions
 
+## 2026-06-08 Provider Swap
+
+- Resolved: Auth0 by Okta replaces WorkOS for v0.1 identity.
+- Projects.dev now has an active Auth0 resource named `auth0` in the default
+  environment; the old WorkOS `auth` resource is detached from that environment.
+- Auth0 callback/logout/web-origin configuration was accepted through
+  `stripe projects update auth0 ...`; local `/api/auth/start` now reaches Auth0
+  Universal Login instead of the callback mismatch page.
+- Vercel Development, Preview, and Production now have the four Auth0 env vars;
+  old WorkOS env vars were removed from Vercel.
+- Full human-assisted E2E still needs a completed Auth0 login session. The app
+  code and provider callback are ready; the remaining step is user credential or
+  passwordless-login completion in Auth0 Universal Login.
+
 No open questions after the 2026-06-07 provider reconciliation.
 
 Resolved decisions for v0.1:
