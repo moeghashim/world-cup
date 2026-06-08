@@ -1,5 +1,21 @@
 # Open Questions
 
+## 2026-06-08 Auth0 Passwordless Delivery Resolution
+
+- Resolved: Auth0 Passwordless Email connection `email` is enabled for the
+  World Cup app, and local `/api/auth/passwordless/start` now returns
+  `sent: true` instead of `bad.connection`.
+- Resolved for v0.1: use Auth0 built-in email delivery for sign-in codes.
+  Auth0 custom SMTP through AgentMail is not active for sign-in because Auth0
+  records `550 5.1.8 Sender address rejected` immediately after `Code/Link Sent`.
+- Evidence: direct AgentMail SMTP using `world-cup-agent@agentmail.to` as the
+  authenticated user and sender queued successfully to `moe@babanuj.com`, and
+  the user confirmed receiving that direct SMTP test.
+- Remaining QA dependency: a fresh six-digit code from `moe@babanuj.com` is
+  needed to complete `/api/auth/passwordless/verify` in the real browser flow.
+  The AgentMail QA inbox did not receive Auth0 built-in delivery during polling,
+  so it is not reliable for this sign-off run.
+
 ## 2026-06-08 Provider Swap
 
 - Resolved: Auth0 by Okta replaces WorkOS for v0.1 identity.
@@ -32,14 +48,12 @@ No open questions after the 2026-06-07 provider reconciliation.
 Resolved decisions for v0.1:
 
 - Env names come from Stripe Projects via `stripe projects env --pull`.
-- WorkOS handles auth-endpoint abuse; no custom v0.1 rate limiting.
-- Resend is replaced by AgentMail, but AgentMail is not used in v0.1 because
-  WorkOS sends sign-in emails.
+- Auth0 handles auth-endpoint abuse; no custom v0.1 rate limiting.
+- Resend is replaced by AgentMail for later prize/product emails. Auth0 sends
+  v0.1 sign-in emails through its built-in delivery path.
 
-Implementation note: WorkOS AuthKit requires a `WORKOS_COOKIE_PASSWORD` style
-cookie/session secret. If Stripe Projects does not expose one, Codex should add
-the exact WorkOS-required secret through Stripe Projects/Vercel env and append a
-new open question entry only if that cannot be done without a human decision.
+Superseded note: the old WorkOS cookie-secret question no longer applies after
+the Auth0 provider swap. The active app session uses `AUTH0_COOKIE_SECRET`.
 
 ## 2026-06-07 Chrome QA Blocker
 

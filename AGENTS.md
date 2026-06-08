@@ -38,7 +38,7 @@ Current implementation baseline:
 - PostHog first-party `/ingest` proxy in `vite.config.ts` and `vercel.json`.
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
-- AI usage disclosure currently shows `~8.5M` total tokens and `~$76`
+- AI usage disclosure currently shows `~8.7M` total tokens and `~$78`
   estimated API-equivalent cost in `src/App.tsx` and the appended
   `BUILD_BLOG.md` reset note.
 - `BUILD_BLOG.md` remains append-only for the public build article.
@@ -87,8 +87,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~8.5M` total tokens and
-`~$76` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~8.7M` total tokens and
+`~$78` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -112,8 +112,10 @@ docs (`BUILD_BLOG.md`) rather than in the UI: currently `~8.5M` total tokens and
 - Google Analytics gtag for page-view tracking, with the static homepage snippet using `G-RFPJRPKYQR` and `VITE_GA_MEASUREMENT_ID` reserved for the runtime fallback path.
 - `posthog-js` for env-gated product analytics through the first-party `/ingest` proxy.
 - Auth0 by Okta for account identity through Projects.dev resource `auth0`.
-- Auth0 Passwordless Email API routes for email-code sign-in, blocked on the
-  Auth0 tenant connection named `email` being enabled.
+- Auth0 Passwordless Email API routes for email-code sign-in through Auth0
+  built-in email delivery. AgentMail custom SMTP for Auth0 sign-in is disabled
+  while Auth0 and AgentMail investigate a `550 5.1.8 Sender address rejected`
+  handoff failure.
 - `jose` for Auth0 ID-token verification in Vercel serverless callbacks.
 - Optimized raster stadium hero loaded from `src/assets/world-cup-hero.jpg`.
 
@@ -336,6 +338,12 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   player-facing account flow keeps the Floodlights website design and no longer
   switches into the Auth0-branded screen from the normal UI. Refreshed the
   documentation estimate to `~8.5M` total tokens and `~$76`.
+- Triaged Auth0 email-code delivery: confirmed the Auth0 Passwordless Email
+  connection is enabled, isolated Auth0 custom SMTP with AgentMail as failing
+  with `550 5.1.8 Sender address rejected`, confirmed direct AgentMail SMTP to
+  `moe@babanuj.com` is delivered, switched Auth0 sign-in back to built-in email
+  delivery, documented the remaining human-assisted code-entry QA step, and
+  refreshed the documentation estimate to `~8.7M` total tokens and `~$78`.
 
 ### 2026-06-07
 
@@ -484,6 +492,13 @@ Browser verification covered:
 - verifying the same-design sign-in adjustment in the in-app browser: `/profile`
   opens the Floodlights email-code modal with `Send email code`, no `Password`
   field, and no `Use hosted Auth0` button
+- verifying Auth0 passwordless delivery triage: local
+  `/api/auth/passwordless/start` returns `sent: true`; Auth0 custom SMTP through
+  AgentMail logs `550 5.1.8 Sender address rejected`; direct AgentMail SMTP to
+  `moe@babanuj.com` queues successfully and was user-confirmed received; Auth0
+  built-in delivery logs `Code/Link Sent` to `moe@babanuj.com` without a new
+  `Failed Sending Notification`; AgentMail QA inbox polling did not receive the
+  Auth0 built-in email in the test window
 
 Latest screenshot:
 

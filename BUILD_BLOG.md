@@ -1,6 +1,6 @@
 # Building A World Cup Prediction And Sponsor Rewards Website
 
-Last updated: 2026-06-07
+Last updated: 2026-06-08
 
 This is the working blog post for the project. Update this file on every commit so the article stays aligned with the real build history.
 
@@ -989,4 +989,37 @@ Verification confirmed that `/profile` opens the Floodlights email-code modal
 with `Send email code`, no password field, and no hosted Auth0 button.
 
 The cumulative build estimate is now roughly `~8.5M` total tokens and `~$76`
+estimated API-equivalent cost.
+
+## Auth0 Email Delivery Provider Triage
+
+Passwordless email-code sign-in is now past the missing-connection blocker. The
+Auth0 Passwordless Email connection named `email` is enabled, and the local
+passwordless start endpoint returns `sent: true`.
+
+The next blocker was delivery. Auth0 custom SMTP was configured with AgentMail:
+
+- SMTP host `smtp.agentmail.to`
+- port `587`
+- username `world-cup-agent@agentmail.to`
+- provider From `world-cup-agent@agentmail.to`
+- `Verification Email (Code)` template From `world-cup-agent@agentmail.to`
+
+Auth0 accepted the passwordless request but then logged `Failed Sending
+Notification` with `550 5.1.8 Sender address rejected`. The same happened when
+the recipient was the AgentMail QA inbox and when it was `moe@babanuj.com`.
+
+To isolate the problem, a direct SMTP test used AgentMail from this machine with
+the same inbox identity, API key, sender, and recipient. That direct message was
+accepted and queued, and the user confirmed receiving it. The issue is therefore
+specific to the Auth0 custom SMTP handoff, not general AgentMail deliverability.
+
+For v0.1, Auth0 custom SMTP is disabled and Auth0 built-in email delivery is the
+active sign-in path. Auth0 now logs a clean `Code/Link Sent` row for
+`moe@babanuj.com` without a matching failure row. The remaining account E2E step
+is to enter a fresh six-digit code from that inbox and verify the signed app
+session, handle creation, anonymous-pick migration, persistence, profile page,
+Arabic RTL, and both themes.
+
+The cumulative build estimate is now roughly `~8.7M` total tokens and `~$78`
 estimated API-equivalent cost.
