@@ -7,6 +7,7 @@ export type CachedResult = {
   matchId: string
   homeScore: number | null
   awayScore: number | null
+  winner: 'home' | 'away' | null
   status: string
   finishedAt: string | null
   source: string
@@ -31,6 +32,7 @@ function mapResultRow(row: ResultRow): CachedResult {
     matchId: row.match_id,
     homeScore: row.home_score,
     awayScore: row.away_score,
+    winner: row.winner,
     status: row.status,
     finishedAt: isoStringFromDatabase(row.finished_at),
     source: row.source,
@@ -69,15 +71,17 @@ export async function upsertResults(results: NormalizedResult[]): Promise<number
           match_id,
           home_score,
           away_score,
+          winner,
           status,
           finished_at,
           source,
           updated_at
         )
-        values ($1, $2, $3, $4, $5::timestamptz, $6, now())
+        values ($1, $2, $3, $4, $5, $6::timestamptz, $7, now())
         on conflict (match_id) do update
           set home_score = excluded.home_score,
               away_score = excluded.away_score,
+              winner = excluded.winner,
               status = excluded.status,
               finished_at = excluded.finished_at,
               source = excluded.source,
@@ -87,6 +91,7 @@ export async function upsertResults(results: NormalizedResult[]): Promise<number
         result.matchId,
         result.homeScore,
         result.awayScore,
+        result.winner,
         result.status,
         result.finishedAt,
         result.source,

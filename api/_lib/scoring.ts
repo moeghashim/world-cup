@@ -11,6 +11,7 @@ export type ScoringResult = {
   matchId: string
   homeScore: number | null
   awayScore: number | null
+  winner: 'home' | 'away' | null
   status: string
 }
 
@@ -161,7 +162,10 @@ function actualWinner(
   match: TournamentMatch,
   result: ScoringResult | undefined,
 ): string | null {
-  if (!result || result.homeScore === null || result.awayScore === null) return null
+  if (!result) return null
+  if (result.winner === 'home') return match.homeTeamCode
+  if (result.winner === 'away') return match.awayTeamCode
+  if (result.homeScore === null || result.awayScore === null) return null
   if (result.homeScore === result.awayScore) return null
   return result.homeScore > result.awayScore
     ? match.homeTeamCode
@@ -290,6 +294,7 @@ function mapResultRow(row: ResultRow): ScoringResult {
     matchId: row.match_id,
     homeScore: row.home_score,
     awayScore: row.away_score,
+    winner: row.winner,
     status: row.status,
   }
 }

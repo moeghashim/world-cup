@@ -14,6 +14,7 @@ export type NormalizedResult = {
   matchId: string
   homeScore: number | null
   awayScore: number | null
+  winner: 'home' | 'away' | null
   status: NormalizedResultStatus
   finishedAt: string | null
   source: LiveResultsProvider
@@ -38,6 +39,8 @@ type FootballDataMatch = {
   awayTeam?: { name?: string | null; tla?: string | null }
   score?: {
     winner?: string | null
+    duration?: string | null
+    penalties?: { home?: number | null; away?: number | null }
     fullTime?: { home?: number | null; away?: number | null }
   }
   lastUpdated?: string
@@ -54,8 +57,8 @@ type ApiFootballFixture = {
     status?: { short?: string | null; long?: string | null }
   }
   teams?: {
-    home?: { name?: string | null; code?: string | null }
-    away?: { name?: string | null; code?: string | null }
+    home?: { name?: string | null; code?: string | null; winner?: boolean | null }
+    away?: { name?: string | null; code?: string | null; winner?: boolean | null }
   }
   goals?: { home?: number | null; away?: number | null }
   score?: {
@@ -88,6 +91,47 @@ function dateBucket(value: string | null | undefined): string {
 
 function numberOrNull(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
+function winnerFromScores(
+  home: number | null,
+  away: number | null,
+): 'home' | 'away' | null {
+  if (home === null || away === null || home === away) return null
+  return home > away ? 'home' : 'away'
+}
+
+function footballDataWinner(value: string | null | undefined): 'home' | 'away' | null {
+  switch ((value ?? '').toUpperCase()) {
+    case 'HOME_TEAM':
+      return 'home'
+    case 'AWAY_TEAM':
+      return 'away'
+    default:
+      return null
+  }
+}
+
+function apiFootballWinner(fixture: ApiFootballFixture): 'home' | 'away' | null {
+  if (fixture.teams?.home?.winner === true) return 'home'
+  if (fixture.teams?.away?.winner === true) return 'away'
+
+  const penaltyWinner = winnerFromScores(
+    numberOrNull(fixture.score?.penalty?.home),
+    numberOrNull(fixture.score?.penalty?.away),
+  )
+  if (penaltyWinner) return penaltyWinner
+
+  const extraWinner = winnerFromScores(
+    numberOrNull(fixture.score?.extratime?.home),
+    numberOrNull(fixture.score?.extratime?.away),
+  )
+  if (extraWinner) return extraWinner
+
+  return winnerFromScores(
+    numberOrNull(fixture.score?.fulltime?.home ?? fixture.goals?.home),
+    numberOrNull(fixture.score?.fulltime?.away ?? fixture.goals?.away),
+  )
 }
 
 function matchCandidate(
@@ -213,6 +257,7 @@ export function normalizeFootballDataResults(
         matchId: tournamentMatch.id,
         homeScore: numberOrNull(match.score?.fullTime?.home),
         awayScore: numberOrNull(match.score?.fullTime?.away),
+        winner: footballDataWinner(match.score?.winner),
         status,
         finishedAt: resultDate(status, match.lastUpdated ?? match.utcDate),
         source: 'football-data',
@@ -255,6 +300,7 @@ export function normalizeApiFootballResults(
         matchId: tournamentMatch.id,
         homeScore: extraHome ?? fullHome ?? numberOrNull(fixture.goals?.home),
         awayScore: extraAway ?? fullAway ?? numberOrNull(fixture.goals?.away),
+        winner: apiFootballWinner(fixture),
         status,
         finishedAt: resultDate(status, fixture.fixture?.date),
         source: 'api-football',

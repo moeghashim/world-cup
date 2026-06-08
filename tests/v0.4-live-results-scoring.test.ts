@@ -107,14 +107,14 @@ test('scorer is idempotent and applies exact v0.4 scoring math only', () => {
     match('match-104', 104, 'final', 'MEX', 'ARG'),
   ]
   const results = [
-    { matchId: 'match-1', homeScore: 2, awayScore: 0, status: 'finished' },
-    { matchId: 'match-2', homeScore: 1, awayScore: 1, status: 'finished' },
-    { matchId: 'match-3', homeScore: 0, awayScore: 1, status: 'finished' },
-    { matchId: 'match-73', homeScore: 2, awayScore: 0, status: 'finished' },
-    { matchId: 'match-89', homeScore: 1, awayScore: 0, status: 'finished' },
-    { matchId: 'match-97', homeScore: 1, awayScore: 0, status: 'finished' },
-    { matchId: 'match-101', homeScore: 1, awayScore: 0, status: 'finished' },
-    { matchId: 'match-104', homeScore: 1, awayScore: 0, status: 'finished' },
+    { matchId: 'match-1', homeScore: 2, awayScore: 0, winner: null, status: 'finished' },
+    { matchId: 'match-2', homeScore: 1, awayScore: 1, winner: null, status: 'finished' },
+    { matchId: 'match-3', homeScore: 0, awayScore: 1, winner: null, status: 'finished' },
+    { matchId: 'match-73', homeScore: 2, awayScore: 0, winner: null, status: 'finished' },
+    { matchId: 'match-89', homeScore: 1, awayScore: 0, winner: null, status: 'finished' },
+    { matchId: 'match-97', homeScore: 1, awayScore: 0, winner: null, status: 'finished' },
+    { matchId: 'match-101', homeScore: 1, awayScore: 0, winner: null, status: 'finished' },
+    { matchId: 'match-104', homeScore: 1, awayScore: 0, winner: null, status: 'finished' },
   ]
   const input = {
     matches,
@@ -155,6 +155,47 @@ test('scorer is idempotent and applies exact v0.4 scoring math only', () => {
   assert.equal(standing.breakdown.predictions.scored, false)
 })
 
+test('scorer awards knockout advancement points when penalties decide a drawn match', () => {
+  const matches = [
+    match('match-104', 104, 'final', 'MEX', 'ARG'),
+  ]
+  const input = {
+    matches,
+    results: [
+      {
+        matchId: 'match-104',
+        homeScore: 1,
+        awayScore: 1,
+        winner: 'away' as const,
+        status: 'finished',
+      },
+    ],
+    brackets: [
+      {
+        userId: 'picked-arg',
+        locked: true,
+        data: { ko: { r4m0: 'ARG' } },
+      },
+      {
+        userId: 'picked-mex',
+        locked: true,
+        data: { ko: { r4m0: 'MEX' } },
+      },
+    ],
+    groupPicks: [],
+  }
+
+  const first = computeStandings(input)
+  const second = computeStandings(input)
+  const pickedArg = first.find((standing) => standing.userId === 'picked-arg')
+  const pickedMex = first.find((standing) => standing.userId === 'picked-mex')
+
+  assert.deepEqual(second, first)
+  assert.equal(pickedArg?.points, 160)
+  assert.equal(pickedArg?.breakdown.knockout.matches[0].winner, 'ARG')
+  assert.equal(pickedMex?.points, 0)
+})
+
 test('provider adapters normalize football-data and api-football payloads to the same match result', () => {
   const matches = [
     match('match-1', 1, 'group', 'MEX', 'RSA', '2026-06-11T19:00:00.000Z'),
@@ -168,7 +209,7 @@ test('provider adapters normalize football-data and api-football payloads to the
           status: 'FINISHED',
           homeTeam: { name: 'Mexico', tla: 'MEX' },
           awayTeam: { name: 'South Africa', tla: 'RSA' },
-          score: { fullTime: { home: 2, away: 0 } },
+          score: { winner: 'HOME_TEAM', fullTime: { home: 2, away: 0 } },
           lastUpdated: '2026-06-11T21:00:00Z',
         },
       ],
@@ -196,19 +237,77 @@ test('provider adapters normalize football-data and api-football payloads to the
   )
 
   assert.deepEqual(
-    footballData.map(({ matchId, homeScore, awayScore, status }) => ({
+    footballData.map(({ matchId, homeScore, awayScore, winner, status }) => ({
       matchId,
       homeScore,
       awayScore,
+      winner,
       status,
     })),
-    apiFootball.map(({ matchId, homeScore, awayScore, status }) => ({
+    apiFootball.map(({ matchId, homeScore, awayScore, winner, status }) => ({
       matchId,
       homeScore,
       awayScore,
+      winner,
       status,
     })),
   )
+})
+
+test('provider adapters normalize penalty winners to the same advancing side', () => {
+  const matches = [
+    match('match-104', 104, 'final', 'MEX', 'ARG', '2026-07-19T19:00:00.000Z'),
+  ]
+  const footballData = normalizeFootballDataResults(
+    {
+      matches: [
+        {
+          id: 104,
+          utcDate: '2026-07-19T19:00:00Z',
+          status: 'FINISHED',
+          homeTeam: { name: 'Mexico', tla: 'MEX' },
+          awayTeam: { name: 'Argentina', tla: 'ARG' },
+          score: {
+            winner: 'AWAY_TEAM',
+            duration: 'PENALTY_SHOOTOUT',
+            fullTime: { home: 1, away: 1 },
+            penalties: { home: 3, away: 4 },
+          },
+          lastUpdated: '2026-07-19T22:00:00Z',
+        },
+      ],
+    },
+    matches,
+  )
+  const apiFootball = normalizeApiFootballResults(
+    {
+      response: [
+        {
+          fixture: {
+            id: 104,
+            date: '2026-07-19T19:00:00Z',
+            status: { short: 'PEN' },
+          },
+          teams: {
+            home: { name: 'Mexico', code: 'MEX', winner: false },
+            away: { name: 'Argentina', code: 'ARG', winner: true },
+          },
+          score: {
+            fulltime: { home: 1, away: 1 },
+            penalty: { home: 3, away: 4 },
+          },
+        },
+      ],
+    },
+    matches,
+  )
+
+  assert.equal(footballData[0].winner, 'away')
+  assert.equal(apiFootball[0].winner, 'away')
+  assert.equal(footballData[0].homeScore, 1)
+  assert.equal(apiFootball[0].homeScore, 1)
+  assert.equal(footballData[0].awayScore, 1)
+  assert.equal(apiFootball[0].awayScore, 1)
 })
 
 test('live results provider swaps by env with football-data as default', () => {

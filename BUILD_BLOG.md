@@ -1678,3 +1678,33 @@ console errors.
 
 The cumulative build estimate is now roughly `~11.8M` total tokens and `~$109`
 estimated API-equivalent cost.
+
+### v0.4.1 - Knockout Penalty Winners
+
+Claude's v0.4 review found a scoring bug that only appears once knockout
+matches can be decided on penalties. The scorer previously derived a knockout
+winner only by comparing the stored home and away scores. If regulation or
+extra time ended level, the scorer treated the result as no winner and awarded
+no advancement points, even when the provider payload already identified the
+team that advanced.
+
+This follow-up adds an additive `results.winner` column with values limited to
+`home`, `away`, or null. The football-data adapter now maps `score.winner` into
+that field, and the api-football adapter trusts `teams.home.winner` /
+`teams.away.winner` first, then falls back to penalty and final score fields
+when those booleans are missing. The cache persists the normalized winner on
+insert and update.
+
+Scoring now checks `result.winner` before falling back to the existing score
+comparison. That preserves group-stage draw behavior and ordinary knockout
+score wins, while correctly awarding Final, semifinal, quarterfinal, Round of
+16, and Round of 32 points when a drawn knockout score is settled by penalties.
+
+The regression test covers a 1-1 Final where Argentina advances as the away
+side: the Argentina picker receives the Final weight and the Mexico picker gets
+zero, with idempotent recomputation. The adapter tests also prove equivalent
+football-data and api-football penalty payloads normalize to the same advancing
+side.
+
+The cumulative build estimate is now roughly `~11.9M` total tokens and `~$110`
+estimated API-equivalent cost.
