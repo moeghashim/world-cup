@@ -1140,3 +1140,35 @@ Verification for this task ran `npm run build`.
 
 The cumulative build estimate is now roughly `~9.2M` total tokens and `~$83`
 estimated API-equivalent cost.
+
+### Task 003 - Add Openfootball Seed And Refresh Script
+
+The repository now has a repeatable tournament seed path:
+
+- `scripts/tournament-normalize.ts` parses the vendored openfootball snapshot,
+  maps actual team names to stable codes, derives the 12-group draw, builds all
+  104 matches, and converts local `UTC±offset` kickoff strings into ISO UTC.
+- `scripts/seed-openfootball.ts` runs the verifier or upserts the normalized
+  groups, teams, and matches into Neon through `PRIMARY_DB_CONNECTION_STRING`.
+- `package.json` exposes `npm run verify:tournament-data` and
+  `npm run db:seed:tournament`.
+
+The normalizer is strict on team identity. If the upstream file changes to a
+team name without a stable code mapping, the script fails rather than inventing
+new product data.
+
+Verification for this task ran:
+
+```bash
+npm run verify:tournament-data
+npm run db:apply
+npm run db:seed:tournament
+npm run build
+```
+
+The seeded Neon readback confirmed 12 groups, 48 teams, 104 matches, 72 group
+matches, and opening kickoff `2026-06-11T19:00:00.000Z` for Mexico vs South
+Africa.
+
+The cumulative build estimate is now roughly `~9.3M` total tokens and `~$84`
+estimated API-equivalent cost.

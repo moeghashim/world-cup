@@ -7,13 +7,13 @@ files: ["scripts/seed-openfootball.ts", "package.json", "BUILD_BLOG.md", "AGENTS
 
 ## Acceptance Criteria
 
-- [ ] Parse the vendored openfootball JSON into normalized teams, groups, and
+- [x] Parse the vendored openfootball JSON into normalized teams, groups, and
   matches.
-- [ ] Convert openfootball local `UTC±offset` kickoff strings into ISO UTC.
-- [ ] Upsert teams and matches into Neon using `PRIMARY_DB_CONNECTION_STRING`.
-- [ ] Support a verification/dry-run mode for tests and CI without requiring
+- [x] Convert openfootball local `UTC±offset` kickoff strings into ISO UTC.
+- [x] Upsert teams and matches into Neon using `PRIMARY_DB_CONNECTION_STRING`.
+- [x] Support a verification/dry-run mode for tests and CI without requiring
   database writes.
-- [ ] Produce clear counts for teams, groups, group fixtures, and total fixtures.
+- [x] Produce clear counts for teams, groups, group fixtures, and total fixtures.
 
 ## Notes
 
