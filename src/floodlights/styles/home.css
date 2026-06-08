@@ -27,12 +27,12 @@
 .ledrow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
 .tcell{text-align:center}
 .tcode{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;padding:4px 11px;border-radius:7px;display:inline-block;margin-bottom:4px}
-.tcell.mex .tcode{color:var(--lime-ink);background:rgba(201,255,61,.1);border:1px solid rgba(201,255,61,.4)}
-.tcell.kor .tcode{color:var(--amber-ink);background:rgba(255,194,61,.1);border:1px solid rgba(255,194,61,.4)}
+.tcell.home .tcode{color:var(--lime-ink);background:rgba(201,255,61,.1);border:1px solid rgba(201,255,61,.4)}
+.tcell.away .tcode{color:var(--amber-ink);background:rgba(255,194,61,.1);border:1px solid rgba(255,194,61,.4)}
 .tnm{font-size:11px;color:var(--mut);margin-bottom:6px}
 .sv{font-size:54px}
-.tcell.mex .sv{color:var(--lime-ink);text-shadow:0 0 18px rgba(201,255,61,.5)}
-.tcell.kor .sv{color:var(--amber-ink);text-shadow:0 0 18px rgba(255,194,61,.5)}
+.tcell.home .sv{color:var(--lime-ink);text-shadow:0 0 18px rgba(201,255,61,.5)}
+.tcell.away .sv{color:var(--amber-ink);text-shadow:0 0 18px rgba(255,194,61,.5)}
 [data-theme="light"] .tcell .sv{text-shadow:none}
 .colon{font-family:'Doto',monospace;font-weight:900;font-size:40px;color:var(--mut)}
 .stepper{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}

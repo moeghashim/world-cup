@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~9.0M` total tokens and `~$81` estimated API-equivalent cost in
+  `~9.8M` total tokens and `~$89` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -101,8 +101,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.0M` total tokens and
-`~$81` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.8M` total tokens and
+`~$89` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -372,6 +372,48 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   light themes, recorded Chrome as blocked by another extension UI for the
   browser-owned cookie check, and refreshed the documentation estimate to
   `~9.0M` total tokens and `~$81`.
+- Started v0.2 real tournament data by verifying and vendoring the
+  openfootball World Cup 2026 JSON snapshot under `db/openfootball/`, recording
+  the CC0 source metadata, and confirming 104 total fixtures, 72 group fixtures,
+  12 groups, and 48 group-stage teams. Refreshed the documentation estimate to
+  `~9.1M` total tokens and `~$82`.
+- Added `db/migrations/003_real_tournament_data.sql` with idempotent
+  `tournament_groups`, `teams`, and `matches` tables, extended `db/schema.sql`
+  and `db/types.ts`, added the normalized tournament API shape in
+  `api/_lib/tournament-data.ts`, verified with `npm run build`, and refreshed
+  the documentation estimate to `~9.2M` total tokens and `~$83`.
+- Added `scripts/tournament-normalize.ts` and `scripts/seed-openfootball.ts`,
+  exposed `npm run verify:tournament-data` and `npm run db:seed:tournament`,
+  converted openfootball `UTC±offset` kickoffs to ISO UTC, seeded Neon, verified
+  the readback counts at 12 groups / 48 teams / 104 matches / 72 group matches,
+  and refreshed the documentation estimate to `~9.3M` total tokens and `~$84`.
+- Added `GET /api/data/fixtures`, generated a server-only static fallback module,
+  taught the tournament data helper to prefer Neon/cache and mark fallback reads,
+  wired the local API shim route, verified Neon and no-env fallback handler
+  responses, verified with `npm run build`, and refreshed the documentation
+  estimate to `~9.4M` total tokens and `~$85`.
+- Replaced Floodlights sample teams, groups, quick-pick fixtures, and
+  Round-of-32 template with the real openfootball-backed structure, wired the
+  homepage and Pick'em quick-pick slate to prefer `/api/data/fixtures`, switched
+  quick-pick persistence to real match IDs, verified build and data integrity,
+  and refreshed the documentation estimate to `~9.5M` total tokens and `~$86`.
+- Added server-side kickoff locks for group picks, score predictions, and the
+  full knockout bracket, returning `pick_locked` before any write after the
+  relevant kickoff. Added a non-production `x-worldcup-now` QA override because
+  all real fixtures are still upcoming on 2026-06-08, localized the UI lock
+  toast, verified build and lock-helper behavior, and refreshed the
+  documentation estimate to `~9.6M` total tokens and `~$87`.
+- Added `tests/v0.2-real-tournament-data.test.ts` and `npm run test:v0.2` for
+  tournament normalization, client data integrity, fixtures fallback, per-match
+  locks, bracket locks, and invalid group-pick IDs. Re-ran `npm run test:v0.1`,
+  `npm run build`, and `npm run lint`, then refreshed the documentation estimate
+  to `~9.7M` total tokens and `~$88`.
+- Ran v0.2 Chrome QA and recorded evidence in `tests/e2e/v0.2-chrome-qa.md`
+  with screenshots for English/dark homepage, English/light Pick'em, Arabic
+  RTL/light Pick'em, Arabic RTL/dark Pick'em, and the upcoming quick-pick sign-in
+  gate. Re-ran `npm run verify:tournament-data`, `npm run test:v0.2`,
+  `npm run test:v0.1`, `npm run lint`, and `npm run build`, then refreshed the
+  documentation estimate to `~9.8M` total tokens and `~$89`.
 
 ### 2026-06-07
 

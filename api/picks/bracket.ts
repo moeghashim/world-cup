@@ -6,6 +6,7 @@ import {
   sendJson,
 } from '../_lib/http.js'
 import { loadBracket, saveBracket, validateBracketPayload } from '../_lib/picks.js'
+import { assertBracketOpen } from '../_lib/pick-locks.js'
 import { requireAuthContext, requireHandle } from '../_lib/session.js'
 
 export default async function handler(
@@ -24,10 +25,9 @@ export default async function handler(
     requireMethod(request, 'PUT')
     const context = await requireHandle(request)
     const body = await readJsonBody<unknown>(request)
-    const bracket = await saveBracket(
-      context.user.id,
-      validateBracketPayload(body),
-    )
+    const payload = validateBracketPayload(body)
+    await assertBracketOpen(request)
+    const bracket = await saveBracket(context.user.id, payload)
 
     sendJson(response, 200, { bracket })
   } catch (error) {

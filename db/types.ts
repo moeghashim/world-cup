@@ -32,3 +32,47 @@ export type PredictionRow = {
   locked_at: string | null
   updated_at: string
 }
+
+export type TournamentGroupRow = {
+  code: string
+  name: string
+  sort_order: number
+  source: string
+  updated_at: string
+}
+
+export type TeamRow = {
+  code: string
+  name: string
+  slug: string
+  group_code: string
+  group_name: string
+  group_seed: number
+  colors: unknown
+  localized_names: unknown
+  source: string
+  updated_at: string
+}
+
+export type MatchRow = {
+  id: string
+  match_number: number
+  stage: string
+  round: string
+  group_code: string | null
+  group_name: string | null
+  home_team_code: string | null
+  away_team_code: string | null
+  home_team_name: string
+  away_team_name: string
+  home_placeholder: string | null
+  away_placeholder: string | null
+  kickoff_at: string
+  kickoff_local_date: string
+  kickoff_local_time: string
+  kickoff_timezone: string
+  venue: string
+  status: string
+  source: unknown
+  updated_at: string
+}

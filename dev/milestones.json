@@ -17,6 +17,20 @@
         "011-replace-workos-with-auth0",
         "012-add-auth0-passwordless-email-flow"
       ]
+    },
+    {
+      "id": "v0.2-real-tournament-data",
+      "status": "planned",
+      "tasks": [
+        "001-verify-vendor-openfootball-data",
+        "002-add-tournament-data-schema",
+        "003-add-seed-openfootball-script",
+        "004-add-fixtures-api-cache",
+        "005-replace-floodlights-real-data",
+        "006-enforce-kickoff-locks",
+        "007-add-v02-tests",
+        "008-run-v02-e2e-qa"
+      ]
     }
   ]
 }

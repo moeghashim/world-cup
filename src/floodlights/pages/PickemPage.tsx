@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/pickem.css'
-import { GROUPS, GROUP_KEYS, KO_PTS, KO_ROUNDS, MATCHES, MAX_KO_PICKS, SPONSORS } from '../data'
+import { GROUPS, GROUP_KEYS, KO_PTS, KO_ROUNDS, MAX_KO_PICKS, SPONSORS } from '../data'
 import { useI18n } from '../i18n/context'
 import { useToast } from '../lib/toastContext'
 import { useReveal } from '../lib/useReveal'
@@ -29,6 +29,7 @@ import { captureAnalyticsEvent } from '../../analytics'
 import { ApiClientError, apiRequest } from '../lib/apiClient'
 import { useAuth } from '../lib/authContext'
 import { migrateAnonymousPicks } from '../lib/accountMigration'
+import { getQuickPickMatches, useTournamentData } from '../lib/tournamentData'
 
 const SEP = '  ·  '
 const R_KEYS = ['r_r32', 'r_r16', 'r_qf', 'r_sf', 'r_final']
@@ -52,7 +53,7 @@ const fourth = (st: BracketState, g: string): string | null => {
 }
 const potPts = (st: BracketState) => Object.keys(st.ko).reduce((p, k) => p + KO_PTS[+k.charAt(1)], 0)
 
-interface GroupPicks { picks: Record<number, string>; locked: boolean }
+interface GroupPicks { picks: Record<string, string>; locked: boolean }
 
 export function PickemPage() {
   const { t, tname } = useI18n()
@@ -60,6 +61,8 @@ export function PickemPage() {
   const auth = useAuth()
   useReveal()
 
+  const tournamentData = useTournamentData()
+  const quickMatches = getQuickPickMatches(tournamentData?.matches)
   const [state, setState] = useState<BracketState>(() => readSharedBracket() ?? normalize(load('bracket', {})))
   const [viewing, setViewing] = useState(() => readSharedBracket() !== null)
   const [showBanner, setShowBanner] = useState(() => readSharedBracket() !== null)
@@ -219,6 +222,8 @@ export function PickemPage() {
     } catch (error) {
       if (error instanceof ApiClientError && error.code === 'handle_required') {
         sendToHandleSetup()
+      } else if (error instanceof ApiClientError && error.code === 'pick_locked') {
+        toast(t('toast_pick_locked'), '🔒')
       } else {
         toast(t('auth_save_failed'), '!')
       }
@@ -278,15 +283,21 @@ export function PickemPage() {
   }
 
   /* ---------------- group quick pick'em ---------------- */
-  const gpPick = (i: number, p: string, el: Element) => {
+  const gpPick = (id: string, p: string, el: Element) => {
     if (gp.locked) return
-    const next = { ...gp, picks: { ...gp.picks, [i]: p } }
+    const next = { ...gp, picks: { ...gp.picks, [id]: p } }
     setGp(next)
     save('grouppicks', next)
     pop(el, 1.12)
   }
   const gpLock = async () => {
-    if (gp.locked || Object.keys(gp.picks).length < MATCHES.length) return
+    const currentPicks = Object.fromEntries(
+      quickMatches
+        .map((match) => [match.id, gp.picks[match.id]])
+        .filter((entry): entry is [string, string] => typeof entry[1] === 'string'),
+    )
+
+    if (gp.locked || Object.keys(currentPicks).length < quickMatches.length) return
     if (!auth.authenticated) {
       openLockGate('group')
       return
@@ -296,7 +307,7 @@ export function PickemPage() {
       return
     }
 
-    const next = { ...gp, locked: true }
+    const next = { picks: currentPicks, locked: true }
     setSavingLock('group')
     try {
       await apiRequest('/api/picks/group', {
@@ -311,6 +322,8 @@ export function PickemPage() {
     } catch (error) {
       if (error instanceof ApiClientError && error.code === 'handle_required') {
         sendToHandleSetup()
+      } else if (error instanceof ApiClientError && error.code === 'pick_locked') {
+        toast(t('toast_pick_locked'), '🔒')
       } else {
         toast(t('auth_save_failed'), '!')
       }
@@ -327,7 +340,7 @@ export function PickemPage() {
   const isFull = fullyDone(state)
   const showShare = koN > 0 || allGroupsDone
   const showReset = !state.locked && !viewing && (allGroupsDone || koN > 0)
-  const gpN = Object.keys(gp.picks).length
+  const gpN = quickMatches.filter((match) => Boolean(gp.picks[match.id])).length
   const bracketLocked = state.locked || viewing
 
   const bracketRows: { label: string; codes: (string | null)[]; accent: string }[] = [
@@ -633,41 +646,41 @@ export function PickemPage() {
         </div>
         <div className="gpbar reveal">
           <div className="gp-l">
-            <span className="gp-cnt"><b>{gpN}</b><span className="of">/ {MATCHES.length} {t('gp_picks_made')}</span></span>
-            <span className="gp-track"><i style={{ width: `${(gpN / MATCHES.length) * 100}%` }}></i></span>
+            <span className="gp-cnt"><b>{gpN}</b><span className="of">/ {quickMatches.length} {t('gp_picks_made')}</span></span>
+            <span className="gp-track"><i style={{ width: `${(gpN / quickMatches.length) * 100}%` }}></i></span>
           </div>
           <div className="flex ac gap-12" style={{ flexWrap: 'wrap' }}>
             <span className="gp-pts">⚡ <b>{gpN * 10}</b> pts</span>
-            <button className={`btn btn-lime gp-lock-btn ${gp.locked ? 'locked' : ''}`.trim()} ref={gpLockRef} disabled={savingLock === 'group' || (!gp.locked && gpN < MATCHES.length)} onClick={gpLock}>
-              {savingLock === 'group' ? t('auth_saving') : gp.locked ? t('gp_lock_done') : gpN < MATCHES.length ? `${t('gp_picks_made')} (${gpN}/${MATCHES.length})` : t('gp_lock')}
+            <button className={`btn btn-lime gp-lock-btn ${gp.locked ? 'locked' : ''}`.trim()} ref={gpLockRef} disabled={savingLock === 'group' || (!gp.locked && gpN < quickMatches.length)} onClick={gpLock}>
+              {savingLock === 'group' ? t('auth_saving') : gp.locked ? t('gp_lock_done') : gpN < quickMatches.length ? `${t('gp_picks_made')} (${gpN}/${quickMatches.length})` : t('gp_lock')}
             </button>
           </div>
         </div>
         <div className="gp-grid">
-          {MATCHES.map((m, i) => {
-            const sel = gp.picks[i]
+          {quickMatches.map((m) => {
+            const sel = gp.picks[m.id]
             const opt = (side: string, code: string) => (
-              <div className={`gp-opt ${sel === side ? 'sel' : ''}`.trim()} role="button" tabIndex={0} onClick={(e) => gpPick(i, side, e.currentTarget)}>
+              <div className={`gp-opt ${sel === side ? 'sel' : ''}`.trim()} role="button" tabIndex={0} onClick={(e) => gpPick(m.id, side, e.currentTarget)}>
                 <span className="gp-tick">✓</span>
                 <Flag code={code} size={34} />
                 <span className="nm">{tname(code)}</span>
               </div>
             )
             return (
-              <div className={`gp-card ${sel ? 'picked' : ''}`.trim()} key={i}>
+              <div className={`gp-card ${sel ? 'picked' : ''}`.trim()} key={m.id}>
                 <span className="gp-stamp">✓</span>
                 <div className="gp-top">
-                  <span className="g">{t('group_word')} {m.g}</span>
+                  <span className="g">{t('group_word')} {m.g} · Match {m.matchNumber}</span>
                   <span>{m.live ? t('qp_live') : m.d}</span>
                 </div>
                 <div className="gp-row">
                   {opt('a', m.a)}
-                  <div className={`gp-draw ${sel === 'd' ? 'sel' : ''}`.trim()} role="button" tabIndex={0} onClick={(e) => gpPick(i, 'd', e.currentTarget)}>
+                  <div className={`gp-draw ${sel === 'd' ? 'sel' : ''}`.trim()} role="button" tabIndex={0} onClick={(e) => gpPick(m.id, 'd', e.currentTarget)}>
                     {t('qp_draw')}
                   </div>
                   {opt('b', m.b)}
                 </div>
-                <div className="gp-foot"><span>{m.j} {t('qp_in')}</span><span className="pts">+10</span></div>
+                <div className="gp-foot"><span>{m.venue}</span><span className="pts">+10</span></div>
               </div>
             )
           })}

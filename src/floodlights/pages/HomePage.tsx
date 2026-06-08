@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/home.css'
-import { CROWD_CHAMPION, MATCHES, SPONSORS } from '../data'
+import { CROWD_CHAMPION, SPONSORS } from '../data'
 import { useI18n } from '../i18n/context'
 import { useToast } from '../lib/toastContext'
 import { useReveal } from '../lib/useReveal'
@@ -13,6 +13,7 @@ import { SiteFooter } from '../components/SiteFooter'
 import { HashLink } from '../components/HashLink'
 import { Flag } from '../components/Flag'
 import { SponsorBand, SponsorCard, PresentingLogo, PrizeSponsor } from '../components/SponsorLogo'
+import { formatKickoffUtc, getQuickPickMatches, useTournamentData } from '../lib/tournamentData'
 
 const SEP = '  ·  '
 const MINI_COLS: string[][] = [['ARG', 'FRA', 'ESP', 'BRA'], ['ARG', 'BRA'], ['ARG']]
@@ -22,16 +23,19 @@ export function HomePage() {
   const { toast } = useToast()
   useReveal()
 
-  const [scores, setScores] = useState({ mex: 0, kor: 0 })
+  const tournamentData = useTournamentData()
+  const quickMatches = getQuickPickMatches(tournamentData?.matches)
+  const featuredMatch = quickMatches[0]
+  const [scores, setScores] = useState({ home: 0, away: 0 })
   const [locked, setLocked] = useState(false)
-  const [qp, setQp] = useState<Record<number, string>>({})
-  const mexRef = useRef<HTMLDivElement>(null)
-  const korRef = useRef<HTMLDivElement>(null)
+  const [qp, setQp] = useState<Record<string, string>>({})
+  const homeRef = useRef<HTMLDivElement>(null)
+  const awayRef = useRef<HTMLDivElement>(null)
   const lockRef = useRef<HTMLButtonElement>(null)
 
-  const step = (team: 'mex' | 'kor', dir: number) => {
+  const step = (team: 'home' | 'away', dir: number) => {
     setScores((s) => ({ ...s, [team]: Math.max(0, Math.min(9, s[team] + dir)) }))
-    pop(team === 'mex' ? mexRef.current : korRef.current)
+    pop(team === 'home' ? homeRef.current : awayRef.current)
   }
   const lock = () => {
     if (locked) return
@@ -39,21 +43,21 @@ export function HomePage() {
     confetti(lockRef.current)
     toast(t('toast_pred'), '🎟')
   }
-  const pickQp = (i: number, p: string, el: Element) => {
-    setQp((s) => ({ ...s, [i]: p }))
+  const pickQp = (id: string, p: string, el: Element) => {
+    setQp((s) => ({ ...s, [id]: p }))
     pop(el, 1.12)
   }
 
   const outcome =
-    scores.mex === scores.kor
-      ? `${t('outcome_draw')} · ${scores.mex}–${scores.kor}`
-      : `${tname(scores.mex > scores.kor ? 'MEX' : 'KOR')} ${t('outcome_win')} · ${scores.mex}–${scores.kor}`
+    scores.home === scores.away
+      ? `${t('outcome_draw')} · ${scores.home}–${scores.away}`
+      : `${tname(scores.home > scores.away ? featuredMatch.a : featuredMatch.b)} ${t('outcome_win')} · ${scores.home}–${scores.away}`
 
   return (
     <>
       <Ticker>
         <span>
-          ◢ World Cup 2026 · {t('board_days')}{SEP}<b>317</b> · MEX v KOR{SEP}{t('prize_free')}{SEP}48 {t('teams_word')}{SEP}
+          ◢ World Cup 2026 · Match {featuredMatch.matchNumber}{SEP}<b>{featuredMatch.a}</b> v <b>{featuredMatch.b}</b>{SEP}{t('prize_free')}{SEP}48 {t('teams_word')}{SEP}
         </span>
       </Ticker>
 
@@ -95,30 +99,30 @@ export function HomePage() {
             </div>
             <div className="board-in">
               <div className="board-spon"><PresentingLogo /></div>
-              <div className="board-fix">{t('board_fix')}</div>
+              <div className="board-fix">{tname(featuredMatch.a)} vs {tname(featuredMatch.b)}</div>
               <div className="board-meta">
-                <span className="chip">{t('board_when')}</span>
-                <span className="chip">{t('board_loc')}</span>
-                <span className="chip">{t('board_days')}</span>
+                <span className="chip">{formatKickoffUtc(featuredMatch.kickoffAt)}</span>
+                <span className="chip">📍 {featuredMatch.venue}</span>
+                <span className="chip">Match {featuredMatch.matchNumber}</span>
               </div>
               <div className="led ledrow">
-                <div className="tcell mex">
-                  <span className="tcode">MEX</span>
-                  <div className="tnm">{tname('MEX')}</div>
-                  <div className="sv led-digit" ref={mexRef}>{scores.mex}</div>
+                <div className="tcell home">
+                  <span className="tcode">{featuredMatch.a}</span>
+                  <div className="tnm">{tname(featuredMatch.a)}</div>
+                  <div className="sv led-digit" ref={homeRef}>{scores.home}</div>
                   <div className="stepper">
-                    <button onClick={() => step('mex', -1)}>−</button>
-                    <button onClick={() => step('mex', 1)}>+</button>
+                    <button onClick={() => step('home', -1)}>−</button>
+                    <button onClick={() => step('home', 1)}>+</button>
                   </div>
                 </div>
                 <div className="colon">:</div>
-                <div className="tcell kor">
-                  <span className="tcode">KOR</span>
-                  <div className="tnm">{tname('KOR')}</div>
-                  <div className="sv led-digit" ref={korRef}>{scores.kor}</div>
+                <div className="tcell away">
+                  <span className="tcode">{featuredMatch.b}</span>
+                  <div className="tnm">{tname(featuredMatch.b)}</div>
+                  <div className="sv led-digit" ref={awayRef}>{scores.away}</div>
                   <div className="stepper">
-                    <button onClick={() => step('kor', -1)}>−</button>
-                    <button onClick={() => step('kor', 1)}>+</button>
+                    <button onClick={() => step('away', -1)}>−</button>
+                    <button onClick={() => step('away', 1)}>+</button>
                   </div>
                 </div>
               </div>
@@ -203,23 +207,23 @@ export function HomePage() {
             <p>{t('qp_sub')}</p>
           </div>
           <div className="qp-grid">
-            {MATCHES.map((m, i) => {
-              const sel = qp[i]
+            {quickMatches.map((m) => {
+              const sel = qp[m.id]
               const opt = (side: string, code: string) => (
-                <div className={`qp-opt ${sel === side ? 'sel' : ''}`.trim()} onClick={(e) => pickQp(i, side, e.currentTarget)}>
+                <div className={`qp-opt ${sel === side ? 'sel' : ''}`.trim()} onClick={(e) => pickQp(m.id, side, e.currentTarget)}>
                   <Flag code={code} size={32} />
                   <span className="nm">{tname(code)}</span>
                 </div>
               )
               return (
-                <div className={`qp ${sel ? 'picked' : ''}`.trim()} key={i}>
+                <div className={`qp ${sel ? 'picked' : ''}`.trim()} key={m.id}>
                   <div className="qp-top">
-                    <span>{t('group_word')} {m.g}</span>
+                    <span>{t('group_word')} {m.g} · Match {m.matchNumber}</span>
                     <span>{m.live ? t('qp_live') : m.d}</span>
                   </div>
                   <div className="qp-row">
                     {opt('a', m.a)}
-                    <div className={`qp-draw ${sel === 'd' ? 'sel' : ''}`.trim()} onClick={(e) => pickQp(i, 'd', e.currentTarget)}>
+                    <div className={`qp-draw ${sel === 'd' ? 'sel' : ''}`.trim()} onClick={(e) => pickQp(m.id, 'd', e.currentTarget)}>
                       {t('qp_draw')}
                     </div>
                     {opt('b', m.b)}

@@ -17,6 +17,7 @@ const routes: Record<string, () => Promise<{ default: Handler }>> = {
     import('../api/auth/passwordless-verify.js'),
   '/api/profile': () => import('../api/profile.js'),
   '/api/profile/handle': () => import('../api/profile/handle.js'),
+  '/api/data/fixtures': () => import('../api/data/fixtures.js'),
   '/api/picks/bracket': () => import('../api/picks/bracket.js'),
   '/api/picks/group': () => import('../api/picks/group.js'),
   '/api/picks/predict': () => import('../api/picks/predict.js'),

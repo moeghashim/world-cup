@@ -1,5 +1,21 @@
 # Open Questions
 
+## 2026-06-08 v0.2 QA Time Override
+
+- Default chosen: server pick-lock helpers accept `x-worldcup-now` only outside
+  production so tests can verify rejected past-kickoff picks before the real
+  tournament starts. Production ignores this override and uses server time.
+  Rationale: on 2026-06-08 every real World Cup 2026 fixture is still upcoming,
+  so a real past-kickoff browser state cannot exist yet without a controlled QA
+  clock.
+
+## 2026-06-08 v0.2 Knockout Bracket Lock Timing
+
+- Resolved in PLAN.md on `main`: group picks and score predictions lock at each
+  match's own kickoff. The whole knockout bracket locks at the first tournament
+  match's kickoff because v0.2 has no live results/standings yet to resolve
+  staged bracket updates.
+
 ## 2026-06-08 Auth0 Passwordless Delivery Resolution
 
 - Resolved: Auth0 Passwordless Email connection `email` is enabled for the

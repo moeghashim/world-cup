@@ -1091,3 +1091,230 @@ user's Chrome profile still had an extension UI blocking automation.
 
 The cumulative build estimate is now roughly `~9.0M` total tokens and `~$81`
 estimated API-equivalent cost.
+
+## v0.2: Real Tournament Data
+
+### Task 001 - Verify And Vendor Openfootball Data
+
+The v0.2 milestone starts by replacing Floodlights sample tournament data with
+the real World Cup 2026 structure. I fetched the upstream openfootball snapshot
+from `https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json`
+and vendored it at `db/openfootball/worldcup-2026.json` with source notes in
+`db/openfootball/README.md`.
+
+The saved file verifies as:
+
+- 104 total fixtures
+- 72 group-stage fixtures
+- 12 groups
+- 48 actual group-stage teams
+
+The source is CC0 1.0 Universal and manually maintained by openfootball, so this
+is treated as a static seed, not a live result feed. The browser will read the
+normalized tournament data through our own `/api/data/fixtures` endpoint after
+the remaining v0.2 tasks wire the Neon/cache layer.
+
+The cumulative build estimate is now roughly `~9.1M` total tokens and `~$82`
+estimated API-equivalent cost.
+
+### Task 002 - Add Tournament Data Schema
+
+The database now has a dedicated v0.2 tournament-data migration:
+`db/migrations/003_real_tournament_data.sql`.
+
+It adds:
+
+- `tournament_groups` for the 12 group labels and ordering
+- `teams` for stable team codes, names, slugs, group assignment, seed order,
+  colors, and localized display metadata
+- `matches` for stable match IDs, match numbers, stages, groups, team codes or
+  knockout placeholders, UTC kickoff timestamps, local kickoff fields, venues,
+  status, and raw source metadata
+
+The schema is idempotent and indexed for group schedules, stage/kickoff reads,
+and team lookups. `db/schema.sql` now includes the new migration, and
+`db/types.ts` plus `api/_lib/tournament-data.ts` define the normalized row and
+API shapes that the seed script and fixtures endpoint will share.
+
+Verification for this task ran `npm run build`.
+
+The cumulative build estimate is now roughly `~9.2M` total tokens and `~$83`
+estimated API-equivalent cost.
+
+### Task 003 - Add Openfootball Seed And Refresh Script
+
+The repository now has a repeatable tournament seed path:
+
+- `scripts/tournament-normalize.ts` parses the vendored openfootball snapshot,
+  maps actual team names to stable codes, derives the 12-group draw, builds all
+  104 matches, and converts local `UTC±offset` kickoff strings into ISO UTC.
+- `scripts/seed-openfootball.ts` runs the verifier or upserts the normalized
+  groups, teams, and matches into Neon through `PRIMARY_DB_CONNECTION_STRING`.
+- `package.json` exposes `npm run verify:tournament-data` and
+  `npm run db:seed:tournament`.
+
+The normalizer is strict on team identity. If the upstream file changes to a
+team name without a stable code mapping, the script fails rather than inventing
+new product data.
+
+Verification for this task ran:
+
+```bash
+npm run verify:tournament-data
+npm run db:apply
+npm run db:seed:tournament
+npm run build
+```
+
+The seeded Neon readback confirmed 12 groups, 48 teams, 104 matches, 72 group
+matches, and opening kickoff `2026-06-11T19:00:00.000Z` for Mexico vs South
+Africa.
+
+The cumulative build estimate is now roughly `~9.3M` total tokens and `~$84`
+estimated API-equivalent cost.
+
+### Task 004 - Add Fixtures API Cache
+
+The app now has a first-party tournament fixture endpoint:
+`GET /api/data/fixtures`.
+
+The endpoint returns:
+
+- groups
+- teams
+- all 104 matches
+- lock metadata, including the bracket lock timestamp
+- source metadata with an explicit `fallback` marker
+
+The API prefers the seeded Neon tables and caches the normalized response for
+short reads. If Neon is unavailable or not configured, it falls back to a
+generated server-only static module at `api/_lib/tournament-static.ts` and marks
+`source.fallback: true`. The browser still reads our API route; it does not fetch
+openfootball directly.
+
+Verification for this task covered:
+
+- `GET /api/data/fixtures` with local Neon env: 12 groups, 48 teams, 104 matches,
+  `bracketLocksAt: 2026-06-11T19:00:00.000Z`, `fallback: false`
+- no-env fallback path: 12 groups, 48 teams, 104 matches, `fallback: true`
+- `npm run build`
+
+The cumulative build estimate is now roughly `~9.4M` total tokens and `~$85`
+estimated API-equivalent cost.
+
+### Task 005 - Replace Floodlights Sample Data
+
+Floodlights now uses the real tournament structure in the product-facing data
+surface:
+
+- `src/floodlights/data.ts` contains the actual 48 teams from the openfootball
+  group draw, with stable team codes, safe color tokens, and Arabic display
+  names.
+- `GROUPS` now reflects the real Groups A through L.
+- `R32_TEMPLATE` now follows the openfootball Round-of-32 match order, including
+  the third-place placeholder labels while preserving the app's eight selected
+  wildcard teams.
+- The homepage prediction board and Pick'em group quick-pick cards read the
+  first three group fixtures through `/api/data/fixtures` when available, then
+  fall back to the local real fixture constants.
+- Quick-pick persistence now uses real match IDs such as `match-1` instead of
+  array indexes.
+
+Verification for this task ran `npm run build` and a data integrity check that
+confirmed 48 teams, 12 groups, 48 grouped teams, zero missing team codes, 16
+Round-of-32 pairs, and wildcard indexes 0 through 7.
+
+The cumulative build estimate is now roughly `~9.5M` total tokens and `~$86`
+estimated API-equivalent cost.
+
+### Task 006 - Enforce Kickoff Locks
+
+Kickoff locks are now server-enforced before writes:
+
+- group picks call `assertMatchesOpen(..., { groupOnly: true })`, so each selected
+  group match closes exactly at that match's kickoff.
+- score predictions call the same match lock helper for their `matchId`.
+- bracket writes call `assertBracketOpen`, which closes the entire knockout
+  bracket at the first tournament match kickoff: `2026-06-11T19:00:00.000Z`.
+
+Closed writes return HTTP `409` with API code `pick_locked` and a non-PII message.
+The Pick'em UI now shows a localized lock toast when the server rejects a closed
+bracket or group-pick lock.
+
+Because today is 2026-06-08 and every real fixture is still upcoming, tests need
+a controlled clock to prove the closed state. The server accepts
+`x-worldcup-now` only outside production, and that default is recorded in
+`dev/open-questions.md` for final review.
+
+Verification for this task ran `npm run build` plus direct lock-helper checks:
+before `2026-06-11T19:00:00.000Z` passes for `match-1` and the bracket; exactly
+at kickoff rejects both with `pick_locked`.
+
+The cumulative build estimate is now roughly `~9.6M` total tokens and `~$87`
+estimated API-equivalent cost.
+
+### Task 007 - Add v0.2 Tests
+
+The milestone now has focused test coverage in
+`tests/v0.2-real-tournament-data.test.ts`.
+
+It verifies:
+
+- openfootball normalization counts: 104 total fixtures, 72 group fixtures, 12
+  groups, and 48 teams
+- UTC conversion for the first kickoff
+- Floodlights client constants: 48 teams, 12 groups, 16 Round-of-32 pairs, and
+  eight wildcard slots
+- `/api/data/fixtures` static fallback shape when Neon is unavailable
+- per-match lock behavior: match 1 closes at kickoff while match 2 remains open
+  until its own kickoff
+- bracket lock behavior at the tournament opener
+- group-pick rejection for unknown or knockout match IDs
+
+Verification for this task ran:
+
+```bash
+npm run test:v0.2
+npm run test:v0.1
+npm run build
+npm run lint
+```
+
+The cumulative build estimate is now roughly `~9.7M` total tokens and `~$88`
+estimated API-equivalent cost.
+
+### Task 008 - Run v0.2 Chrome E2E QA
+
+Chrome QA evidence is recorded in `tests/e2e/v0.2-chrome-qa.md`, with screenshots
+under `tests/e2e/screenshots/`.
+
+The browser matrix covered:
+
+- homepage in English/dark
+- Pick'em in English/light
+- Pick'em in Arabic RTL/light
+- Pick'em in Arabic RTL/dark
+
+The visible UI showed the real opener, Mexico vs South Africa, Match 1, Mexico
+City, `Jun 11 · 19:00 UTC`, plus the first three real quick-pick fixtures:
+Match 1, Match 2, and Match 7. Chrome showed no app console errors. Installed
+Chrome extensions emitted extension-origin warnings, which are documented as not
+app-origin errors.
+
+The upcoming browser flow selected three quick picks and reached the expected
+sign-in gate. Past-kickoff rejection is proven through the v0.2 server/API test
+clock because the current date is 2026-06-08 and every real World Cup 2026 match
+is still upcoming.
+
+Final verification ran:
+
+```bash
+npm run verify:tournament-data
+npm run test:v0.2
+npm run test:v0.1
+npm run lint
+npm run build
+```
+
+The cumulative build estimate is now roughly `~9.8M` total tokens and `~$89`
+estimated API-equivalent cost.
