@@ -1,5 +1,14 @@
 # Open Questions
 
+## 2026-06-08 v0.4.1 api-football Winner Fallback
+
+- Default chosen: trust api-football `teams.home.winner` /
+  `teams.away.winner` first, then fall back to penalty scores, then extra-time
+  scores, then full-time/goals scores when the winner booleans are absent.
+- Rationale: the provider booleans are the authoritative advancing-side signal,
+  while the score fallbacks keep cached knockout scoring resilient if a provider
+  fixture omits the booleans but still carries penalty or final score data.
+
 ## 2026-06-08 v0.4 Live Results Provider Coverage
 
 - Default chosen: implement `football-data` as the default provider and

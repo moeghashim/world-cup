@@ -80,6 +80,7 @@ export type ResultRow = {
   match_id: string
   home_score: number | null
   away_score: number | null
+  winner: 'home' | 'away' | null
   status: string
   finished_at: string | null
   source: string

@@ -104,6 +104,20 @@
         "006-add-v04-tests",
         "007-run-v04-chrome-qa-and-pr"
       ]
+    },
+    {
+      "id": "v0.4.1-knockout-winner",
+      "status": "ready_for_review",
+      "tasks": [
+        "001-add-result-winner-schema",
+        "002-wire-provider-winner-cache-scoring",
+        "003-add-penalty-winner-tests-and-qa"
+      ],
+      "completedTasks": [
+        "001-add-result-winner-schema",
+        "002-wire-provider-winner-cache-scoring",
+        "003-add-penalty-winner-tests-and-qa"
+      ]
     }
   ]
 }

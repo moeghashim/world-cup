@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~11.8M` total tokens and `~$109` estimated API-equivalent cost in
+  `~11.9M` total tokens and `~$110` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -104,8 +104,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~11.8M` total tokens and
-`~$109` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~11.9M` total tokens and
+`~$110` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -486,6 +486,11 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   now read real standings, attribution renders for football-data, QA evidence
   lives under `tests/e2e/screenshots/v0.4/`, and the documentation estimate is
   refreshed to `~11.8M` total tokens and `~$109`.
+- Fixed v0.4 knockout scoring for penalty-decided matches by adding cached
+  `results.winner`, normalizing football-data and api-football advancing-side
+  fields, awarding knockout points from that winner before score comparison,
+  adding penalty winner regression coverage, and refreshing the documentation
+  estimate to `~11.9M` total tokens and `~$110`.
 
 ### 2026-06-07
 
