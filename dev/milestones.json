@@ -47,7 +47,8 @@
       "completedTasks": [
         "001-fix-production-passwordless-signup-route",
         "002-add-hosts-schema-and-api",
-        "003-gate-home-match-prediction-lock"
+        "003-gate-home-match-prediction-lock",
+        "004-add-hosts-ui-and-public-page"
       ]
     }
   ]

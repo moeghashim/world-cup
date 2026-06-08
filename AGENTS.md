@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~10.1M` total tokens and `~$92` estimated API-equivalent cost in
+  `~10.2M` total tokens and `~$93` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -101,8 +101,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~10.1M` total tokens and
-`~$92` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~10.2M` total tokens and
+`~$93` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -431,6 +431,11 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   home scores through `/api/picks/predict` after sign-in/handle setup, loaded
   saved account predictions on return visits, and refreshed the documentation
   estimate to `~10.1M` total tokens and `~$92`.
+- Added the host user interface and public host page: `/hosts` now supports
+  self-serve host creation, join-code entry, share links, QR codes, and
+  sign-in/handle gates; `/h/:slug` shows a handle-only leaderboard, member
+  count, most-picked champion, and consensus. Refreshed the documentation
+  estimate to `~10.2M` total tokens and `~$93`.
 
 ### 2026-06-07
 

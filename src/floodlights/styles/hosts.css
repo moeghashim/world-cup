@@ -1,0 +1,55 @@
+.hosts-page,.host-public{padding:54px 28px 84px}
+.hosts-hero,.host-public-hero{margin-bottom:28px}
+.hosts-hero{max-width:780px}
+.hosts-hero h1,.host-public-hero h1{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:clamp(38px,6vw,68px);line-height:.98;margin:12px 0}
+.hosts-hero p,.host-public-hero p{color:var(--mut);font-size:17px;line-height:1.6;max-width:680px}
+.hosts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start;margin:28px 0}
+.host-card,.host-result-card,.host-panel,.host-share-card,.host-stat{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-soft)}
+.host-card{padding:24px;display:grid;gap:12px}
+.host-card-k{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--lime-ink)}
+.host-card-k.cyan{color:var(--cyan-ink)}
+.host-card h2,.host-result-card h2,.host-panel h2{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:clamp(22px,3vw,34px);line-height:1.05}
+.host-card p,.host-result-card p{color:var(--mut);line-height:1.55}
+.host-card label{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-top:4px}
+.host-card input{width:100%;background:var(--inset);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:13px 14px;font:inherit}
+.host-card input:focus{outline:2px solid rgba(52,231,255,.35);border-color:var(--cyan)}
+.host-result{display:grid;gap:18px;margin:30px 0}
+.host-result-card{padding:22px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center}
+.host-result-card.compact{display:flex;justify-content:space-between;flex-wrap:wrap}
+.host-link-row{display:flex;gap:10px;align-items:center;margin:16px 0;flex-wrap:wrap}
+.host-link-row code,.host-share-card code{display:block;max-width:100%;overflow:auto;background:var(--inset);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--txt-2);font-size:12px}
+.host-code-pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:8px 13px;font-family:'Chakra Petch',sans-serif;font-weight:700;color:var(--mut)}
+.host-code-pill b{color:var(--lime-ink);letter-spacing:.12em}
+.host-qr{background:#fff;border-radius:14px;padding:12px;width:max-content;color:#0a0f06}
+.host-public-hero{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:end}
+.host-public-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.host-share-card{padding:18px;display:grid;gap:12px;justify-items:center}
+.host-stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:28px 0}
+.host-stat{padding:20px;text-align:center}
+.host-stat span{display:block;font-family:'Doto',monospace;font-weight:900;font-size:clamp(28px,4vw,44px);color:var(--lime-ink);line-height:.9;margin-bottom:8px}
+.host-stat b{font-family:'Chakra Petch',sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.host-panels{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:20px}
+.host-panel{padding:20px}
+.host-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
+.host-panel-head span{font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:12px;color:var(--mut)}
+.host-leaderboard,.host-consensus{display:grid;gap:10px}
+.host-member{display:grid;grid-template-columns:42px minmax(0,1fr) minmax(160px,auto) 58px;gap:10px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+.host-rank{width:28px;height:28px;border-radius:8px;background:var(--panel-3);display:grid;place-items:center;font-family:'Doto',monospace;font-weight:900;color:var(--mut)}
+.host-handle,.host-champ,.host-points{font-family:'Chakra Petch',sans-serif;font-weight:700}
+.host-handle{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.host-champ{display:inline-flex;align-items:center;gap:8px;color:var(--txt-2)}
+.host-points{text-align:end;color:var(--amber-ink)}
+.host-consensus-row{display:grid;grid-template-columns:1fr auto 42px;gap:10px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.host-consensus-row span,.host-consensus-row b{font-family:'Chakra Petch',sans-serif;font-weight:700}
+.host-consensus-row span{color:var(--mut)}
+.host-consensus-row em{font-style:normal;text-align:end;color:var(--lime-ink);font-family:'Doto',monospace;font-weight:900}
+.host-empty{color:var(--mut);line-height:1.55}
+html.ar .host-card-k,html.ar .host-card label,html.ar .host-stat b{letter-spacing:0;text-transform:none}
+
+@media(max-width:900px){
+  .hosts-grid,.host-public-hero,.host-stat-grid,.host-panels{grid-template-columns:1fr}
+  .host-result-card{grid-template-columns:1fr}
+  .host-member{grid-template-columns:36px minmax(0,1fr);align-items:start}
+  .host-champ,.host-points{grid-column:2}
+  .host-points{text-align:start}
+}

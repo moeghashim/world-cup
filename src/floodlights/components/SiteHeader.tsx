@@ -34,6 +34,7 @@ export function SiteHeader({ wide = false, cta }: { wide?: boolean; cta: HeaderC
           <NavLink to="/pickem" className={navClass} onClick={closeMenu}>{t('nav_pickem')}</NavLink>
           <NavLink to="/brackets" className={navClass} onClick={closeMenu}>{t('nav_brackets')}</NavLink>
           <HashLink to="/" hash="prizes" onNavigate={closeMenu}>{t('nav_prizes')}</HashLink>
+          <NavLink to="/hosts" className={navClass} onClick={closeMenu}>{t('nav_hosts')}</NavLink>
           <NavLink to="/sponsors" className={navClass} onClick={closeMenu}>{t('nav_sponsor')}</NavLink>
           <NavLink to="/profile" className={navClass} onClick={closeMenu}>
             {auth.user?.handle ?? t('nav_profile')}

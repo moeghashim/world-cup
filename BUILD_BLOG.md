@@ -1406,3 +1406,28 @@ npm run build
 
 The cumulative build estimate is now roughly `~10.1M` total tokens and `~$92`
 estimated API-equivalent cost.
+
+### Task 004 - Add Hosts UI And Public Page
+
+The host feature is now reachable from the main navigation. `/hosts` lets a
+signed-in user create a room, or lets an anonymous user start the flow and finish
+after Auth0 sign-in plus handle setup. Created hosts show their public page,
+join link, short join code, and a QR code. The same page also lets fans join a
+host by code without losing the account gate.
+
+The public `/h/:slug` page loads from the hosts API and keeps the privacy
+boundary tight: member rows show handles, champion picks, and placeholder
+points only. It also shows member count, most-picked champion, match consensus,
+the typeable join code, and a QR-backed join link. English and Arabic copy were
+added for the required v0.3 QA languages; other languages fall back to English
+for the new host strings until a later localization pass.
+
+Verification ran:
+
+```bash
+npm run test:v0.3
+npm run build
+```
+
+The cumulative build estimate is now roughly `~10.2M` total tokens and `~$93`
+estimated API-equivalent cost.
