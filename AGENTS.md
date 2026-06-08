@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~10.5M` total tokens and `~$96` estimated API-equivalent cost in
+  `~10.7M` total tokens and `~$98` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -101,8 +101,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~10.5M` total tokens and
-`~$96` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~10.7M` total tokens and
+`~$98` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -621,6 +621,16 @@ Browser verification covered:
   stale-code modal; the extension-free in-app browser verified `/pickem` in
   English dark, English light, Arabic RTL light, and Arabic RTL dark with no
   console errors
+- verifying v0.3 clean Chrome QA progress: the extension-free Chrome profile
+  reached the website-styled Auth0 code-entry step for `moe@babanuj.com`, but
+  relayed OTPs were rejected as `invalid_code`, so the user requested Claude
+  review that single email-code confirmation on the deployed/preview link; a
+  disposable signed QA session then verified authenticated `/profile`, homepage
+  prediction lock persistence after reload, `/hosts` create with join
+  link/QR/code, typed-code join, multi-host membership, public `/h/:slug`
+  handle-only leaderboard/no-PII rendering, and Arabic RTL light/dark host pages
+  with a fixed 148px logo and no horizontal overflow; disposable QA users and
+  cascade-owned host data were deleted from Neon after evidence capture
 
 Latest screenshot:
 
@@ -639,6 +649,13 @@ Latest screenshot:
 `artifacts/team-saudi-detail-page.png`
 `artifacts/sponsor-onboarding-form.png`
 `artifacts/sponsor-onboarding-mobile.png`
+`tests/e2e/screenshots/v0.3/home-authenticated-lock-en-dark.png`
+`tests/e2e/screenshots/v0.3/hosts-create-en-dark.png`
+`tests/e2e/screenshots/v0.3/hosts-join-code-en-dark.png`
+`tests/e2e/screenshots/v0.3/host-public-joined-en-dark.png`
+`tests/e2e/screenshots/v0.3/host-public-owner-en-dark.png`
+`tests/e2e/screenshots/v0.3/host-public-ar-light.png`
+`tests/e2e/screenshots/v0.3/host-public-ar-dark.png`
 
 ## Next Tasks
 

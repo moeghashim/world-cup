@@ -1509,3 +1509,37 @@ the same `left=320`, `right=1600`, and `width=1280` desktop alignment.
 
 The cumulative build estimate is now roughly `~10.5M` total tokens and `~$96`
 estimated API-equivalent cost.
+
+### Task 007 - Chrome QA Progress
+
+The v0.3 QA pass moved to a clean extension-free Chrome profile after the
+user's main Chrome window kept exposing extension UI over the page. The clean
+profile reached the website-styled Auth0 email-code modal, submitted
+`moe@babanuj.com`, and displayed the one-time-code entry step. Relayed codes
+were rejected by Auth0 as `invalid_code`, so the user requested that Claude
+review that single real email-code confirmation against the deployed/preview
+link instead of continuing the local OTP path.
+
+The protected app flows were still exercised in clean Chrome with a disposable
+signed QA account and then cleaned up from Neon. The homepage prediction stayed
+locked after reload, `/hosts` created a host with a join link, QR code, and
+short code, a second host was joined by typed code, and the public host pages
+showed handle-only leaderboards with no email or private identifiers. Arabic
+light and dark host pages rendered with `dir="rtl"`, Arabic navigation, the
+fixed 148px logo footprint, and no horizontal overflow.
+
+Evidence now lives in:
+
+```text
+tests/e2e/v0.3-chrome-qa.md
+tests/e2e/screenshots/v0.3/home-authenticated-lock-en-dark.png
+tests/e2e/screenshots/v0.3/hosts-create-en-dark.png
+tests/e2e/screenshots/v0.3/hosts-join-code-en-dark.png
+tests/e2e/screenshots/v0.3/host-public-joined-en-dark.png
+tests/e2e/screenshots/v0.3/host-public-owner-en-dark.png
+tests/e2e/screenshots/v0.3/host-public-ar-light.png
+tests/e2e/screenshots/v0.3/host-public-ar-dark.png
+```
+
+The cumulative build estimate is now roughly `~10.7M` total tokens and `~$98`
+estimated API-equivalent cost.
