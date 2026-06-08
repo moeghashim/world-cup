@@ -10,6 +10,7 @@ import {
   saveGroupPicks,
   validateGroupPicksPayload,
 } from '../_lib/picks.js'
+import { assertMatchesOpen } from '../_lib/pick-locks.js'
 import { requireAuthContext, requireHandle } from '../_lib/session.js'
 
 export default async function handler(
@@ -28,10 +29,11 @@ export default async function handler(
     requireMethod(request, 'PUT')
     const context = await requireHandle(request)
     const body = await readJsonBody<unknown>(request)
-    const groupPicks = await saveGroupPicks(
-      context.user.id,
-      validateGroupPicksPayload(body),
-    )
+    const payload = validateGroupPicksPayload(body)
+    await assertMatchesOpen(Object.keys(payload.picks), request, {
+      groupOnly: true,
+    })
+    const groupPicks = await saveGroupPicks(context.user.id, payload)
 
     sendJson(response, 200, { groupPicks })
   } catch (error) {

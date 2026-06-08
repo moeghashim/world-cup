@@ -22,6 +22,7 @@ export type ApiErrorCode =
   | 'not_authenticated'
   | 'handle_required'
   | 'handle_taken'
+  | 'pick_locked'
   | 'server_error'
 
 export class HttpError extends Error {

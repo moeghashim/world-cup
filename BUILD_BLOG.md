@@ -1226,3 +1226,29 @@ Round-of-32 pairs, and wildcard indexes 0 through 7.
 
 The cumulative build estimate is now roughly `~9.5M` total tokens and `~$86`
 estimated API-equivalent cost.
+
+### Task 006 - Enforce Kickoff Locks
+
+Kickoff locks are now server-enforced before writes:
+
+- group picks call `assertMatchesOpen(..., { groupOnly: true })`, so each selected
+  group match closes exactly at that match's kickoff.
+- score predictions call the same match lock helper for their `matchId`.
+- bracket writes call `assertBracketOpen`, which closes the entire knockout
+  bracket at the first tournament match kickoff: `2026-06-11T19:00:00.000Z`.
+
+Closed writes return HTTP `409` with API code `pick_locked` and a non-PII message.
+The Pick'em UI now shows a localized lock toast when the server rejects a closed
+bracket or group-pick lock.
+
+Because today is 2026-06-08 and every real fixture is still upcoming, tests need
+a controlled clock to prove the closed state. The server accepts
+`x-worldcup-now` only outside production, and that default is recorded in
+`dev/open-questions.md` for final review.
+
+Verification for this task ran `npm run build` plus direct lock-helper checks:
+before `2026-06-11T19:00:00.000Z` passes for `match-1` and the bracket; exactly
+at kickoff rejects both with `pick_locked`.
+
+The cumulative build estimate is now roughly `~9.6M` total tokens and `~$87`
+estimated API-equivalent cost.

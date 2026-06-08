@@ -10,6 +10,7 @@ import {
   savePrediction,
   validatePredictionPayload,
 } from '../_lib/picks.js'
+import { assertMatchesOpen } from '../_lib/pick-locks.js'
 import { requireAuthContext, requireHandle } from '../_lib/session.js'
 
 export default async function handler(
@@ -30,10 +31,9 @@ export default async function handler(
     requireMethod(request, 'PUT')
     const context = await requireHandle(request)
     const body = await readJsonBody<unknown>(request)
-    const prediction = await savePrediction(
-      context.user.id,
-      validatePredictionPayload(body),
-    )
+    const payload = validatePredictionPayload(body)
+    await assertMatchesOpen([payload.matchId], request)
+    const prediction = await savePrediction(context.user.id, payload)
 
     sendJson(response, 200, { prediction })
   } catch (error) {

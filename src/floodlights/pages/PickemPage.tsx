@@ -222,6 +222,8 @@ export function PickemPage() {
     } catch (error) {
       if (error instanceof ApiClientError && error.code === 'handle_required') {
         sendToHandleSetup()
+      } else if (error instanceof ApiClientError && error.code === 'pick_locked') {
+        toast(t('toast_pick_locked'), '🔒')
       } else {
         toast(t('auth_save_failed'), '!')
       }
@@ -320,6 +322,8 @@ export function PickemPage() {
     } catch (error) {
       if (error instanceof ApiClientError && error.code === 'handle_required') {
         sendToHandleSetup()
+      } else if (error instanceof ApiClientError && error.code === 'pick_locked') {
+        toast(t('toast_pick_locked'), '🔒')
       } else {
         toast(t('auth_save_failed'), '!')
       }
