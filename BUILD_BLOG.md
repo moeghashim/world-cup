@@ -1201,3 +1201,28 @@ Verification for this task covered:
 
 The cumulative build estimate is now roughly `~9.4M` total tokens and `~$85`
 estimated API-equivalent cost.
+
+### Task 005 - Replace Floodlights Sample Data
+
+Floodlights now uses the real tournament structure in the product-facing data
+surface:
+
+- `src/floodlights/data.ts` contains the actual 48 teams from the openfootball
+  group draw, with stable team codes, safe color tokens, and Arabic display
+  names.
+- `GROUPS` now reflects the real Groups A through L.
+- `R32_TEMPLATE` now follows the openfootball Round-of-32 match order, including
+  the third-place placeholder labels while preserving the app's eight selected
+  wildcard teams.
+- The homepage prediction board and Pick'em group quick-pick cards read the
+  first three group fixtures through `/api/data/fixtures` when available, then
+  fall back to the local real fixture constants.
+- Quick-pick persistence now uses real match IDs such as `match-1` instead of
+  array indexes.
+
+Verification for this task ran `npm run build` and a data integrity check that
+confirmed 48 teams, 12 groups, 48 grouped teams, zero missing team codes, 16
+Round-of-32 pairs, and wildcard indexes 0 through 7.
+
+The cumulative build estimate is now roughly `~9.5M` total tokens and `~$86`
+estimated API-equivalent cost.

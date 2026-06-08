@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~9.4M` total tokens and `~$85` estimated API-equivalent cost in
+  `~9.5M` total tokens and `~$86` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -101,8 +101,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.4M` total tokens and
-`~$85` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.5M` total tokens and
+`~$86` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -392,6 +392,11 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   wired the local API shim route, verified Neon and no-env fallback handler
   responses, verified with `npm run build`, and refreshed the documentation
   estimate to `~9.4M` total tokens and `~$85`.
+- Replaced Floodlights sample teams, groups, quick-pick fixtures, and
+  Round-of-32 template with the real openfootball-backed structure, wired the
+  homepage and Pick'em quick-pick slate to prefer `/api/data/fixtures`, switched
+  quick-pick persistence to real match IDs, verified build and data integrity,
+  and refreshed the documentation estimate to `~9.5M` total tokens and `~$86`.
 
 ### 2026-06-07
 
