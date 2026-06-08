@@ -78,7 +78,7 @@
 
 ---
 
-## S3 — Hosts + public host page (v0.4)
+## S3 — Hosts + public host page (v0.3)
 
 **Goal:** users join a host (cafe/company); each host has a public URL with members' predictions + stats.
 
@@ -151,6 +151,17 @@ was built, ending on an up-to-date cost estimate.
 - [ ] Works in all 5 languages + RTL + both themes.
 
 ---
+
+## S6 — v0.3 fixes & accounts-UX (production bug + UI/RTL)
+
+**Goal:** unblock production signup, gate sign-in on every commit action, and fix three UI issues.
+
+**Acceptance criteria**
+- [ ] Production signup works: requesting a code from the live site succeeds (no "Could not send the code"); the failure path surfaces a clear message and is captured in Sentry. (Root cause may be Auth0 config — fix code/config and document any required dashboard step.)
+- [ ] The home **match-prediction** "Lock my prediction" prompts Auth0 sign-in and persists after signup — same gate + anonymous-pick migration as the Pick'em lock. Sign-in is prompted for both Pick'em and match prediction.
+- [ ] In Arabic RTL, the header logo no longer overlaps the "2026" wordmark (verified AR dark + light).
+- [ ] The homepage and inner pages (e.g. `/pickem`) share one consistent desktop max content width.
+- [ ] On desktop, the knockout bracket renders two-sided (left + right halves converging on the Final); mobile stays single-column/scrollable; RTL + both themes preserved.
 
 ## Release gating
 
