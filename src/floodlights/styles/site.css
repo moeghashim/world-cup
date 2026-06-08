@@ -213,6 +213,10 @@ html.ar .auth-gate-kicker,html.ar .auth-code-form label{letter-spacing:0}
 .profile-handle-form label{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
 .profile-handle-form input{width:100%;background:var(--inset);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:13px 14px;font:inherit}
 .profile-handle-form input:focus{outline:2px solid rgba(52,231,255,.35);border-color:var(--cyan)}
+.profile-points-card{border-color:rgba(201,255,61,.35);background:linear-gradient(180deg,rgba(201,255,61,.1),rgba(18,25,43,.88))}
+.profile-points-value{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:clamp(46px,8vw,72px);line-height:.9;color:var(--lime);text-shadow:0 0 22px rgba(201,255,61,.25);margin:16px 0}
+.profile-muted.small{font-size:13px;margin-bottom:0}
+.profile-attribution{margin-top:18px;color:var(--mut);font-size:12px;line-height:1.5}
 html.ar .profile-list dt,html.ar .profile-handle-form label{letter-spacing:0}
 @media(max-width:820px){.profile-grid{grid-template-columns:1fr}.profile-list div{display:grid}.profile-list dd{text-align:start}}
 

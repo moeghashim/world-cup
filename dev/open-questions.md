@@ -1,5 +1,55 @@
 # Open Questions
 
+## 2026-06-08 v0.4 Live Results Provider Coverage
+
+- Default chosen: implement `football-data` as the default provider and
+  `api-football` as an env-selectable alternate behind the same normalized
+  interface.
+- Evidence: football-data.org's public coverage page lists `Worldcup` under its
+  Free Tier, and its API documentation exposes the `WC` competition endpoint.
+  The policy page confirms registered free clients are rate-limited rather than
+  blocked.
+- Gap: this workspace does not have a live `FOOTBALL_DATA_ORG_TOKEN`, so WC 2026
+  fixture/result access still needs a token-backed smoke test before the first
+  real polling window. If the real token shows missing WC 2026 result coverage,
+  flip `LIVE_RESULTS_PROVIDER=api-football` and add `API_FOOTBALL_KEY`.
+
+## 2026-06-08 v0.4 Server Env Names
+
+- Default chosen: use `FOOTBALL_DATA_ORG_TOKEN`, `API_FOOTBALL_KEY`,
+  `LIVE_RESULTS_PROVIDER`, and `CRON_SECRET` as server-only env names.
+- Rationale: these providers are not in the Stripe Projects catalog for this
+  repo, and clients must never receive provider credentials. Tests and builds
+  must pass without live values.
+
+## 2026-06-08 v0.4 Group Pick Flat Points
+
+- Default chosen: a correct group-stage outcome pick is worth 10 points. That
+  includes `a`/`home`, `b`/`away`, and `d`/`draw` because the current UI lets
+  players choose a draw for group matches.
+- Rationale: PLAN locks "flat group winner" scoring but does not name the
+  amount; the existing Pick'em UI already labels each group pick as `+10`.
+
+## 2026-06-08 v0.4 Knockout Match Mapping
+
+- Default chosen: bracket knockout keys map to the real fixture order in
+  `matches` by stage and `match_number`: R32 -> `r0m*`, R16 -> `r1m*`, QF ->
+  `r2m*`, SF -> `r3m*`, Final -> `r4m0`. The third-place match is ignored for
+  bracket scoring.
+- Rationale: this matches the existing bracket template and openfootball
+  fixture order without adding a new normalization table in v0.4.
+
+## 2026-06-08 v0.4 Schema Replay Guard
+
+- Default chosen: keep historical migrations unchanged and add a narrow
+  `scripts/apply-schema.ts` replay guard for migration 002's
+  `workos_user_id drop not null` statement when the live database has already
+  applied migration 005 and removed that column.
+- Rationale: `npm run db:apply` replays idempotent SQL files against the current
+  database. After the WorkOS cleanup, that one old Auth0 transition statement is
+  no longer idempotent on an upgraded DB. The guard is scoped to migration 002
+  plus Postgres missing-column code `42703`; all other schema errors still fail.
+
 ## 2026-06-08 v0.3.2 Bracket Views Metric
 
 - Default chosen: replace the old hardcoded bracket-views sponsor tile

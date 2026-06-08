@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~11.3M` total tokens and `~$104` estimated API-equivalent cost in
+  `~11.8M` total tokens and `~$109` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -93,17 +93,19 @@ Source layout under `src/floodlights/`:
   applied via `data-theme` on `<html>` with a pre-paint script in `index.html`.
 - `lib/` — `storage.ts` (`fl:` localStorage namespace), `confetti.ts`,
   `useReveal.ts`, `motion.tsx` (count-up, bar fills), `bracket.ts` (resolution +
-  URL-hash share codec), `toastContext.ts` + `ToastProvider.tsx`.
+  URL-hash share codec), `standings.ts` (cached standings client read),
+  `toastContext.ts` + `ToastProvider.tsx`.
 - `components/` — `SiteHeader`, `SiteFooter`, `Ticker`, `LangPicker`,
   `ThemeToggle`, `BrandLogo`, `Flag`, `SponsorLogo` family, `HashLink`.
-- `pages/` — `HomePage`, `PickemPage`, `BracketsPage`, `SponsorsPage`.
+- `pages/` — `HomePage`, `PickemPage`, `BracketsPage`, `SponsorsPage`,
+  `HostsPage`, `HostPage`, and `ProfilePage`.
 
 Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~11.3M` total tokens and
-`~$104` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~11.8M` total tokens and
+`~$109` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -124,6 +126,11 @@ docs (`BUILD_BLOG.md`) rather than in the UI: currently `~11.3M` total tokens an
 - `zod` for catalog props/action schemas.
 - `lucide-react` for interface icons.
 - `@neondatabase/serverless` for Vercel server-side prediction entry writes to Neon.
+- Server-side live result providers: `football-data` by default via
+  `FOOTBALL_DATA_ORG_TOKEN`, with `api-football` as
+  `LIVE_RESULTS_PROVIDER=api-football` via `API_FOOTBALL_KEY`.
+- Vercel Cron uses `CRON_SECRET` for fixture refresh, result polling, and
+  idempotent standings scoring routes.
 - Google Analytics gtag for page-view tracking, with the static homepage snippet using `G-RFPJRPKYQR` and `VITE_GA_MEASUREMENT_ID` reserved for the runtime fallback path.
 - `posthog-js` for env-gated product analytics through the first-party `/ingest` proxy.
 - Auth0 by Okta for account identity through Projects.dev resource `auth0`.
@@ -472,6 +479,13 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   sample crowd/community constants, added exact aggregate/no-PII tests,
   captured EN/AR screenshots, and refreshed the documentation estimate to
   `~11.3M` total tokens and `~$104`.
+- Added v0.4 live-results and scoring: migration 006 creates cached `results`
+  and computed `standings`, `football-data` is the default server-side provider
+  with `api-football` as an env-selected alternate, cron routes refresh fixtures,
+  poll active match windows, and run an idempotent scorer, host/profile points
+  now read real standings, attribution renders for football-data, QA evidence
+  lives under `tests/e2e/screenshots/v0.4/`, and the documentation estimate is
+  refreshed to `~11.8M` total tokens and `~$109`.
 
 ### 2026-06-07
 
@@ -505,7 +519,9 @@ npm run test:v0.1
 npm run test:v0.2
 npm run test:v0.3
 npm run test:v0.3.2
+npm run test:v0.4
 npm run build
+npm run db:apply
 npm run verify:api:fallback
 npm run verify:api:dev
 npm run db:prediction-schema
@@ -663,6 +679,12 @@ Browser verification covered:
   MEX at 100% from the locked-bracket consensus, every community API response
   returned 200, and screenshots were saved under
   `tests/e2e/screenshots/v0.3.2/`
+- verifying v0.4 live scoring browser surfaces: Playwright Chromium rendered
+  mocked same-origin cached standings on `/h/v04-qa-room` and `/profile`, showed
+  `330` points on host and profile surfaces, rendered the football-data
+  attribution, spot-checked English, Spanish, French, Portuguese, and Arabic in
+  dark and light themes, confirmed Arabic RTL, reported no console errors, and
+  saved screenshots under `tests/e2e/screenshots/v0.4/`
 
 Latest screenshot:
 
@@ -694,6 +716,10 @@ Latest screenshot:
 `tests/e2e/screenshots/v0.3.2/brackets-ar-dark.png`
 `tests/e2e/screenshots/v0.3.2/sponsors-en-dark.png`
 `tests/e2e/screenshots/v0.3.2/sponsors-ar-dark.png`
+`tests/e2e/screenshots/v0.4/host-points-en-dark.png`
+`tests/e2e/screenshots/v0.4/profile-points-en-dark.png`
+`tests/e2e/screenshots/v0.4/host-points-ar-light.png`
+`tests/e2e/screenshots/v0.4/profile-points-ar-light.png`
 
 ## Next Tasks
 

@@ -104,7 +104,7 @@
 
 ---
 
-## S4 — Real tournament data + live results (v0.2 data, v0.3 live)
+## S4 — Real tournament data + live results (v0.2 data, v0.4)
 
 **Goal:** replace sample data with real WC 2026 data; score picks against real results.
 
@@ -113,7 +113,7 @@
   venues, UTC kickoffs) from **openfootball (CC0)** into Neon via a script; the app renders real
   fixtures and the real bracket structure (replacing `R32_TEMPLATE`); picks **lock per-match at
   kickoff** (server-enforced).
-- **v0.3:** a **pluggable live-results provider** (API-Football primary, football-data.org
+- **v0.4:** a **pluggable live-results provider** (API-Football primary, football-data.org
   fallback) behind one interface; **Vercel Cron** refreshes fixtures daily and polls scores only
   during active match windows; results cache in Neon and **clients read only our cache**.
 - An **idempotent scoring job** applies the locked weights (R32 10 → Final 160; flat for group

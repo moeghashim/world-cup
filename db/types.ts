@@ -76,6 +76,23 @@ export type MatchRow = {
   updated_at: string
 }
 
+export type ResultRow = {
+  match_id: string
+  home_score: number | null
+  away_score: number | null
+  status: string
+  finished_at: string | null
+  source: string
+  updated_at: string
+}
+
+export type StandingRow = {
+  user_id: string
+  points: number
+  breakdown: unknown
+  updated_at: string
+}
+
 export type HostRow = {
   id: string
   slug: string
