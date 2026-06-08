@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../styles/home.css'
-import { CROWD_CHAMPION, SPONSORS } from '../data'
+import { SPONSORS } from '../data'
 import { useI18n } from '../i18n/context'
 import { useToast } from '../lib/toastContext'
 import { useReveal } from '../lib/useReveal'
@@ -25,16 +25,23 @@ import {
 } from '../lib/accountMigration'
 import { captureAnalyticsEvent } from '../../analytics'
 import type { PredictionPayload } from '../lib/accountTypes'
+import {
+  formatPlusStatNumber,
+  formatStatNumber,
+  useCommunityStats,
+} from '../lib/communityStats'
 
 const SEP = '  ·  '
 const MINI_COLS: string[][] = [['ARG', 'FRA', 'ESP', 'BRA'], ['ARG', 'BRA'], ['ARG']]
+const PRIZE_WINNERS_PER_MATCH = 6
 
 export function HomePage() {
-  const { t, tname } = useI18n()
+  const { t, tname, lang } = useI18n()
   const { toast } = useToast()
   const auth = useAuth()
   useReveal()
 
+  const communityStats = useCommunityStats()
   const tournamentData = useTournamentData()
   const quickMatches = getQuickPickMatches(tournamentData?.matches)
   const featuredMatch = quickMatches[0]
@@ -136,6 +143,19 @@ export function HomePage() {
     scores.home === scores.away
       ? `${t('outcome_draw')} · ${scores.home}–${scores.away}`
       : `${tname(scores.home > scores.away ? featuredMatch.a : featuredMatch.b)} ${t('outcome_win')} · ${scores.home}–${scores.away}`
+  const heroTrust =
+    communityStats.players > 0
+      ? t('hero_trust', formatPlusStatNumber(lang, communityStats.players))
+      : t('hero_trust_empty')
+  const ctaCopy =
+    communityStats.players > 0
+      ? t('cta_p', formatStatNumber(lang, communityStats.players))
+      : t('cta_p_empty')
+  const topChampionRows = communityStats.championDistribution.slice(0, 4)
+  const maxChampionPct = Math.max(
+    1,
+    ...topChampionRows.map((row) => row.pct),
+  )
 
   useEffect(() => {
     if (!auth.authenticated || auth.needsHandle || !auth.user) return
@@ -226,7 +246,7 @@ export function HomePage() {
                 <i style={{ background: 'var(--mag)', color: '#fff' }}>KO</i>
                 <i style={{ background: 'var(--amber)' }}>RS</i>
               </div>
-              <p dangerouslySetInnerHTML={{ __html: t('hero_trust') }} />
+              <p dangerouslySetInnerHTML={{ __html: heroTrust }} />
             </div>
           </div>
 
@@ -322,13 +342,21 @@ export function HomePage() {
               <h3>{t('feat_pb_h')}</h3>
               <p>{t('feat_pb_p')}</p>
               <div className="crowd-rows">
-                {CROWD_CHAMPION.slice(0, 4).map((r) => (
-                  <div className="crow" key={r.code}>
-                    <Flag code={r.code} size={28} />
-                    <div className="bar"><GrowI width={`${(r.pct / 21) * 100}%`} /></div>
-                    <span className="pct">{r.pct}%</span>
-                  </div>
-                ))}
+                {topChampionRows.length > 0 ? (
+                  topChampionRows.map((r) => (
+                    <div className="crow" key={r.code}>
+                      {r.code === 'Other' ? (
+                        <span className="flag other-flag">··</span>
+                      ) : (
+                        <Flag code={r.code} size={28} />
+                      )}
+                      <div className="bar"><GrowI width={`${(r.pct / maxChampionPct) * 100}%`} /></div>
+                      <span className="pct">{r.pct}%</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="crowd-empty">{t('stats_empty')}</div>
+                )}
               </div>
               <Link to="/brackets" className="btn btn-cyan mt-auto">{t('feat_pb_cta')}</Link>
             </div>
@@ -395,8 +423,8 @@ export function HomePage() {
               <h3>{t('prize_item_h')}</h3>
               <p>{t('prize_item_p')}</p>
               <div className="pmeta">
-                <div className="pcard"><div className="n">6</div><div className="l">{t('prize_winners')}</div></div>
-                <div className="pcard"><div className="n">317</div><div className="l">{t('prize_joined')}</div></div>
+                <div className="pcard"><div className="n">{PRIZE_WINNERS_PER_MATCH}</div><div className="l">{t('prize_winners')}</div></div>
+                <div className="pcard"><div className="n">{formatStatNumber(lang, communityStats.players)}</div><div className="l">{t('prize_joined')}</div></div>
                 <div className="pcard"><div className="n">{t('prize_free')}</div><div className="l">{t('prize_free')}</div></div>
               </div>
               <Link to="/pickem" className="btn btn-cyan">{t('prize_cta')}</Link>
@@ -426,7 +454,7 @@ export function HomePage() {
       <section className="cta">
         <div className="wrap">
           <h2 className="reveal"><span>{t('cta_h2_1')}</span> <span className="lime">{t('cta_h2_2')}</span></h2>
-          <p className="reveal">{t('cta_p')}</p>
+          <p className="reveal">{ctaCopy}</p>
           <Link to="/pickem" className="btn btn-lime btn-lg reveal">{t('hero_cta1')}</Link>
         </div>
       </section>

@@ -8,6 +8,11 @@ import { useToast } from '../lib/toastContext'
 import { useReveal } from '../lib/useReveal'
 import { confetti } from '../lib/confetti'
 import { CountUp } from '../lib/motion'
+import {
+  formatStatNumber,
+  localeForLang,
+  useCommunityStats,
+} from '../lib/communityStats'
 import { Ticker } from '../components/Ticker'
 import { SiteHeader } from '../components/SiteHeader'
 import { SiteFooter } from '../components/SiteFooter'
@@ -15,13 +20,8 @@ import { Flag } from '../components/Flag'
 import { SponsorCard, SponsorLogo, SponsorBand, PresentingLogo, PrizeSponsor } from '../components/SponsorLogo'
 
 const SEP = '  ·  '
-
-const REACH = [
-  { value: 12400, key: 'stat_players' },
-  { value: 96000, key: 'stat_views' },
-  { value: 104, key: 'stat_matches_c' },
-  { value: 31, key: 'stat_days_c' },
-] as const
+const MATCHES_COVERED = 104
+const TOURNAMENT_DAYS = 31
 
 const WHY = [
   { ic: '🎁', color: 'var(--lime-ink)', h: 'spon_why1_h', p: 'spon_why1_p' },
@@ -46,10 +46,18 @@ function CheckIcon() {
 }
 
 export function SponsorsPage() {
-  const { t, tname } = useI18n()
+  const { t, tname, lang } = useI18n()
   const { toast } = useToast()
   useReveal()
 
+  const communityStats = useCommunityStats()
+  const locale = localeForLang(lang)
+  const reach = [
+    { value: communityStats.players, key: 'stat_players' },
+    { value: communityStats.bracketsLocked, key: 'stat_brackets_locked' },
+    { value: MATCHES_COVERED, key: 'stat_matches_c' },
+    { value: TOURNAMENT_DAYS, key: 'stat_days_c' },
+  ] as const
   const [tier, setTier] = useState('presenting')
   const submitRef = useRef<HTMLButtonElement>(null)
   const culture = sponsorById('culture')
@@ -73,7 +81,7 @@ export function SponsorsPage() {
     <>
       <Ticker>
         <span>
-          ◢ {t('spon_kick')}{SEP}<b>12,400</b> {t('stat_players')}{SEP}31 {t('stat_days_c')}{SEP}
+          ◢ {t('spon_kick')}{SEP}<b>{formatStatNumber(lang, communityStats.players)}</b> {t('stat_players')}{SEP}{TOURNAMENT_DAYS} {t('stat_days_c')}{SEP}
         </span>
       </Ticker>
 
@@ -104,9 +112,9 @@ export function SponsorsPage() {
             <h2 style={{ fontSize: 'clamp(26px,3vw,38px)' }}>{t('spon_reach_h')}</h2>
           </div>
           <div className="reach reveal">
-            {REACH.map((s) => (
+            {reach.map((s) => (
               <div className="stat" key={s.key}>
-                <CountUp className="n" value={s.value} />
+                <CountUp className="n" value={s.value} locale={locale} />
                 <span className="l">{t(s.key)}</span>
               </div>
             ))}

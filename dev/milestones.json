@@ -66,6 +66,22 @@
         "002-fix-mobile-header-and-prize-overflow",
         "003-run-mobile-qa-and-pr"
       ]
+    },
+    {
+      "id": "v0.3.2-real-stats",
+      "status": "ready_for_review",
+      "tasks": [
+        "001-add-community-aggregates-api",
+        "002-wire-real-stats-ui-and-i18n",
+        "003-add-v032-tests",
+        "004-run-v032-qa-and-pr"
+      ],
+      "completedTasks": [
+        "001-add-community-aggregates-api",
+        "002-wire-real-stats-ui-and-i18n",
+        "003-add-v032-tests",
+        "004-run-v032-qa-and-pr"
+      ]
     }
   ]
 }

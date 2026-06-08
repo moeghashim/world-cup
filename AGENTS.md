@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~11.1M` total tokens and `~$102` estimated API-equivalent cost in
+  `~11.3M` total tokens and `~$104` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -74,7 +74,8 @@ Current routes (`react-router-dom`, served by `vercel.json`'s SPA rewrite):
 - `/pickem` — 48-team bracket builder (group ranking → wildcard thirds →
   32-team knockout → champion), share-link modal, group quick pick'em
 - `/brackets` — public brackets (you-vs-crowd, most-picked champion, match
-  consensus, leaderboard, head-to-head compare from the saved bracket)
+  consensus, handle-only public samples, head-to-head compare from the saved
+  bracket)
 - `/sponsors` — sponsorship pitch (hero, reach stats, why-it-works, four
   partnership packages, inventory mockups, backers, contact form)
 
@@ -85,7 +86,7 @@ Source layout under `src/floodlights/`:
   the per-page sheets. `.page-head` and `.stat` were renamed per page
   (`.spon-head` / `.pk-head` / `.bk-head`, `.bk-stat`) to avoid global clashes.
 - `data.ts` — 48 teams (EN + AR + colour), 12 groups, R32 seeding template,
-  knockout metadata, crowd/community sample data, sponsors.
+  knockout metadata, and sponsors.
 - `i18n/` — `dictionaries.ts` (en/es/fr/pt/ar + localized country names),
   `context.ts` + `I18nProvider.tsx` (lang, dir, `t`, `tname`, `cname`).
 - `theme/` — `context.ts` + `ThemeProvider.tsx` (dark default, light variant),
@@ -101,8 +102,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~11.1M` total tokens and
-`~$102` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~11.3M` total tokens and
+`~$104` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -465,6 +466,12 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   compacted the mobile header controls, tightened homepage/brackets mobile
   overflow, captured EN/AR dark/light screenshots, and refreshed the
   documentation estimate to `~11.1M` total tokens and `~$102`.
+- Added the v0.3.2 read-only community stats endpoint backed by Neon/cache,
+  replaced fabricated homepage, public-brackets, and sponsorship stats with
+  real low-data aggregates, kept prize winners as named config, removed
+  sample crowd/community constants, added exact aggregate/no-PII tests,
+  captured EN/AR screenshots, and refreshed the documentation estimate to
+  `~11.3M` total tokens and `~$104`.
 
 ### 2026-06-07
 
@@ -494,6 +501,10 @@ Latest successful commands:
 
 ```bash
 npm run lint
+npm run test:v0.1
+npm run test:v0.2
+npm run test:v0.3
+npm run test:v0.3.2
 npm run build
 npm run verify:api:fallback
 npm run verify:api:dev
@@ -645,6 +656,13 @@ Browser verification covered:
   handle-only leaderboard/no-PII rendering, and Arabic RTL light/dark host pages
   with a fixed 148px logo and no horizontal overflow; disposable QA users and
   cascade-owned host data were deleted from Neon after evidence capture
+- verifying v0.3.2 real community stats: local `/api/data/community` returned
+  Neon-backed low-data aggregates (`players=2`, `bracketsLocked=1`,
+  `hostsJoined=0`, `fallback=false`), `/`, `/brackets`, and `/sponsors` rendered
+  real or empty-state numbers in English and Arabic RTL, R32 match 1 displayed
+  MEX at 100% from the locked-bracket consensus, every community API response
+  returned 200, and screenshots were saved under
+  `tests/e2e/screenshots/v0.3.2/`
 
 Latest screenshot:
 
@@ -670,6 +688,12 @@ Latest screenshot:
 `tests/e2e/screenshots/v0.3/host-public-owner-en-dark.png`
 `tests/e2e/screenshots/v0.3/host-public-ar-light.png`
 `tests/e2e/screenshots/v0.3/host-public-ar-dark.png`
+`tests/e2e/screenshots/v0.3.2/home-en-dark.png`
+`tests/e2e/screenshots/v0.3.2/home-ar-dark.png`
+`tests/e2e/screenshots/v0.3.2/brackets-en-dark.png`
+`tests/e2e/screenshots/v0.3.2/brackets-ar-dark.png`
+`tests/e2e/screenshots/v0.3.2/sponsors-en-dark.png`
+`tests/e2e/screenshots/v0.3.2/sponsors-ar-dark.png`
 
 ## Next Tasks
 

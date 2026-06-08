@@ -96,7 +96,6 @@ export function getQuickPickMatches(matches?: TournamentFixture[]): Match[] {
       b: match.awayTeamCode as string,
       g: match.groupCode as string,
       d: formatKickoffUtc(match.kickoffAt),
-      j: 317,
       kickoffAt: match.kickoffAt,
       venue: match.venue,
       matchNumber: match.matchNumber,
