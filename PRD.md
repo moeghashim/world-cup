@@ -35,9 +35,10 @@
 - As a new player, I choose a handle the first time I sign in.
 
 **Functional requirements**
-- `POST /api/auth/request` sends a magic link via Resend to the submitted email.
-- `GET /api/auth/verify?token=…` consumes a one-time, time-limited token and sets an httpOnly
-  session cookie; tokens are single-use and expire.
+- Sign-in uses **WorkOS** passwordless/magic-link (provisioned, credentials from Stripe Projects):
+  the app starts a WorkOS auth flow; WorkOS emails the link and handles the callback; on success we
+  find/create the local `users` row by WorkOS user id and establish a WorkOS-managed session. No
+  custom token/session code.
 - First sign-in requires choosing a **unique handle**; subsequent sign-ins reuse it.
 - Sign-in is prompted at the moment of **lock prediction / lock bracket / join host** (not on load).
 - localStorage bracket + group picks present at sign-in are **migrated** into the account once.
