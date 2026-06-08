@@ -6,21 +6,22 @@
 > Process is governed by `AGENTS.md` → **Development Process — Plan → Build → Sign-off**
 > (Claude plans/reviews, Codex implements, nothing merges/deploys before Claude sign-off).
 
-## Plan update — 2026-06-07 · provider reconciliation
+## Plan update — provider reconciliation (2026-06-07 · Auth0 swap 2026-06-08)
 
 Stripe Projects is the credential/infra source (`stripe projects env --pull`). The provisioned
 stack overrides earlier rows — **these supersede any conflicting prose below; the Decisions log
 (§12) reflects them**:
 
-- **Auth → WorkOS** (provisioned): passwordless/magic-link sign-in + WorkOS-managed sessions,
-  replacing the custom magic-link. No custom token/session tables.
-- **Email → AgentMail** (provisioned), replacing Resend: prize emails + any transactional mail
-  WorkOS doesn't send.
+- **Auth → Auth0 by Okta** (provisioned, swapped 2026-06-08): passwordless **email-code** sign-in +
+  an app-issued **signed httpOnly session**; the hosted Authorization Code / Universal Login routes
+  are retained as a fallback. Replaces WorkOS. No custom token/session tables.
+- **Email → AgentMail** (provisioned) for prize/transactional email. **Auth0 built-in delivery** sends
+  the v0.1 sign-in codes (Auth0 custom SMTP via AgentMail is disabled pending a `550 5.1.8` fix).
 - **Monitoring → Sentry** (provisioned): client + serverless error tracking (new).
 - **Hosting stays Vercel** (Cloudflare is provisioned but unused for now).
 - **Credentials:** never invent env var names — pull from Stripe Projects. Key names:
-  `PRIMARY_DB_CONNECTION_STRING` (Neon), `WORKOS_API_KEY` / `WORKOS_CLIENT_ID` (auth),
-  `AGENTMAIL_AGENTMAIL_API_KEY` (email), `SENTRY_DSN` (monitoring), `WORLDCUP_*` (PostHog).
+  `PRIMARY_DB_CONNECTION_STRING` (Neon), `AUTH0_DOMAIN` / `AUTH0_CLIENT_ID` / `AUTH0_CLIENT_SECRET` /
+  `AUTH0_COOKIE_SECRET` (auth), `AGENTMAIL_AGENTMAIL_API_KEY` (email), `SENTRY_DSN` (monitoring), `WORLDCUP_*` (PostHog).
 
 ## 1. Brief
 
@@ -58,8 +59,8 @@ accounts, real data, live scoring, hosts, prizes, and the build-story page.
 | Design system / i18n / theme | Existing Floodlights system (EN/ES/FR/PT/AR + RTL, dark/light) | Reuse; **all new surfaces must honor it.** |
 | Backend | Vercel serverless functions (`/api/*`) | Existing `api/` dir; holds all secrets/keys. |
 | Database | Neon Postgres via `@neondatabase/serverless` | Existing project stack; serverless-friendly. |
-| Auth | **WorkOS** (provisioned) — passwordless/magic-link sign-in + WorkOS-managed sessions | Already provisioned in Stripe Projects; less code to own, stronger security. |
-| Email | **AgentMail** (provisioned) | Transactional email (prize notifications; sign-in emails handled by WorkOS). |
+| Auth | **Auth0 by Okta** (provisioned) — passwordless email-code sign-in + signed httpOnly app session (Authorization Code/Universal Login fallback) | Provisioned in Stripe Projects; ID tokens verified with `jose`. |
+| Email | **AgentMail** (provisioned) | Prize/transactional email; v0.1 sign-in codes sent via Auth0 built-in delivery. |
 | Geo | Vercel edge request geo (country header) | US detection, zero user action. |
 | Static data | openfootball (CC0) seeded into Neon via a script | Free, reliable, license-clean. |
 | Live data | **Pluggable provider interface**; API-Football primary, football-data.org fallback | Build on free; defer the real-time spend to near kickoff. |
@@ -118,7 +119,7 @@ worldcup/
 
 ## 7. Runtime / API conventions
 
-- **Secrets server-side only** (Neon URL, WorkOS + AgentMail keys, data-provider keys) — never in the bundle.
+- **Secrets server-side only** (Neon URL, Auth0 + AgentMail keys, data-provider keys) — never in the bundle.
 - **Cache-then-serve:** clients read fixtures/results from **our** Neon/cache, never the provider.
 - **Idempotent scoring:** re-running the scorer on the same results yields the same standings.
 - **Pick locks are server-enforced** at each match's kickoff (client UI mirrors it).
@@ -127,9 +128,9 @@ worldcup/
 
 ## 8. Data model (Neon — Codex finalizes columns/types/migrations)
 
-- `users` (id, **workos_user_id unique**, email **unique**, handle **unique**, country_at_signup, created_at)
-- Auth + sessions handled by **WorkOS** — no custom `magic_link_tokens`/`sessions` tables; map the
-  WorkOS user to the local `users` row by `workos_user_id`
+- `users` (id, **auth0_user_id unique**, email **unique**, handle **unique**, country_at_signup, created_at)
+- Auth via **Auth0**; the app issues its own **signed httpOnly session** (HMAC holding only the Auth0
+  `sub`) — no custom `magic_link_tokens`/`sessions` tables; map the Auth0 user by `auth0_user_id`
 - `brackets` (user_id, data **jsonb** {groups, thirds, ko}, locked, updated_at) — mirrors the
   client model; scorer derives picks from it (Codex may normalize if cleaner)
 - `group_picks` (user_id, match_id, pick, locked_at)
@@ -153,7 +154,7 @@ worldcup/
 
 | Version | Scope |
 |---|---|
-| **v0.1 — Accounts + persistence** | WorkOS magic-link auth, Neon schema, picks server-side (bracket/group/predict), pre-login migration, handle at sign-in, `/profile`. |
+| **v0.1 — Accounts + persistence** | Auth0 email-code auth, Neon schema, picks server-side (bracket/group/predict), pre-login migration, handle at sign-in, `/profile`. |
 | **v0.2 — Real tournament data** | Seed teams/draw/fixtures from openfootball; replace sample data + `R32_TEMPLATE` with real structure; per-match kickoff locks. |
 | **v0.3 — Live results + scoring** | Pluggable live provider (API-Football), match-window polling + cache, idempotent scoring engine, standings/points. |
 | **v0.4 — Hosts** | Self-serve create, link/QR/code join, multi-host membership, public `/h/:slug` page (leaderboard + consensus). |
@@ -162,8 +163,8 @@ worldcup/
 
 ## 11. Confirmed defaults (LOCKED)
 
-1. **Auth:** **WorkOS** passwordless/magic-link sign-in (provisioned). No password, no custom token code.
-2. **Session:** **WorkOS-managed** sealed session cookie; session duration configured in WorkOS.
+1. **Auth:** **Auth0** passwordless email-code sign-in (provisioned); hosted Authorization Code flow retained as fallback. No password.
+2. **Session:** app-issued **signed httpOnly cookie** (`wwc_session`, HMAC of the Auth0 `sub`, ~30-day exp). Stateless; server-side revocation is a later hardening task.
 3. **Pre-login picks:** localStorage bracket/group picks are claimed into the account on first sign-in.
 4. **DB:** Neon Postgres via `@neondatabase/serverless`, accessed only from Vercel functions.
 5. **Static data:** seed teams/draw/fixtures from openfootball (CC0) into Neon via a refresh script.
@@ -183,7 +184,7 @@ worldcup/
 
 | Decision | Value | Source |
 |---|---|---|
-| Identity model | Mandatory email **magic-link via WorkOS** (email = login for everyone) | Locked by user (updated 2026-06-07) |
+| Identity model | Mandatory email sign-in via **Auth0** passwordless email-code (email = login for everyone) | Locked by user (updated 2026-06-08: WorkOS → Auth0) |
 | Optional item | **US physical shipping address** (not email), "used to ship prizes" | Locked by user |
 | Geo method | Vercel **edge IP** country header | Recommended, accepted |
 | Match data scope | **Live incl. results** (picks scored vs reality) | Locked by user |
@@ -213,7 +214,7 @@ worldcup/
 - **Build & process:** Codex (implements), Claude/Claude Code (plans + reviews), Stripe Projects (provisioning + spend limits).
 - **Hosting/runtime:** Vercel (hosting, serverless functions, edge geolocation, Cron).
 - **Database:** Neon (Postgres).
-- **Identity:** **WorkOS** (provisioned) — passwordless/magic-link auth + sessions.
+- **Identity:** **Auth0 by Okta** (provisioned) — passwordless email-code auth; app-issued signed httpOnly session.
 - **Email:** **AgentMail** (provisioned) — transactional email.
 - **Monitoring:** **Sentry** (provisioned) — client + serverless error tracking.
 - **Tournament data:** openfootball/worldcup.json (CC0, static); API-Football (primary live); football-data.org (fallback live).

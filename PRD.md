@@ -35,10 +35,12 @@
 - As a new player, I choose a handle the first time I sign in.
 
 **Functional requirements**
-- Sign-in uses **WorkOS** passwordless/magic-link (provisioned, credentials from Stripe Projects):
-  the app starts a WorkOS auth flow; WorkOS emails the link and handles the callback; on success we
-  find/create the local `users` row by WorkOS user id and establish a WorkOS-managed session. No
-  custom token/session code.
+- Sign-in uses **Auth0** passwordless **email-code** (provisioned, credentials from Stripe Projects):
+  the app requests a code (`/api/auth/passwordless/start`), the user enters it
+  (`/api/auth/passwordless/verify`), Auth0 verifies it, and we find/create the local `users` row by
+  `auth0_user_id` and set an app-issued **signed httpOnly session** (HMAC of the Auth0 `sub`). The
+  hosted Authorization Code routes (`/api/auth/start` + `/api/auth/callback`) are retained as a
+  fallback. Auth0 tokens are never stored client-side or returned from non-auth APIs.
 - First sign-in requires choosing a **unique handle**; subsequent sign-ins reuse it.
 - Sign-in is prompted at the moment of **lock prediction / lock bracket / join host** (not on load).
 - localStorage bracket + group picks present at sign-in are **migrated** into the account once.
