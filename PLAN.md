@@ -157,8 +157,8 @@ worldcup/
 |---|---|
 | **v0.1 — Accounts + persistence** | Auth0 email-code auth, Neon schema, picks server-side (bracket/group/predict), pre-login migration, handle at sign-in, `/profile`. |
 | **v0.2 — Real tournament data** | Seed teams/draw/fixtures from openfootball; replace sample data + `R32_TEMPLATE` with real structure; per-match kickoff locks. |
-| **v0.3 — Live results + scoring** | Pluggable live provider (API-Football), match-window polling + cache, idempotent scoring engine, standings/points. |
-| **v0.4 — Hosts** | Self-serve create, link/QR/code join, multi-host membership, public `/h/:slug` page (leaderboard + consensus). |
+| **v0.3 — Accounts UX + Hosts + fixes** | Fix the production signup bug (P0); gate sign-in on all lock actions (Pick'em + home match prediction); Hosts (self-serve create, link/QR/code join, multi-host, become/join at signup or later, public `/h/:slug` page); plus the Arabic-RTL logo overlap, consistent desktop content width, and a two-sided desktop knockout bracket. |
+| **v0.4 — Live results + scoring** | Pluggable live provider (API-Football), match-window polling + cache, idempotent scoring engine, standings/points. |
 | **v0.5 — US prizes & address** | Geo gating, win detection, address-at-win + disclosure, prize emails, claim flow, compliance surface. |
 | **v0.6 — "How it's built" page** | Public scrollytelling build-story page with up-to-date AI tokens + $ estimate. No deps — may move earlier. |
 
@@ -235,7 +235,7 @@ worldcup/
 
 | Item | Proposed resolution | Resolve by |
 |---|---|---|
-| Real-time vs delayed live scoring (the ~$25/mo) | Build provider-agnostic; default delayed-free, upgrade to API-Football Pro near kickoff if real-time is wanted | Before v0.3 ships to prod |
+| Real-time vs delayed live scoring (the ~$25/mo) | Build provider-agnostic; default delayed-free, upgrade to API-Football Pro near kickoff if real-time is wanted | Before v0.4 ships to prod |
 | Domain registrar | Keep current registrar for `winworldcup2026.com` | Anytime |
 | Prize fulfillment partner | Choose during v0.5 (Gelato/Printful/3PL per prior research) | v0.5 |
 | Bracket storage: jsonb vs normalized | Codex picks; jsonb default, normalize if it simplifies scoring | v0.1/v0.3 |
