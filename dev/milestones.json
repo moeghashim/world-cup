@@ -1,0 +1,22 @@
+{
+  "milestones": [
+    {
+      "id": "v0.1-accounts-persistence",
+      "status": "planned",
+      "tasks": [
+        "001-align-provider-env-contracts",
+        "002-add-workos-user-picks-schema",
+        "003-add-workos-auth-server",
+        "004-add-user-profile-handle-apis",
+        "005-add-server-picks-api",
+        "006-add-auth-ui-and-lock-gates",
+        "007-claim-anonymous-picks",
+        "008-add-profile-page",
+        "009-wire-sentry-monitoring",
+        "010-add-v01-tests-and-qa",
+        "011-replace-workos-with-auth0",
+        "012-add-auth0-passwordless-email-flow"
+      ]
+    }
+  ]
+}

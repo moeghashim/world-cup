@@ -38,9 +38,9 @@ Current implementation baseline:
 - PostHog first-party `/ingest` proxy in `vite.config.ts` and `vercel.json`.
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
-- AI usage disclosure currently shows `~6.3M` total tokens and `~$56`
-  estimated API-equivalent cost in `src/App.tsx` and the appended
-  `BUILD_BLOG.md` reset note.
+- AI usage disclosure is currently tracked in documentation, not the UI:
+  `~9.0M` total tokens and `~$81` estimated API-equivalent cost in
+  `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
 ## Floodlights Implementation - 2026-06-07
@@ -87,8 +87,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~6.9M` total tokens and
-`~$60` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.0M` total tokens and
+`~$81` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -111,6 +111,12 @@ docs (`BUILD_BLOG.md`) rather than in the UI: currently `~6.9M` total tokens and
 - `@neondatabase/serverless` for Vercel server-side prediction entry writes to Neon.
 - Google Analytics gtag for page-view tracking, with the static homepage snippet using `G-RFPJRPKYQR` and `VITE_GA_MEASUREMENT_ID` reserved for the runtime fallback path.
 - `posthog-js` for env-gated product analytics through the first-party `/ingest` proxy.
+- Auth0 by Okta for account identity through Projects.dev resource `auth0`.
+- Auth0 Passwordless Email API routes for email-code sign-in through Auth0
+  built-in email delivery. AgentMail custom SMTP for Auth0 sign-in is disabled
+  while Auth0 and AgentMail investigate a `550 5.1.8 Sender address rejected`
+  handoff failure.
+- `jose` for Auth0 ID-token verification in Vercel serverless callbacks.
 - Optimized raster stadium hero loaded from `src/assets/world-cup-hero.jpg`.
 
 ## Architecture Notes
@@ -320,6 +326,39 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
 
 - Repaired the homepage prediction QA path by making `npm run dev` start both Vite and the local prediction API shim, adding `npm run dev:app` for frontend-only work, adding `npm run verify:api:dev` for Vite-proxy prediction submission smoke tests, extracting the homepage prediction payload builder, mapping raw network failures to the localized retry copy, improving the State field label, fixing mobile receipt wrapping, and refreshing the AI build estimate to `~6.2M` total tokens and `~$55`.
 
+### 2026-06-08
+
+- Replaced WorkOS with Auth0 by Okta for the v0.1 account flow: provisioned Projects.dev resource `auth0`, detached the old WorkOS `auth` resource from the default environment, added Auth0 Authorization Code Flow handlers, verified ID tokens with `jose`, mapped local users by `auth0_user_id`, added a signed httpOnly app session, fixed Auth0 callback/logout/web-origin config through Projects.dev, added Auth0 env vars to Vercel Development/Preview/Production, removed WorkOS env vars from Vercel, and refreshed the documentation estimate to `~8.2M` total tokens and `~$73`.
+- Added first-party Auth0 email-code sign-in: `/api/auth/passwordless/start`,
+  `/api/auth/passwordless/verify`, inline lock-gate/profile email-code UI,
+  localized copy, dev API shim routes, tests for passwordless start and the
+  current missing Auth0 email connection, documented the provider blocker, and
+  refreshed the documentation estimate to `~8.4M` total tokens and `~$75`.
+- Removed the visible hosted Auth0 fallback from the public sign-in modal so the
+  player-facing account flow keeps the Floodlights website design and no longer
+  switches into the Auth0-branded screen from the normal UI. Refreshed the
+  documentation estimate to `~8.5M` total tokens and `~$76`.
+- Triaged Auth0 email-code delivery: confirmed the Auth0 Passwordless Email
+  connection is enabled, isolated Auth0 custom SMTP with AgentMail as failing
+  with `550 5.1.8 Sender address rejected`, confirmed direct AgentMail SMTP to
+  `moe@babanuj.com` is delivered, switched Auth0 sign-in back to built-in email
+  delivery, documented the remaining human-assisted code-entry QA step, and
+  refreshed the documentation estimate to `~8.7M` total tokens and `~$78`.
+- Verified the first real Auth0 OTP session with `moe@babanuj.com`: accepted a
+  fresh human-supplied code, confirmed `/api/auth/passwordless/verify` sets an
+  authenticated app session, confirmed `/api/auth/me`, saved first handle
+  `moe2026`, verified authenticated group-pick, prediction, and bracket
+  save/reload paths, and refreshed the documentation estimate to `~8.8M` total
+  tokens and `~$79`.
+- Completed the follow-up Auth0 QA package for review: accepted another fresh
+  human-supplied code from `moe@babanuj.com` through the local passwordless
+  verify endpoint, confirmed first-sign-in handle setup, verified authenticated
+  group-pick, score-prediction, bracket, and profile API readbacks, verified
+  extension-free browser coverage for English + Arabic RTL across dark and
+  light themes, recorded Chrome as blocked by another extension UI for the
+  browser-owned cookie check, and refreshed the documentation estimate to
+  `~9.0M` total tokens and `~$81`.
+
 ### 2026-06-07
 
 - Adopted the **Floodlights** design from the Claude Design handoff bundle and
@@ -456,6 +495,39 @@ Browser verification covered:
 - verifying `/brackets` reads the saved bracket and populates "you vs the crowd" (Mexico champion, 81% agreement, 13/16 R32 winners, 3 contrarian calls), champion-distribution and match-consensus bars
 - verifying the light theme flips the whole site to the high-contrast light palette and stays legible
 - verifying Arabic switches to RTL with Zain/Alexandria fonts and localized team names while LED/Doto numbers stay left-to-right
+- verifying Auth0 provider swap with `npm run lint`, `npm run test:v0.1`, `npm run build`, `npm run db:apply`, `npx vercel build`, local `/api/auth/start` 302 redirect, Auth0 `/authorize` -> `/u/login`, Vercel env list showing Auth0 env vars and no WorkOS env vars, and in-app browser smoke check from `/pickem` lock gate to Auth0 Universal Login
+- verifying Auth0 passwordless follow-up with `npm run test:v0.1`, `npm run
+  lint`, `npm run build`, a direct local
+  `POST /api/auth/passwordless/start` using `moe@babanuj.com` returning
+  `auth_provider_not_ready`, Auth0 Authentication API returning
+  `bad.connection`, Projects.dev Auth0 catalog showing only `client` as the
+  deployable resource, and the in-app browser rendering the email-code modal
+  without a password field
+- verifying the same-design sign-in adjustment in the in-app browser: `/profile`
+  opens the Floodlights email-code modal with `Send email code`, no `Password`
+  field, and no `Use hosted Auth0` button
+- verifying Auth0 passwordless delivery triage: local
+  `/api/auth/passwordless/start` returns `sent: true`; Auth0 custom SMTP through
+  AgentMail logs `550 5.1.8 Sender address rejected`; direct AgentMail SMTP to
+  `moe@babanuj.com` queues successfully and was user-confirmed received; Auth0
+  built-in delivery logs `Code/Link Sent` to `moe@babanuj.com` without a new
+  `Failed Sending Notification`; AgentMail QA inbox polling did not receive the
+  Auth0 built-in email in the test window
+- verifying the first real Auth0 OTP session: local
+  `/api/auth/passwordless/verify` accepted a human-supplied code for
+  `moe@babanuj.com`, returned an authenticated session and handle-setup
+  redirect, `/api/auth/me` read the signed session cookie, handle `moe2026` was
+  saved, and authenticated group-pick, prediction, and bracket data each
+  saved/reloaded successfully
+- verifying follow-up Auth0 QA: a fresh code from `moe@babanuj.com` was
+  accepted by the local passwordless verify endpoint; `/api/auth/me`,
+  `/api/profile/handle`, `/api/picks/group`, `/api/picks/predict`,
+  `/api/picks/bracket`, and `/api/profile` returned the expected authenticated
+  values and persisted readbacks; Chrome rendered the website-styled email-code
+  modal but another Chrome extension UI blocked structured automation after the
+  stale-code modal; the extension-free in-app browser verified `/pickem` in
+  English dark, English light, Arabic RTL light, and Arabic RTL dark with no
+  console errors
 
 Latest screenshot:
 

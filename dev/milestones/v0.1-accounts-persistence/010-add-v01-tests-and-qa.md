@@ -1,0 +1,30 @@
+---
+id: 010
+title: Add v0.1 tests and Chrome QA evidence
+milestone: v0.1-accounts-persistence
+category: tests
+priority: medium
+files: ["package.json", "src/floodlights/**/*.test.ts", "api/**/*.test.ts", "tests/e2e/*.md", "README.md"]
+---
+
+## Acceptance criteria
+- [x] WorkOS callback/session handling, handle validation, pick payload validation, and migration behavior have unit or smoke coverage. (PRD S1 acceptance criteria)
+- [x] Tests assert that non-auth pick APIs do not return email or token/session fields. (PRD S1: no email/token in non-auth API response)
+- [x] `npm run lint`, `npm run build`, and the v0.1 test command pass locally. (Workflow test floor)
+- [ ] Chrome E2E QA covers WorkOS sign-in, play-to-lock gate, handle-at-first-sign-in, anonymous-pick migration, persistence across reload/fresh session, and `/profile` in English + Arabic and both themes. (User workflow update)
+
+## Suggested approach
+Use mocked WorkOS/Neon where needed for automated tests. Run real-browser QA
+against the local or preview app after env pull. Record pass/fail and evidence
+in the milestone PR body.
+
+## QA Note - 2026-06-08
+
+Provider reconciliation replaced WorkOS with Auth0 by Okta for v0.1. Auth0
+email-code verification passed with a human-supplied code from
+`moe@babanuj.com`, and authenticated API readbacks passed for handle setup,
+group picks, score predictions, bracket state, and profile. Chrome rendered the
+website-styled email-code modal, but another Chrome extension UI blocked
+structured automation before Chrome could own the final session cookie.
+Extension-free browser coverage passed for `/pickem` in English dark, English
+light, Arabic RTL light, and Arabic RTL dark with no console errors.

@@ -3,10 +3,6 @@ type HealthResponse = {
   json: (body: unknown) => void
 }
 
-declare const process: {
-  env: Record<string, string | undefined>
-}
-
 export default function handler(_request: unknown, response: HealthResponse) {
   response.status(200).json({
     ok: true,
@@ -14,9 +10,11 @@ export default function handler(_request: unknown, response: HealthResponse) {
     integrations: {
       vercel: true,
       googleAnalytics: 'G-RFPJRPKYQR',
-      posthog: Boolean(process.env.VITE_POSTHOG_KEY),
+      posthog: Boolean(process.env.WORLDCUP_API_KEY),
       stripeProjects: true,
       primaryDatabase: Boolean(process.env.PRIMARY_DB_CONNECTION_STRING),
+      auth0: Boolean(process.env.AUTH0_CLIENT_ID),
+      sentry: Boolean(process.env.SENTRY_DSN),
     },
   })
 }

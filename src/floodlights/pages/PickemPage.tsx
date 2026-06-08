@@ -24,6 +24,11 @@ import { SiteHeader } from '../components/SiteHeader'
 import { SiteFooter } from '../components/SiteFooter'
 import { Flag } from '../components/Flag'
 import { SponsorBand } from '../components/SponsorLogo'
+import { SignInGate } from '../components/SignInGate'
+import { captureAnalyticsEvent } from '../../analytics'
+import { ApiClientError, apiRequest } from '../lib/apiClient'
+import { useAuth } from '../lib/authContext'
+import { migrateAnonymousPicks } from '../lib/accountMigration'
 
 const SEP = '  ·  '
 const R_KEYS = ['r_r32', 'r_r16', 'r_qf', 'r_sf', 'r_final']
@@ -52,6 +57,7 @@ interface GroupPicks { picks: Record<number, string>; locked: boolean }
 export function PickemPage() {
   const { t, tname } = useI18n()
   const { toast } = useToast()
+  const auth = useAuth()
   useReveal()
 
   const [state, setState] = useState<BracketState>(() => readSharedBracket() ?? normalize(load('bracket', {})))
@@ -62,6 +68,8 @@ export function PickemPage() {
     return { picks: g.picks || {}, locked: !!g.locked }
   })
   const [modalOpen, setModalOpen] = useState(false)
+  const [gateOpen, setGateOpen] = useState(false)
+  const [savingLock, setSavingLock] = useState<'bracket' | 'group' | null>(null)
   const [shareUrl, setShareUrl] = useState('')
   const [copied, setCopied] = useState(false)
   const popTarget = useRef<{ r: number; m: number } | null>(null)
@@ -80,6 +88,43 @@ export function PickemPage() {
     popTarget.current = null
     pop(document.querySelector(`.slot.sel[data-r="${tgt.r}"][data-m="${tgt.m}"]`))
   }, [state])
+
+  useEffect(() => {
+    if (!auth.authenticated || auth.needsHandle || !auth.user || viewing) return
+
+    let active = true
+
+    async function loadAccountPicks() {
+      try {
+        await migrateAnonymousPicks(auth.user!.id)
+        const [bracketResponse, groupPicksResponse] = await Promise.all([
+          apiRequest<{ bracket: BracketState | null }>('/api/picks/bracket'),
+          apiRequest<{ groupPicks: GroupPicks | null }>('/api/picks/group'),
+        ])
+
+        if (!active) return
+
+        if (bracketResponse.bracket) {
+          const nextBracket = normalize(bracketResponse.bracket)
+          setState(nextBracket)
+          save('bracket', nextBracket)
+        }
+
+        if (groupPicksResponse.groupPicks) {
+          setGp(groupPicksResponse.groupPicks)
+          save('grouppicks', groupPicksResponse.groupPicks)
+        }
+      } catch {
+        toast(t('auth_save_failed'), '!')
+      }
+    }
+
+    void loadAccountPicks()
+
+    return () => {
+      active = false
+    }
+  }, [auth.authenticated, auth.needsHandle, auth.user, t, toast, viewing])
 
   /* ---------------- groups ---------------- */
   const chooseGroup = (g: string, code: string) => {
@@ -137,12 +182,49 @@ export function PickemPage() {
   }
 
   /* ---------------- actions ---------------- */
-  const lockBracket = () => {
+  const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`
+
+  const sendToHandleSetup = () => {
+    toast(t('auth_handle_needed'), '✦')
+    window.location.assign(`/profile?setup=handle&returnTo=${encodeURIComponent(returnTo)}`)
+  }
+
+  const openLockGate = (surface: 'bracket' | 'group') => {
+    captureAnalyticsEvent('lock_gate_opened', { surface })
+    setGateOpen(true)
+  }
+
+  const lockBracket = async () => {
     if (state.locked || viewing || !fullyDone(state)) return
+    if (!auth.authenticated) {
+      openLockGate('bracket')
+      return
+    }
+    if (auth.needsHandle) {
+      sendToHandleSetup()
+      return
+    }
+
     const next = { ...state, locked: true }
-    commit(next)
-    confetti(lockRef.current)
-    toast(t('toast_locked'), '🎟')
+    setSavingLock('bracket')
+    try {
+      await apiRequest('/api/picks/bracket', {
+        method: 'PUT',
+        body: next,
+      })
+      commit(next)
+      confetti(lockRef.current)
+      toast(t('toast_locked'), '🎟')
+      captureAnalyticsEvent('bracket_locked', { has_handle: true })
+    } catch (error) {
+      if (error instanceof ApiClientError && error.code === 'handle_required') {
+        sendToHandleSetup()
+      } else {
+        toast(t('auth_save_failed'), '!')
+      }
+    } finally {
+      setSavingLock(null)
+    }
   }
   const resetBracket = () => {
     commit(emptyState())
@@ -203,13 +285,38 @@ export function PickemPage() {
     save('grouppicks', next)
     pop(el, 1.12)
   }
-  const gpLock = () => {
+  const gpLock = async () => {
     if (gp.locked || Object.keys(gp.picks).length < MATCHES.length) return
+    if (!auth.authenticated) {
+      openLockGate('group')
+      return
+    }
+    if (auth.needsHandle) {
+      sendToHandleSetup()
+      return
+    }
+
     const next = { ...gp, locked: true }
-    setGp(next)
-    save('grouppicks', next)
-    confetti(gpLockRef.current)
-    toast(t('toast_pred'), '🎟')
+    setSavingLock('group')
+    try {
+      await apiRequest('/api/picks/group', {
+        method: 'PUT',
+        body: next,
+      })
+      setGp(next)
+      save('grouppicks', next)
+      confetti(gpLockRef.current)
+      toast(t('toast_pred'), '🎟')
+      captureAnalyticsEvent('group_picks_locked', { has_handle: true })
+    } catch (error) {
+      if (error instanceof ApiClientError && error.code === 'handle_required') {
+        sendToHandleSetup()
+      } else {
+        toast(t('auth_save_failed'), '!')
+      }
+    } finally {
+      setSavingLock(null)
+    }
   }
 
   /* ---------------- derived ---------------- */
@@ -480,10 +587,10 @@ export function PickemPage() {
                 <button
                   className={`btn btn-lime lock-bracket-btn ${state.locked ? 'locked' : ''}`.trim()}
                   ref={lockRef}
-                  disabled={!state.locked && !isFull}
+                  disabled={savingLock === 'bracket' || (!state.locked && !isFull)}
                   onClick={lockBracket}
                 >
-                  {state.locked ? t('lock_bracket_done') : isFull ? t('lock_bracket') : t('lock_bracket_need')}
+                  {savingLock === 'bracket' ? t('auth_saving') : state.locked ? t('lock_bracket_done') : isFull ? t('lock_bracket') : t('lock_bracket_need')}
                 </button>
                 {showShare && (
                   <div className="bk-row2">
@@ -531,8 +638,8 @@ export function PickemPage() {
           </div>
           <div className="flex ac gap-12" style={{ flexWrap: 'wrap' }}>
             <span className="gp-pts">⚡ <b>{gpN * 10}</b> pts</span>
-            <button className={`btn btn-lime gp-lock-btn ${gp.locked ? 'locked' : ''}`.trim()} ref={gpLockRef} disabled={!gp.locked && gpN < MATCHES.length} onClick={gpLock}>
-              {gp.locked ? t('gp_lock_done') : gpN < MATCHES.length ? `${t('gp_picks_made')} (${gpN}/${MATCHES.length})` : t('gp_lock')}
+            <button className={`btn btn-lime gp-lock-btn ${gp.locked ? 'locked' : ''}`.trim()} ref={gpLockRef} disabled={savingLock === 'group' || (!gp.locked && gpN < MATCHES.length)} onClick={gpLock}>
+              {savingLock === 'group' ? t('auth_saving') : gp.locked ? t('gp_lock_done') : gpN < MATCHES.length ? `${t('gp_picks_made')} (${gpN}/${MATCHES.length})` : t('gp_lock')}
             </button>
           </div>
         </div>
@@ -568,6 +675,12 @@ export function PickemPage() {
       </section>
 
       <SponsorBand />
+
+      <SignInGate
+        open={gateOpen}
+        onClose={() => setGateOpen(false)}
+        returnTo={returnTo}
+      />
 
       <SiteFooter wide noteKey="footer_note">
         <Link to="/">{t('nav_home')}</Link>

@@ -3,10 +3,12 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { ThemeProvider } from './floodlights/theme/ThemeProvider'
 import { I18nProvider } from './floodlights/i18n/I18nProvider'
 import { ToastProvider } from './floodlights/lib/ToastProvider'
+import { AuthProvider } from './floodlights/lib/AuthProvider'
 import { HomePage } from './floodlights/pages/HomePage'
 import { PickemPage } from './floodlights/pages/PickemPage'
 import { BracketsPage } from './floodlights/pages/BracketsPage'
 import { SponsorsPage } from './floodlights/pages/SponsorsPage'
+import { ProfilePage } from './floodlights/pages/ProfilePage'
 import { initializeGoogleAnalytics, initializePostHog } from './analytics'
 
 /** scroll to top on navigation, or to an in-page anchor when the URL has a hash */
@@ -32,16 +34,19 @@ function App() {
   return (
     <ThemeProvider>
       <I18nProvider>
-        <ToastProvider>
-          <ScrollToHash />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/pickem" element={<PickemPage />} />
-            <Route path="/brackets" element={<BracketsPage />} />
-            <Route path="/sponsors" element={<SponsorsPage />} />
-            <Route path="*" element={<HomePage />} />
-          </Routes>
-        </ToastProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <ScrollToHash />
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/pickem" element={<PickemPage />} />
+              <Route path="/brackets" element={<BracketsPage />} />
+              <Route path="/sponsors" element={<SponsorsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="*" element={<HomePage />} />
+            </Routes>
+          </ToastProvider>
+        </AuthProvider>
       </I18nProvider>
     </ThemeProvider>
   )

@@ -1,6 +1,6 @@
 # Building A World Cup Prediction And Sponsor Rewards Website
 
-Last updated: 2026-06-03
+Last updated: 2026-06-08
 
 This is the working blog post for the project. Update this file on every commit so the article stays aligned with the real build history.
 
@@ -748,3 +748,346 @@ The previous neutral reset screen and its inline AI-usage disclosure banner were
 replaced by this product surface, so the cumulative AI build estimate now lives
 in the documentation: roughly `~6.9M` total tokens and `~$60` estimated
 API-equivalent cost.
+
+## v0.1 Accounts And Persistence Milestone
+
+The reconciled v0.1 plan moves account identity to WorkOS AuthKit and keeps
+credentials managed through Stripe Projects. The implementation deliberately
+drops the earlier custom magic-link token/session design: there are no
+`magic_link_tokens` or custom `sessions` tables. Local account rows map to
+WorkOS with `users.workos_user_id`.
+
+Task 003 added the server-side WorkOS auth flow:
+
+- `/api/auth/start` redirects to WorkOS AuthKit with an encoded return path.
+- `/api/auth/callback` exchanges the WorkOS code, seals the WorkOS session into
+  an httpOnly cookie, and maps the WorkOS user into the local `users` table.
+- `/api/auth/logout` clears the local sealed-session cookie and redirects through
+  the WorkOS logout URL when a valid session is available.
+- shared API helpers now cover environment validation, Neon access, cookies,
+  request-origin handling, WorkOS initialization, session resolution, and local
+  user mapping.
+
+The cumulative build estimate is now roughly `~7.0M` total tokens and `~$61`
+estimated API-equivalent cost.
+
+Task 004 added the account profile API surface:
+
+- `/api/auth/me` reports whether a sealed WorkOS session is authenticated and
+  whether the user still needs to choose a handle.
+- `/api/profile` returns only the current user's email, handle, and signup
+  country, never session or token material.
+- `/api/profile/handle` validates and stores the first public handle, rejecting
+  duplicates with a clear `handle_taken` response.
+
+The cumulative build estimate is now roughly `~7.1M` total tokens and `~$62`
+estimated API-equivalent cost.
+
+Task 005 added authenticated pick persistence:
+
+- `/api/picks/bracket` loads and saves the bracket JSON payload in Neon.
+- `/api/picks/group` loads and saves the group-stage pick'em card.
+- `/api/picks/predict` loads score predictions and upserts match-level score
+  picks.
+- writes use the WorkOS session plus local handle requirement, while read
+  responses stay scoped to pick data and do not include email or token/session
+  fields.
+
+The cumulative build estimate is now roughly `~7.2M` total tokens and `~$63`
+estimated API-equivalent cost.
+
+Task 006 connected the account flow to the Floodlights UI:
+
+- an `AuthProvider` loads the WorkOS-backed session from `/api/auth/me` without
+  prompting on page load;
+- anonymous users only see the sign-in gate when they try to lock a bracket or
+  group pick'em card;
+- the gate starts `/api/auth/start` with the current return path, so WorkOS can
+  bring the fan back to the same play surface;
+- signed-in users with handles save locked picks through the Neon-backed API;
+- signed-in users without handles are sent to the profile setup path before
+  saving; and
+- sign-in/lock analytics events avoid email or token values.
+
+The cumulative build estimate is now roughly `~7.3M` total tokens and `~$64`
+estimated API-equivalent cost.
+
+Task 007 added anonymous-pick migration:
+
+- the existing `fl:bracket` and `fl:grouppicks` localStorage payloads are
+  preserved while the fan plays anonymously;
+- after WorkOS sign-in and handle completion, the pick'em page uploads those
+  local picks into the signed-in account once when the server does not already
+  have picks;
+- the page then reloads account-backed bracket and group pick'em data from Neon
+  so reloads and fresh sessions use the durable copy; and
+- the migration marker stores only the local account id namespace, never email,
+  auth tokens, or session cookie material.
+
+The cumulative build estimate is now roughly `~7.4M` total tokens and `~$65`
+estimated API-equivalent cost.
+
+Task 008 added the localized profile surface:
+
+- `/profile` shows the signed-in account email, public handle, and signup
+  country;
+- first sign-in can land on `/profile?setup=handle` so the fan chooses a handle
+  before account-bound pick saves;
+- duplicate/invalid handle responses are translated into clear UI toasts;
+- signed-out fans can start sign-in without losing the anonymous bracket already
+  stored on the device; and
+- sign-out clears the sealed WorkOS session through the server logout route.
+
+The cumulative build estimate is now roughly `~7.5M` total tokens and `~$66`
+estimated API-equivalent cost.
+
+Task 009 wired monitoring:
+
+- Vite now reads browser-safe runtime constants from the exact Stripe Projects
+  env names: `SENTRY_DSN`, `WORLDCUP_API_KEY`, and `WORLDCUP_HOST`.
+- client Sentry initializes only when `SENTRY_DSN` exists and scrubs email,
+  IP, cookies, auth headers, and request bodies before events are sent;
+- serverless handlers capture unexpected errors through `@sentry/node`, also
+  stripping cookies, auth headers, request bodies, and user email/IP; and
+- PostHog now uses the `WORLDCUP_*` env contract instead of requiring legacy
+  `VITE_POSTHOG_*` names.
+
+The cumulative build estimate is now roughly `~7.6M` total tokens and `~$67`
+estimated API-equivalent cost.
+
+Task 010 added the v0.1 test and local QA harness:
+
+- `npm run test:v0.1` now covers WorkOS callback redirect safety, handle
+  validation, persisted pick payload validation, anonymous migration helpers,
+  non-auth pick API response hygiene, and generic server-error scrubbing.
+- `npm run dev` now starts both the Vite app and a local API shim so browser QA
+  exercises the same serverless handlers through `/api/*` instead of silently
+  missing the account routes.
+- README documents the v0.1 test command alongside lint/build.
+- Chrome QA reached the anonymous play-to-lock gate and the WorkOS hosted
+  AuthKit sign-in page after registering the local callback URI.
+
+The remaining milestone QA blocker is external to the app code: completing
+WorkOS AuthKit sign-in requires an accessible one-time email code or approval
+for a deliberately local-only session seeding helper, and the current Chrome
+session also has another extension UI blocking automation on the AuthKit page.
+
+The cumulative build estimate is now roughly `~7.8M` total tokens and `~$69`
+estimated API-equivalent cost.
+
+## Provider Swap: Auth0 By Okta Replaces WorkOS
+
+WorkOS was removed from the active implementation after its Magic Auth setting
+blocked the required passwordless QA path. The replacement provider is Auth0 by
+Okta, provisioned through Stripe Projects as a new resource named `auth0`.
+
+What changed:
+
+- Projects.dev now has `auth0` active in the default environment and the old
+  WorkOS `auth` resource detached from that environment.
+- Vercel now has `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET`, `AUTH0_DOMAIN`, and
+  `AUTH0_COOKIE_SECRET` in Development, Preview, and Production. The old
+  WorkOS env vars were removed from Vercel.
+- The app now uses Auth0 Universal Login with the Authorization Code Flow.
+- `/api/auth/start` creates an auth-state nonce, stores it in an httpOnly cookie,
+  and redirects to Auth0.
+- `/api/auth/callback` validates the nonce, exchanges the code server-side,
+  verifies the Auth0 ID token, maps the user into Neon by `users.auth0_user_id`,
+  and sets a signed httpOnly `wwc_session` cookie.
+- `/api/auth/logout` clears the app cookie and redirects through Auth0 logout.
+- The local session stores only a signed Auth0 subject. Auth0 tokens are not
+  stored in client-readable state and are not returned from non-auth APIs.
+- A new migration adds `auth0_user_id` while keeping the old `workos_user_id`
+  column nullable for databases that already ran the prior WorkOS migration.
+
+The Auth0 client initially rejected localhost with `Callback URL mismatch`.
+Projects.dev accepted an `auth0` update for callback, logout, and web-origin
+URLs covering local development and `https://winworldcup2026.com`. After that,
+Auth0 `/authorize` redirected to `/u/login`, confirming the callback mismatch
+was fixed.
+
+Verification:
+
+- `npm run lint`
+- `npm run test:v0.1`
+- `npm run build`
+- `npm run db:apply` after updating it to load local `.env`
+- `npx vercel build`
+- local HTTP check for `/api/auth/start`
+- external Auth0 authorize check to `/u/login`
+- `vercel env ls` confirming Auth0 env vars are present and WorkOS env vars are
+  absent
+- in-app browser smoke check from `/pickem` quick-fill → `Lock my bracket` →
+  Auth0 lock gate → Auth0 Universal Login
+
+The database migration was applied to Neon with
+`db/migrations/002_auth0_provider.sql`, adding `auth0_user_id`, making the old
+WorkOS column nullable, and creating the Auth0 user-id uniqueness index.
+
+Full human-assisted account E2E is still pending a completed Auth0 login session,
+so handle setup, anonymous-pick migration after callback, reload persistence, and
+profile verification remain the next QA step.
+
+The cumulative build estimate is now roughly `~8.2M` total tokens and `~$73`
+estimated API-equivalent cost.
+
+## Auth0 Email-Code Sign-In Follow-Up
+
+The hosted Auth0 page still asked for a password when tested with
+`moe@babanuj.com`, so the app now has a first-party email-code sign-in path on
+top of Auth0 Passwordless Email.
+
+What changed:
+
+- `/api/auth/passwordless/start` validates the email server-side and asks Auth0
+  to send a one-time code with `connection: "email"` and `send: "code"`.
+- `/api/auth/passwordless/verify` exchanges the code through Auth0, verifies the
+  ID token, maps the Auth0 subject to `users.auth0_user_id`, and sets the same
+  signed httpOnly `wwc_session` cookie used by the hosted callback flow.
+- The lock gate and signed-out profile page now show an inline email-code form
+  instead of sending the player directly to a password form.
+- Hosted Auth0 Universal Login remains available as a server route fallback, but
+  it is no longer exposed as a public button in the normal sign-in modal.
+- The dev API shim routes the new passwordless endpoints locally, and the v0.1
+  test suite covers both a successful Auth0 request shape and the current
+  missing-provider-connection failure.
+
+The provider blocker is now precise: Auth0 returned `bad.connection` /
+`Connection does not exist` from `POST /passwordless/start`, and adding
+`connection=email` to Universal Login still rendered the username/password
+database form. Projects.dev exposes the Auth0 `client` deployable but not Auth0
+connection management, and the web app client cannot get a Management API token
+without an Auth0 client grant. The remaining provider step is to create/enable
+the Passwordless Email connection named `email` in Auth0 and enable it for the
+World Cup application.
+
+Verification:
+
+- `npm run test:v0.1`
+- `npm run lint`
+- `npm run build`
+- local `POST /api/auth/passwordless/start` with `moe@babanuj.com`, returning
+  `auth_provider_not_ready` while the Auth0 email connection is missing
+- Auth0 Dashboard fallback opened through `stripe projects open auth0`, which
+  reached an Auth0 Dashboard login screen for `moe@10claws.com`
+- in-app browser check that `/profile` opens the email-code modal with no
+  password field
+
+The cumulative build estimate is now roughly `~8.4M` total tokens and `~$75`
+estimated API-equivalent cost.
+
+## Same-Design Sign-In Adjustment
+
+After testing the hosted Auth0 path, the product direction is clearer: players
+should not leave the Floodlights visual system just to sign in. The public
+sign-in modal now keeps the same website design and only shows the email-code
+form plus the cancel/change-email controls. The hosted Auth0 route still exists
+for fallback/debug use, but the normal player UI no longer offers a button that
+switches into the Auth0-branded screen.
+
+Verification confirmed that `/profile` opens the Floodlights email-code modal
+with `Send email code`, no password field, and no hosted Auth0 button.
+
+The cumulative build estimate is now roughly `~8.5M` total tokens and `~$76`
+estimated API-equivalent cost.
+
+## Auth0 Email Delivery Provider Triage
+
+Passwordless email-code sign-in is now past the missing-connection blocker. The
+Auth0 Passwordless Email connection named `email` is enabled, and the local
+passwordless start endpoint returns `sent: true`.
+
+The next blocker was delivery. Auth0 custom SMTP was configured with AgentMail:
+
+- SMTP host `smtp.agentmail.to`
+- port `587`
+- username `world-cup-agent@agentmail.to`
+- provider From `world-cup-agent@agentmail.to`
+- `Verification Email (Code)` template From `world-cup-agent@agentmail.to`
+
+Auth0 accepted the passwordless request but then logged `Failed Sending
+Notification` with `550 5.1.8 Sender address rejected`. The same happened when
+the recipient was the AgentMail QA inbox and when it was `moe@babanuj.com`.
+
+To isolate the problem, a direct SMTP test used AgentMail from this machine with
+the same inbox identity, API key, sender, and recipient. That direct message was
+accepted and queued, and the user confirmed receiving it. The issue is therefore
+specific to the Auth0 custom SMTP handoff, not general AgentMail deliverability.
+
+For v0.1, Auth0 custom SMTP is disabled and Auth0 built-in email delivery is the
+active sign-in path. Auth0 now logs a clean `Code/Link Sent` row for
+`moe@babanuj.com` without a matching failure row. The remaining account E2E step
+is to enter a fresh six-digit code from that inbox and verify the signed app
+session, handle creation, anonymous-pick migration, persistence, profile page,
+Arabic RTL, and both themes.
+
+The cumulative build estimate is now roughly `~8.7M` total tokens and `~$78`
+estimated API-equivalent cost.
+
+## First Real Auth0 OTP Session
+
+The first human-assisted Auth0 email-code session passed. The user supplied a
+fresh six-digit code from `moe@babanuj.com`; the local passwordless verify route
+accepted it, returned an authenticated session, set the signed app cookie, and
+redirected to first-sign-in handle setup.
+
+The follow-on authenticated API check confirmed the account was mapped in Neon
+by Auth0 user id. Because the account had no existing picks, the QA run safely
+used it to verify the v0.1 persistence path:
+
+- handle setup saved `moe2026`
+- group picks saved and reloaded
+- one score prediction saved and reloaded
+- one locked bracket saved and reloaded
+
+This validates the server-side account and persistence contract. The remaining
+browser-specific QA still needs a fresh human-assisted code if we want the
+browser itself to own the session cookie from the email-code modal and complete
+authenticated visual checks in English, Arabic RTL, dark theme, and light theme.
+
+The cumulative build estimate is now roughly `~8.8M` total tokens and `~$79`
+estimated API-equivalent cost.
+
+## Auth0 QA Completion And Browser Limitation
+
+The follow-up Auth0 QA run moved the milestone from API-session smoke to a
+reviewable sign-off package.
+
+The app sent another Auth0 email-code request to `moe@babanuj.com` from the
+website-styled modal. A stale code was rejected in the modal with the expected
+`That code did not work.` copy. The next fresh code from the same inbox was
+accepted by the local passwordless verify endpoint. That route returned the
+signed app session and the expected first-sign-in redirect:
+`/profile?setup=handle&returnTo=%2Fpickem%23group`.
+
+The authenticated API pass then verified the account contract end to end:
+
+- `/api/auth/me` saw the new session and reported first-sign-in handle setup.
+- handle `moe2026` saved successfully.
+- group picks saved and reloaded with `locked: true` and 3 picks.
+- score prediction `match-qa-1` saved and reloaded as a locked `2-1` pick.
+- the bracket saved and reloaded with two groups and final pick `BRA`.
+- `/api/profile` returned `moe@babanuj.com`, `moe2026`, and
+  `needsHandle: false`.
+
+For visual coverage, Chrome itself stayed blocked by extension UI after the
+stale-code modal run. Escape dismissed the visible overlay, but the Chrome
+automation bridge still reported another extension UI blocking the page. The
+extension-free in-app browser covered the visual matrix instead:
+
+- English, dark theme: `dir="ltr"`, `data-theme="dark"`,
+  `Build your bracket`, no console errors.
+- English, light theme: `dir="ltr"`, `data-theme="light"`,
+  `Build your bracket`, no console errors.
+- Arabic, light theme: `lang="ar"`, `dir="rtl"`, `data-theme="light"`,
+  `كوّن جدولك`, no console errors.
+- Arabic, dark theme: `lang="ar"`, `dir="rtl"`, `data-theme="dark"`,
+  `كوّن جدولك`, no console errors.
+
+The honest review boundary is therefore narrow: the production Auth0 and
+persistence endpoints passed with a real human-supplied code, while a
+Chrome-owned session cookie from the modal could not be completed because the
+user's Chrome profile still had an extension UI blocking automation.
+
+The cumulative build estimate is now roughly `~9.0M` total tokens and `~$81`
+estimated API-equivalent cost.
