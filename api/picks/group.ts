@@ -35,7 +35,6 @@ export default async function handler(
 
     sendJson(response, 200, { groupPicks })
   } catch (error) {
-    sendError(response, error)
+    sendError(response, error, request)
   }
 }
-

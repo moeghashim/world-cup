@@ -15,7 +15,6 @@ export default async function handler(
       needsHandle: !context.user.handle,
     })
   } catch (error) {
-    sendError(response, error)
+    sendError(response, error, request)
   }
 }
-

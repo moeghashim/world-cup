@@ -25,7 +25,6 @@ export default async function handler(
 
     sendJson(response, 200, body)
   } catch (error) {
-    sendError(response, error)
+    sendError(response, error, request)
   }
 }
-

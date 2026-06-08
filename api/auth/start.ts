@@ -19,7 +19,6 @@ export default function handler(request: ApiRequest, response: ApiResponse) {
 
     response.redirect(302, authorizationUrl)
   } catch (error) {
-    sendError(response, error)
+    sendError(response, error, request)
   }
 }
-

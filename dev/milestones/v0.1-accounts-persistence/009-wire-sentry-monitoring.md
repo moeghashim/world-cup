@@ -8,10 +8,10 @@ files: ["src/monitoring.ts", "api/_lib/monitoring.ts", "src/main.tsx", "api/**/*
 ---
 
 ## Acceptance criteria
-- [ ] Client Sentry initializes only when `SENTRY_DSN` is present and does not break GA4/PostHog. (PLAN §12: Monitoring, Analytics)
-- [ ] Serverless handlers capture unexpected errors through server-side Sentry setup. (PLAN §3 Monitoring)
-- [ ] Sentry does not capture raw auth tokens, session cookie values, or shipping-address-shaped data. (PRD cross-cutting: Security)
-- [ ] Build remains clean without a DSN. (PLAN §7: secrets server-side only)
+- [x] Client Sentry initializes only when `SENTRY_DSN` is present and does not break GA4/PostHog. (PLAN §12: Monitoring, Analytics)
+- [x] Serverless handlers capture unexpected errors through server-side Sentry setup. (PLAN §3 Monitoring)
+- [x] Sentry does not capture raw auth tokens, session cookie values, or shipping-address-shaped data. (PRD cross-cutting: Security)
+- [x] Build remains clean without a DSN. (PLAN §7: secrets server-side only)
 
 ## Suggested approach
 Use the provisioned `SENTRY_DSN`. In Vite, expose only the browser-safe DSN if

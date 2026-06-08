@@ -23,7 +23,6 @@ export default async function handler(
     response.redirect(302, logoutUrl ?? returnPath)
   } catch (error) {
     clearSessionCookie(response, request)
-    sendError(response, error)
+    sendError(response, error, request)
   }
 }
-

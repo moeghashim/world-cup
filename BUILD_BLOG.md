@@ -840,3 +840,17 @@ Task 008 added the localized profile surface:
 
 The cumulative build estimate is now roughly `~7.5M` total tokens and `~$66`
 estimated API-equivalent cost.
+
+Task 009 wired monitoring:
+
+- Vite now reads browser-safe runtime constants from the exact Stripe Projects
+  env names: `SENTRY_DSN`, `WORLDCUP_API_KEY`, and `WORLDCUP_HOST`.
+- client Sentry initializes only when `SENTRY_DSN` exists and scrubs email,
+  IP, cookies, auth headers, and request bodies before events are sent;
+- serverless handlers capture unexpected errors through `@sentry/node`, also
+  stripping cookies, auth headers, request bodies, and user email/IP; and
+- PostHog now uses the `WORLDCUP_*` env contract instead of requiring legacy
+  `VITE_POSTHOG_*` names.
+
+The cumulative build estimate is now roughly `~7.6M` total tokens and `~$67`
+estimated API-equivalent cost.

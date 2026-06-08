@@ -1,13 +1,15 @@
 import posthog from 'posthog-js'
 
+declare const __WORLDCUP_API_KEY__: string
+declare const __WORLDCUP_HOST__: string
+
 const defaultMeasurementId = 'G-RFPJRPKYQR'
 const scriptId = 'google-analytics-gtag'
 
 export const googleAnalyticsMeasurementId =
   import.meta.env.VITE_GA_MEASUREMENT_ID || defaultMeasurementId
-export const posthogKey = import.meta.env.VITE_POSTHOG_KEY
-export const posthogUiHost =
-  import.meta.env.VITE_POSTHOG_HOST || 'https://us.posthog.com'
+export const posthogKey = __WORLDCUP_API_KEY__
+export const posthogUiHost = __WORLDCUP_HOST__ || 'https://us.posthog.com'
 
 type GtagArguments = [string, ...unknown[]]
 type AnalyticsProperties = Record<

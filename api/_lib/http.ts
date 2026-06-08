@@ -1,3 +1,5 @@
+import { captureServerError } from './monitoring.js'
+
 export type ApiRequest = {
   method?: string
   query?: Record<string, string | string[] | undefined>
@@ -45,7 +47,11 @@ export function sendJson(response: ApiResponse, status: number, body: unknown) {
   response.status(status).json(body)
 }
 
-export function sendError(response: ApiResponse, error: unknown) {
+export function sendError(
+  response: ApiResponse,
+  error: unknown,
+  request?: ApiRequest,
+) {
   if (error instanceof HttpError) {
     response.status(error.status).json({
       error: {
@@ -55,6 +61,8 @@ export function sendError(response: ApiResponse, error: unknown) {
     })
     return
   }
+
+  captureServerError(error, request)
 
   response.status(500).json({
     error: {

@@ -47,7 +47,6 @@ export default async function handler(
     setSessionCookie(response, request, authResponse.sealedSession)
     response.redirect(302, destination)
   } catch (error) {
-    sendError(response, error)
+    sendError(response, error, request)
   }
 }
-

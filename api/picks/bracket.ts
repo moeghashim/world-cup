@@ -31,7 +31,6 @@ export default async function handler(
 
     sendJson(response, 200, { bracket })
   } catch (error) {
-    sendError(response, error)
+    sendError(response, error, request)
   }
 }
-
