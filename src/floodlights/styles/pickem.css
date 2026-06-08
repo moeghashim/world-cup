@@ -66,10 +66,27 @@
 .pick-layout{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
 @media(max-width:1080px){.pick-layout{grid-template-columns:1fr}}
 .bracket-wrap{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px 14px;overflow:hidden}
+.bracket-stage,.bracket-desktop,.bracket-mobile{direction:ltr}
 .bracket-labels{display:flex;padding:2px 4px 12px}
 .bracket-labels .rl{min-width:200px;padding:0 14px;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
 .bracket-labels .rl.champ{color:var(--lime-ink)}
 .bracket{display:flex;gap:0;overflow-x:auto;padding:4px 4px 14px}
+.bracket-mobile{display:none}
+.bracket-desktop{display:grid;grid-template-columns:minmax(0,1fr) minmax(132px,160px) minmax(0,1fr);gap:14px;align-items:center;min-width:0}
+.bracket-side{display:grid;grid-template-columns:repeat(4,minmax(74px,1fr));gap:8px;align-items:stretch;min-width:0}
+.bracket-side .round{min-width:0;padding:0;gap:8px}
+.bracket-side-right{grid-template-columns:repeat(4,minmax(74px,1fr))}
+.bracket-desktop .rl,.bracket-final-column .rl{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);text-align:center;min-height:22px}
+.bracket-desktop .rl.champ,.bracket-final-column .rl.champ{color:var(--lime-ink)}
+.bracket-final-column{display:grid;gap:10px;align-content:center;min-width:0}
+.bracket-final-column .match::after,.bracket-final-column .match::before{display:none}
+.bracket-desktop .match{min-width:0}
+.bracket-desktop .slot{gap:6px;padding:8px 7px;font-size:11px;min-width:0}
+.bracket-desktop .slot .flag{width:20px!important;height:20px!important;font-size:9px!important;flex:0 0 auto}
+.bracket-desktop .champ{padding:16px 10px}
+.bracket-desktop .champ .flag{width:44px!important;height:44px!important}
+.bracket-desktop .champ-nm{font-size:13px}
+.bracket-desktop .champ-empty{font-size:11px}
 .ko-lock{padding:60px 20px;text-align:center;color:var(--mut);font-family:'Chakra Petch',sans-serif;font-size:15px}
 .round{display:flex;flex-direction:column;justify-content:space-around;min-width:200px;padding:0 14px;gap:10px}
 .match{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:11px;overflow:hidden;transition:.15s}
@@ -85,7 +102,7 @@
 .match.stub::after{content:'';position:absolute;left:100%;top:50%;transform:translateY(-50%);width:14px;height:2px;background:var(--line-2);z-index:1}
 .match.lstub::before{content:'';position:absolute;right:100%;top:50%;transform:translateY(-50%);width:14px;height:2px;background:var(--line-2);z-index:1}
 .match.advanced.stub::after{background:var(--lime);box-shadow:var(--glow-lime)}
-.bracket.locked .slot{cursor:default}
+.bracket.locked .slot,.bracket-stage.locked .slot{cursor:default}
 .round-champ{justify-content:center;min-width:185px}
 .champ{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--panel-2);border:1px dashed var(--line-2);border-radius:16px;padding:24px 16px;text-align:center}
 .champ.has{border-style:solid;border-color:var(--lime);box-shadow:var(--glow-lime);background:rgba(201,255,61,.06)}
@@ -93,6 +110,11 @@
 .champ.has .champ-cap{color:var(--lime-ink)}
 .champ-nm{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:16px}
 .champ-empty{color:var(--mut);font-size:12px;line-height:1.5;font-family:'Chakra Petch',sans-serif}
+
+@media(max-width:1180px){
+  .bracket-desktop{display:none}
+  .bracket-mobile{display:block}
+}
 
 /* summary */
 .summary{position:sticky;top:90px;display:flex;flex-direction:column;gap:16px}

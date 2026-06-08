@@ -1431,3 +1431,27 @@ npm run build
 
 The cumulative build estimate is now roughly `~10.2M` total tokens and `~$93`
 estimated API-equivalent cost.
+
+### Task 005 - Fix Layout, RTL Logo, And Desktop Bracket
+
+The shared layout now uses one `--content-max` width for both `.wrap` and
+`.wrap-wide`, so the homepage and inner pages land on the same desktop rhythm.
+The header logo is also isolated from page direction with an explicit LTR SVG
+wordmark and a fixed flex footprint; that prevents Arabic RTL pages from
+squeezing or reordering the `WIN·2026` lockup.
+
+The Pick'em knockout section now renders a desktop two-sided bracket: the left
+and right halves converge on a central Final and Champion column while reusing
+the same pick handler and state model as the existing bracket. The original
+horizontal bracket remains as the mobile/tablet fallback, so small screens stay
+scrollable instead of forcing a dense two-sided view.
+
+Verification ran:
+
+```bash
+npm run test:v0.3
+npm run build
+```
+
+The cumulative build estimate is now roughly `~10.3M` total tokens and `~$94`
+estimated API-equivalent cost.
