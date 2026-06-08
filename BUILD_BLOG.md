@@ -1172,3 +1172,32 @@ Africa.
 
 The cumulative build estimate is now roughly `~9.3M` total tokens and `~$84`
 estimated API-equivalent cost.
+
+### Task 004 - Add Fixtures API Cache
+
+The app now has a first-party tournament fixture endpoint:
+`GET /api/data/fixtures`.
+
+The endpoint returns:
+
+- groups
+- teams
+- all 104 matches
+- lock metadata, including the bracket lock timestamp
+- source metadata with an explicit `fallback` marker
+
+The API prefers the seeded Neon tables and caches the normalized response for
+short reads. If Neon is unavailable or not configured, it falls back to a
+generated server-only static module at `api/_lib/tournament-static.ts` and marks
+`source.fallback: true`. The browser still reads our API route; it does not fetch
+openfootball directly.
+
+Verification for this task covered:
+
+- `GET /api/data/fixtures` with local Neon env: 12 groups, 48 teams, 104 matches,
+  `bracketLocksAt: 2026-06-11T19:00:00.000Z`, `fallback: false`
+- no-env fallback path: 12 groups, 48 teams, 104 matches, `fallback: true`
+- `npm run build`
+
+The cumulative build estimate is now roughly `~9.4M` total tokens and `~$85`
+estimated API-equivalent cost.

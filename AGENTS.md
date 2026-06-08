@@ -53,7 +53,7 @@ Current implementation baseline:
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
 - AI usage disclosure is currently tracked in documentation, not the UI:
-  `~9.3M` total tokens and `~$84` estimated API-equivalent cost in
+  `~9.4M` total tokens and `~$85` estimated API-equivalent cost in
   `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
@@ -101,8 +101,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.3M` total tokens and
-`~$84` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.4M` total tokens and
+`~$85` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -387,6 +387,11 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   converted openfootball `UTC±offset` kickoffs to ISO UTC, seeded Neon, verified
   the readback counts at 12 groups / 48 teams / 104 matches / 72 group matches,
   and refreshed the documentation estimate to `~9.3M` total tokens and `~$84`.
+- Added `GET /api/data/fixtures`, generated a server-only static fallback module,
+  taught the tournament data helper to prefer Neon/cache and mark fallback reads,
+  wired the local API shim route, verified Neon and no-env fallback handler
+  responses, verified with `npm run build`, and refreshed the documentation
+  estimate to `~9.4M` total tokens and `~$85`.
 
 ### 2026-06-07
 

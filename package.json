@@ -10,6 +10,7 @@
     "build": "tsc -b && vite build",
     "db:apply": "node --env-file=.env --import tsx scripts/apply-schema.ts",
     "db:seed:tournament": "node --env-file=.env --import tsx scripts/seed-openfootball.ts",
+    "db:generate:tournament-static": "node --import tsx scripts/generate-tournament-static.ts",
     "verify:tournament-data": "node --import tsx scripts/seed-openfootball.ts --verify",
     "lint": "eslint .",
     "test:v0.1": "tsx --test tests/v0.1-accounts-persistence.test.ts",

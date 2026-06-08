@@ -7,13 +7,13 @@ files: ["api/data/fixtures.ts", "api/_lib/tournament-data.ts", "scripts/dev-api.
 
 ## Acceptance Criteria
 
-- [ ] Add `GET /api/data/fixtures`.
-- [ ] Return teams, groups, matches, lock metadata, and source metadata from
+- [x] Add `GET /api/data/fixtures`.
+- [x] Return teams, groups, matches, lock metadata, and source metadata from
   Neon/cache.
-- [ ] Provide a static-backed fallback only when Neon is unavailable, with an
+- [x] Provide a static-backed fallback only when Neon is unavailable, with an
   explicit fallback marker.
-- [ ] Do not expose provider URLs as a runtime dependency for clients.
-- [ ] Wire the local dev API shim for `/api/data/fixtures`.
+- [x] Do not expose provider URLs as a runtime dependency for clients.
+- [x] Wire the local dev API shim for `/api/data/fixtures`.
 
 ## Notes
 

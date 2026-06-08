@@ -3,6 +3,7 @@ import type {
   TeamRow,
   TournamentGroupRow,
 } from '../../db/types.js'
+import { STATIC_TOURNAMENT_DATA } from './tournament-static.js'
 
 export type MatchStage =
   | 'group'
@@ -52,7 +53,8 @@ export type TournamentMatch = {
 }
 
 export type TournamentSourceMetadata = {
-  source: string
+  url: string
+  name: string
   license: string
   verifiedAt: string
   fallback: boolean
@@ -70,6 +72,21 @@ export type TournamentDataResponse = {
   locks: TournamentLockMetadata
   source: TournamentSourceMetadata
 }
+
+const CACHE_TTL_MS = 60_000
+const SOURCE_METADATA: Omit<TournamentSourceMetadata, 'fallback'> = {
+  url: 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json',
+  name: 'openfootball/worldcup.json',
+  license: 'CC0 1.0 Universal',
+  verifiedAt: '2026-06-08',
+}
+
+let cachedTournamentData:
+  | {
+      expiresAt: number
+      data: TournamentDataResponse
+    }
+  | null = null
 
 function recordFromUnknown(value: unknown): Record<string, string> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
@@ -101,6 +118,14 @@ function normalizeStage(value: string): MatchStage {
   }
 
   return 'group'
+}
+
+function isoStringFromDatabase(value: string | Date): string {
+  return value instanceof Date ? value.toISOString() : value
+}
+
+function dateStringFromDatabase(value: string | Date): string {
+  return value instanceof Date ? value.toISOString().slice(0, 10) : value
 }
 
 export function mapTournamentGroupRow(
@@ -140,8 +165,8 @@ export function mapMatchRow(row: MatchRow): TournamentMatch {
     awayTeamName: row.away_team_name,
     homePlaceholder: row.home_placeholder,
     awayPlaceholder: row.away_placeholder,
-    kickoffAt: row.kickoff_at,
-    kickoffLocalDate: row.kickoff_local_date,
+    kickoffAt: isoStringFromDatabase(row.kickoff_at),
+    kickoffLocalDate: dateStringFromDatabase(row.kickoff_local_date),
     kickoffLocalTime: row.kickoff_local_time,
     kickoffTimezone: row.kickoff_timezone,
     venue: row.venue,
@@ -164,4 +189,67 @@ export function getTournamentLockMetadata(
     bracketLocksAt: firstMatch.kickoffAt,
     firstMatchId: firstMatch.id,
   }
+}
+
+async function loadTournamentDataFromDatabase():
+  Promise<TournamentDataResponse | null> {
+  const connectionString = process.env.PRIMARY_DB_CONNECTION_STRING
+  if (!connectionString) return null
+
+  try {
+    const { neon } = await import('@neondatabase/serverless')
+    const sql = neon(connectionString)
+    const [groupRows, teamRows, matchRows] = await Promise.all([
+      sql.query(
+        'select * from tournament_groups order by sort_order asc',
+        [],
+      ) as unknown as Promise<TournamentGroupRow[]>,
+      sql.query(
+        'select * from teams order by group_code asc, group_seed asc',
+        [],
+      ) as unknown as Promise<TeamRow[]>,
+      sql.query(
+        'select * from matches order by match_number asc',
+        [],
+      ) as unknown as Promise<MatchRow[]>,
+    ])
+
+    if (
+      groupRows.length !== 12 ||
+      teamRows.length !== 48 ||
+      matchRows.length !== 104
+    ) {
+      return null
+    }
+
+    const matches = matchRows.map(mapMatchRow)
+    return {
+      groups: groupRows.map(mapTournamentGroupRow),
+      teams: teamRows.map(mapTeamRow),
+      matches,
+      locks: getTournamentLockMetadata(matches),
+      source: {
+        ...SOURCE_METADATA,
+        fallback: false,
+      },
+    }
+  } catch {
+    return null
+  }
+}
+
+export async function loadTournamentData(): Promise<TournamentDataResponse> {
+  const now = Date.now()
+
+  if (cachedTournamentData && cachedTournamentData.expiresAt > now) {
+    return cachedTournamentData.data
+  }
+
+  const data = (await loadTournamentDataFromDatabase()) ?? STATIC_TOURNAMENT_DATA
+  cachedTournamentData = {
+    expiresAt: now + CACHE_TTL_MS,
+    data,
+  }
+
+  return data
 }
