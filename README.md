@@ -12,13 +12,17 @@ Google Analytics, PostHog, Stripe Projects, and environment configuration.
 npm install
 npm run dev
 npm run lint
+npm run test:v0.1
 npm run build
 ```
+
+`npm run dev` starts both the Vite app and the local API shim for the v0.1
+account routes. Use `npm run dev:app` only for frontend-only work.
 
 ## Local URL
 
 ```bash
-http://127.0.0.1:5173/
+http://localhost:5173/
 ```
 
 ## Integrations

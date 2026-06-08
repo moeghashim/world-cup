@@ -854,3 +854,23 @@ Task 009 wired monitoring:
 
 The cumulative build estimate is now roughly `~7.6M` total tokens and `~$67`
 estimated API-equivalent cost.
+
+Task 010 added the v0.1 test and local QA harness:
+
+- `npm run test:v0.1` now covers WorkOS callback redirect safety, handle
+  validation, persisted pick payload validation, anonymous migration helpers,
+  non-auth pick API response hygiene, and generic server-error scrubbing.
+- `npm run dev` now starts both the Vite app and a local API shim so browser QA
+  exercises the same serverless handlers through `/api/*` instead of silently
+  missing the account routes.
+- README documents the v0.1 test command alongside lint/build.
+- Chrome QA reached the anonymous play-to-lock gate and the WorkOS hosted
+  AuthKit sign-in page after registering the local callback URI.
+
+The remaining milestone QA blocker is external to the app code: completing
+WorkOS AuthKit sign-in requires an accessible one-time email code or approval
+for a deliberately local-only session seeding helper, and the current Chrome
+session also has another extension UI blocking automation on the AuthKit page.
+
+The cumulative build estimate is now roughly `~7.8M` total tokens and `~$69`
+estimated API-equivalent cost.

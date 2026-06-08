@@ -24,6 +24,10 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/ingest/, ''),
         },
+        '/api': {
+          target: 'http://127.0.0.1:5181',
+          changeOrigin: false,
+        },
       },
     },
   }

@@ -4,10 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/dev.mjs",
+    "dev:api": "node --env-file=.env --import tsx scripts/dev-api.ts",
+    "dev:app": "vite",
     "build": "tsc -b && vite build",
     "db:apply": "tsx scripts/apply-schema.ts",
     "lint": "eslint .",
+    "test:v0.1": "tsx --test tests/v0.1-accounts-persistence.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

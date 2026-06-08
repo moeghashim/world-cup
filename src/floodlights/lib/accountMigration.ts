@@ -26,7 +26,7 @@ function migrationMarkerKey(userId: string): string {
   return `${markerPrefix}${userId}`
 }
 
-function hasBracketPicks(bracket: BracketPayload): boolean {
+export function hasBracketPicksForMigration(bracket: BracketPayload): boolean {
   return (
     Object.values(bracket.groups).some((rank) => rank.length > 0) ||
     bracket.thirds.length > 0 ||
@@ -35,7 +35,7 @@ function hasBracketPicks(bracket: BracketPayload): boolean {
   )
 }
 
-function hasGroupPicks(groupPicks: GroupPicksPayload): boolean {
+export function hasGroupPicksForMigration(groupPicks: GroupPicksPayload): boolean {
   return Object.keys(groupPicks.picks).length > 0 || groupPicks.locked
 }
 
@@ -60,7 +60,7 @@ export async function migrateAnonymousPicks(
   let bracketMigrated = false
   let groupPicksMigrated = false
 
-  if (hasBracketPicks(localBracket) && !serverBracket.bracket) {
+  if (hasBracketPicksForMigration(localBracket) && !serverBracket.bracket) {
     await apiRequest('/api/picks/bracket', {
       method: 'PUT',
       body: localBracket,
@@ -68,7 +68,7 @@ export async function migrateAnonymousPicks(
     bracketMigrated = true
   }
 
-  if (hasGroupPicks(localGroupPicks) && !serverGroupPicks.groupPicks) {
+  if (hasGroupPicksForMigration(localGroupPicks) && !serverGroupPicks.groupPicks) {
     await apiRequest('/api/picks/group', {
       method: 'PUT',
       body: localGroupPicks,
@@ -87,4 +87,3 @@ export async function migrateAnonymousPicks(
 
   return { bracketMigrated, groupPicksMigrated }
 }
-

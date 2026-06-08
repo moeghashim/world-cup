@@ -8,9 +8,9 @@ files: ["package.json", "src/floodlights/**/*.test.ts", "api/**/*.test.ts", "tes
 ---
 
 ## Acceptance criteria
-- [ ] WorkOS callback/session handling, handle validation, pick payload validation, and migration behavior have unit or smoke coverage. (PRD S1 acceptance criteria)
-- [ ] Tests assert that non-auth pick APIs do not return email or token/session fields. (PRD S1: no email/token in non-auth API response)
-- [ ] `npm run lint`, `npm run build`, and the v0.1 test command pass locally. (Workflow test floor)
+- [x] WorkOS callback/session handling, handle validation, pick payload validation, and migration behavior have unit or smoke coverage. (PRD S1 acceptance criteria)
+- [x] Tests assert that non-auth pick APIs do not return email or token/session fields. (PRD S1: no email/token in non-auth API response)
+- [x] `npm run lint`, `npm run build`, and the v0.1 test command pass locally. (Workflow test floor)
 - [ ] Chrome E2E QA covers WorkOS sign-in, play-to-lock gate, handle-at-first-sign-in, anonymous-pick migration, persistence across reload/fresh session, and `/profile` in English + Arabic and both themes. (User workflow update)
 
 ## Suggested approach
