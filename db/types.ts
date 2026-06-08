@@ -1,7 +1,6 @@
 export type UserRow = {
   id: string
   auth0_user_id: string
-  workos_user_id: string | null
   email: string
   handle: string | null
   country_at_signup: string | null
