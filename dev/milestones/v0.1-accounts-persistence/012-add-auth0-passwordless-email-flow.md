@@ -36,3 +36,10 @@ Human-assisted OTP QA passed with a fresh code from `moe@babanuj.com`:
 expected first-sign-in handle setup state. The follow-on authenticated API check
 set handle `moe2026` and verified group picks, one score prediction, and one
 bracket save/reload cycle for the mapped Auth0 user.
+
+Follow-up QA accepted another fresh code from `moe@babanuj.com` through the same
+local passwordless verify route, reconfirmed first-sign-in setup, and verified
+the authenticated readback contract for `/api/profile`, group picks, score
+prediction, and bracket state. Chrome still could not complete a browser-owned
+session from the modal because another extension UI blocked automation; the
+extension-free browser completed English/Arabic and dark/light visual coverage.

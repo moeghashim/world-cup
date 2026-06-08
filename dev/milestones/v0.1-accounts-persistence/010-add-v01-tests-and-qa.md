@@ -17,3 +17,14 @@ files: ["package.json", "src/floodlights/**/*.test.ts", "api/**/*.test.ts", "tes
 Use mocked WorkOS/Neon where needed for automated tests. Run real-browser QA
 against the local or preview app after env pull. Record pass/fail and evidence
 in the milestone PR body.
+
+## QA Note - 2026-06-08
+
+Provider reconciliation replaced WorkOS with Auth0 by Okta for v0.1. Auth0
+email-code verification passed with a human-supplied code from
+`moe@babanuj.com`, and authenticated API readbacks passed for handle setup,
+group picks, score predictions, bracket state, and profile. Chrome rendered the
+website-styled email-code modal, but another Chrome extension UI blocked
+structured automation before Chrome could own the final session cookie.
+Extension-free browser coverage passed for `/pickem` in English dark, English
+light, Arabic RTL light, and Arabic RTL dark with no console errors.

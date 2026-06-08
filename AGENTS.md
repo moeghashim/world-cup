@@ -38,9 +38,9 @@ Current implementation baseline:
 - PostHog first-party `/ingest` proxy in `vite.config.ts` and `vercel.json`.
 - Stripe Projects and Vercel local state preserved in ignored `.projects/` and
   `.vercel/` directories.
-- AI usage disclosure currently shows `~8.8M` total tokens and `~$79`
-  estimated API-equivalent cost in `src/App.tsx` and the appended
-  `BUILD_BLOG.md` reset note.
+- AI usage disclosure is currently tracked in documentation, not the UI:
+  `~9.0M` total tokens and `~$81` estimated API-equivalent cost in
+  `BUILD_BLOG.md`.
 - `BUILD_BLOG.md` remains append-only for the public build article.
 
 ## Floodlights Implementation - 2026-06-07
@@ -87,8 +87,8 @@ Design assets (favicons, t-shirt photo, logo files) live in `public/assets/`.
 GA4 and PostHog plumbing are unchanged and still initialize from `App.tsx`.
 Picks, theme, and language persist in `localStorage`. The Floodlights design has
 no AI-usage disclosure banner, so the running token estimate is tracked in the
-docs (`BUILD_BLOG.md`) rather than in the UI: currently `~8.8M` total tokens and
-`~$79` estimated API-equivalent cost.
+docs (`BUILD_BLOG.md`) rather than in the UI: currently `~9.0M` total tokens and
+`~$81` estimated API-equivalent cost.
 
 ## Working Agreement
 
@@ -350,6 +350,14 @@ Runtime website images in `src/assets/` are optimized JPEG exports for page perf
   `moe2026`, verified authenticated group-pick, prediction, and bracket
   save/reload paths, and refreshed the documentation estimate to `~8.8M` total
   tokens and `~$79`.
+- Completed the follow-up Auth0 QA package for review: accepted another fresh
+  human-supplied code from `moe@babanuj.com` through the local passwordless
+  verify endpoint, confirmed first-sign-in handle setup, verified authenticated
+  group-pick, score-prediction, bracket, and profile API readbacks, verified
+  extension-free browser coverage for English + Arabic RTL across dark and
+  light themes, recorded Chrome as blocked by another extension UI for the
+  browser-owned cookie check, and refreshed the documentation estimate to
+  `~9.0M` total tokens and `~$81`.
 
 ### 2026-06-07
 
@@ -511,6 +519,15 @@ Browser verification covered:
   redirect, `/api/auth/me` read the signed session cookie, handle `moe2026` was
   saved, and authenticated group-pick, prediction, and bracket data each
   saved/reloaded successfully
+- verifying follow-up Auth0 QA: a fresh code from `moe@babanuj.com` was
+  accepted by the local passwordless verify endpoint; `/api/auth/me`,
+  `/api/profile/handle`, `/api/picks/group`, `/api/picks/predict`,
+  `/api/picks/bracket`, and `/api/profile` returned the expected authenticated
+  values and persisted readbacks; Chrome rendered the website-styled email-code
+  modal but another Chrome extension UI blocked structured automation after the
+  stale-code modal; the extension-free in-app browser verified `/pickem` in
+  English dark, English light, Arabic RTL light, and Arabic RTL dark with no
+  console errors
 
 Latest screenshot:
 

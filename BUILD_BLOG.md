@@ -1047,3 +1047,47 @@ authenticated visual checks in English, Arabic RTL, dark theme, and light theme.
 
 The cumulative build estimate is now roughly `~8.8M` total tokens and `~$79`
 estimated API-equivalent cost.
+
+## Auth0 QA Completion And Browser Limitation
+
+The follow-up Auth0 QA run moved the milestone from API-session smoke to a
+reviewable sign-off package.
+
+The app sent another Auth0 email-code request to `moe@babanuj.com` from the
+website-styled modal. A stale code was rejected in the modal with the expected
+`That code did not work.` copy. The next fresh code from the same inbox was
+accepted by the local passwordless verify endpoint. That route returned the
+signed app session and the expected first-sign-in redirect:
+`/profile?setup=handle&returnTo=%2Fpickem%23group`.
+
+The authenticated API pass then verified the account contract end to end:
+
+- `/api/auth/me` saw the new session and reported first-sign-in handle setup.
+- handle `moe2026` saved successfully.
+- group picks saved and reloaded with `locked: true` and 3 picks.
+- score prediction `match-qa-1` saved and reloaded as a locked `2-1` pick.
+- the bracket saved and reloaded with two groups and final pick `BRA`.
+- `/api/profile` returned `moe@babanuj.com`, `moe2026`, and
+  `needsHandle: false`.
+
+For visual coverage, Chrome itself stayed blocked by extension UI after the
+stale-code modal run. Escape dismissed the visible overlay, but the Chrome
+automation bridge still reported another extension UI blocking the page. The
+extension-free in-app browser covered the visual matrix instead:
+
+- English, dark theme: `dir="ltr"`, `data-theme="dark"`,
+  `Build your bracket`, no console errors.
+- English, light theme: `dir="ltr"`, `data-theme="light"`,
+  `Build your bracket`, no console errors.
+- Arabic, light theme: `lang="ar"`, `dir="rtl"`, `data-theme="light"`,
+  `كوّن جدولك`, no console errors.
+- Arabic, dark theme: `lang="ar"`, `dir="rtl"`, `data-theme="dark"`,
+  `كوّن جدولك`, no console errors.
+
+The honest review boundary is therefore narrow: the production Auth0 and
+persistence endpoints passed with a real human-supplied code, while a
+Chrome-owned session cookie from the modal could not be completed because the
+user's Chrome profile still had an extension UI blocking automation.
+
+The cumulative build estimate is now roughly `~9.0M` total tokens and `~$81`
+estimated API-equivalent cost.

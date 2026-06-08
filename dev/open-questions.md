@@ -19,6 +19,20 @@
   delivery during polling, so a browser-owned session from the email-code modal
   still needs a human-assisted code if full visual E2E is required.
 
+## 2026-06-08 Auth0 QA Browser Limitation
+
+- Resolved: a second fresh code from `moe@babanuj.com` was accepted by the local
+  Auth0 passwordless verify route and reconfirmed the app session, first-handle
+  setup, authenticated profile, group picks, score prediction, and bracket
+  persistence readbacks.
+- Resolved: extension-free browser visual QA covered `/pickem` in English dark,
+  English light, Arabic RTL light, and Arabic RTL dark with no console errors.
+- Remaining limitation for Claude review: Chrome rendered the website-styled
+  code modal, but another Chrome extension UI continued to block structured
+  automation after a stale-code attempt. The app endpoint passed; the missing
+  piece is only a Chrome-owned session cookie from the modal in this local Chrome
+  profile.
+
 ## 2026-06-08 Provider Swap
 
 - Resolved: Auth0 by Okta replaces WorkOS for v0.1 identity.
