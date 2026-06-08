@@ -1,5 +1,12 @@
 # Open Questions
 
+## 2026-06-08 v0.2 Knockout Bracket Lock Timing
+
+- Resolved in PLAN.md on `main`: group picks and score predictions lock at each
+  match's own kickoff. The whole knockout bracket locks at the first tournament
+  match's kickoff because v0.2 has no live results/standings yet to resolve
+  staged bracket updates.
+
 ## 2026-06-08 Auth0 Passwordless Delivery Resolution
 
 - Resolved: Auth0 Passwordless Email connection `email` is enabled for the

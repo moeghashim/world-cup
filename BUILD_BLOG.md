@@ -1091,3 +1091,28 @@ user's Chrome profile still had an extension UI blocking automation.
 
 The cumulative build estimate is now roughly `~9.0M` total tokens and `~$81`
 estimated API-equivalent cost.
+
+## v0.2: Real Tournament Data
+
+### Task 001 - Verify And Vendor Openfootball Data
+
+The v0.2 milestone starts by replacing Floodlights sample tournament data with
+the real World Cup 2026 structure. I fetched the upstream openfootball snapshot
+from `https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json`
+and vendored it at `db/openfootball/worldcup-2026.json` with source notes in
+`db/openfootball/README.md`.
+
+The saved file verifies as:
+
+- 104 total fixtures
+- 72 group-stage fixtures
+- 12 groups
+- 48 actual group-stage teams
+
+The source is CC0 1.0 Universal and manually maintained by openfootball, so this
+is treated as a static seed, not a live result feed. The browser will read the
+normalized tournament data through our own `/api/data/fixtures` endpoint after
+the remaining v0.2 tasks wire the Neon/cache layer.
+
+The cumulative build estimate is now roughly `~9.1M` total tokens and `~$82`
+estimated API-equivalent cost.
