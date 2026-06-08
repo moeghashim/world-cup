@@ -1282,3 +1282,39 @@ npm run lint
 
 The cumulative build estimate is now roughly `~9.7M` total tokens and `~$88`
 estimated API-equivalent cost.
+
+### Task 008 - Run v0.2 Chrome E2E QA
+
+Chrome QA evidence is recorded in `tests/e2e/v0.2-chrome-qa.md`, with screenshots
+under `tests/e2e/screenshots/`.
+
+The browser matrix covered:
+
+- homepage in English/dark
+- Pick'em in English/light
+- Pick'em in Arabic RTL/light
+- Pick'em in Arabic RTL/dark
+
+The visible UI showed the real opener, Mexico vs South Africa, Match 1, Mexico
+City, `Jun 11 · 19:00 UTC`, plus the first three real quick-pick fixtures:
+Match 1, Match 2, and Match 7. Chrome showed no app console errors. Installed
+Chrome extensions emitted extension-origin warnings, which are documented as not
+app-origin errors.
+
+The upcoming browser flow selected three quick picks and reached the expected
+sign-in gate. Past-kickoff rejection is proven through the v0.2 server/API test
+clock because the current date is 2026-06-08 and every real World Cup 2026 match
+is still upcoming.
+
+Final verification ran:
+
+```bash
+npm run verify:tournament-data
+npm run test:v0.2
+npm run test:v0.1
+npm run lint
+npm run build
+```
+
+The cumulative build estimate is now roughly `~9.8M` total tokens and `~$89`
+estimated API-equivalent cost.
