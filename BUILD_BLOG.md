@@ -1,6 +1,6 @@
 # Building A World Cup Prediction And Sponsor Rewards Website
 
-Last updated: 2026-06-03
+Last updated: 2026-06-07
 
 This is the working blog post for the project. Update this file on every commit so the article stays aligned with the real build history.
 
@@ -748,3 +748,25 @@ The previous neutral reset screen and its inline AI-usage disclosure banner were
 replaced by this product surface, so the cumulative AI build estimate now lives
 in the documentation: roughly `~6.9M` total tokens and `~$60` estimated
 API-equivalent cost.
+
+## v0.1 Accounts And Persistence Milestone
+
+The reconciled v0.1 plan moves account identity to WorkOS AuthKit and keeps
+credentials managed through Stripe Projects. The implementation deliberately
+drops the earlier custom magic-link token/session design: there are no
+`magic_link_tokens` or custom `sessions` tables. Local account rows map to
+WorkOS with `users.workos_user_id`.
+
+Task 003 added the server-side WorkOS auth flow:
+
+- `/api/auth/start` redirects to WorkOS AuthKit with an encoded return path.
+- `/api/auth/callback` exchanges the WorkOS code, seals the WorkOS session into
+  an httpOnly cookie, and maps the WorkOS user into the local `users` table.
+- `/api/auth/logout` clears the local sealed-session cookie and redirects through
+  the WorkOS logout URL when a valid session is available.
+- shared API helpers now cover environment validation, Neon access, cookies,
+  request-origin handling, WorkOS initialization, session resolution, and local
+  user mapping.
+
+The cumulative build estimate is now roughly `~7.0M` total tokens and `~$61`
+estimated API-equivalent cost.

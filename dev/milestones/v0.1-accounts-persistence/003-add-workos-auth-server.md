@@ -8,10 +8,10 @@ files: ["api/auth/start.ts", "api/auth/callback.ts", "api/auth/logout.ts", "api/
 ---
 
 ## Acceptance criteria
-- [ ] Starting sign-in redirects to WorkOS AuthKit/passwordless flow. (PRD S1: WorkOS emails a working magic link)
-- [ ] Callback exchanges the WorkOS code, seals the session cookie, and maps the WorkOS user to local `users`. (PRD S1: verifying sets a session)
-- [ ] Refreshing the app can authenticate from the WorkOS sealed session cookie. (PRD S1: cookie persists)
-- [ ] Logout ends/clears the WorkOS-managed session. (PRD S1: `/profile` lets the user sign out)
+- [x] Starting sign-in redirects to WorkOS AuthKit/passwordless flow. (PRD S1: WorkOS emails a working magic link)
+- [x] Callback exchanges the WorkOS code, seals the session cookie, and maps the WorkOS user to local `users`. (PRD S1: verifying sets a session)
+- [x] Refreshing the app can authenticate from the WorkOS sealed session cookie. (PRD S1: cookie persists)
+- [x] Logout ends/clears the WorkOS-managed session. (PRD S1: `/profile` lets the user sign out)
 
 ## Suggested approach
 Use the WorkOS Node SDK server-side only. Implement Vercel function handlers for
