@@ -16,6 +16,8 @@ import {
   koKey,
   koPick,
   normalize,
+  normalizeGroupRank,
+  rankGroupTeam,
   teamsFor,
 } from '../lib/bracket'
 import type { BracketState } from '../lib/bracket'
@@ -42,12 +44,12 @@ function readSharedBracket(): BracketState | null {
   return decodeState(m[1])
 }
 
-const groupDoneIn = (groups: Record<string, string[]>, g: string) => (groups[g] || []).length >= 3
+const groupDoneIn = (groups: Record<string, string[]>, g: string) => normalizeGroupRank(g, groups[g]).length >= 3
 const allGroupsDoneIn = (groups: Record<string, string[]>) => GROUP_KEYS.every((g) => groupDoneIn(groups, g))
 const wildReady = (st: BracketState) => allGroupsDoneIn(st.groups) && st.thirds.length === 8
 const fullyDone = (st: BracketState) => wildReady(st) && koCount(st) === MAX_KO_PICKS
 const fourth = (st: BracketState, g: string): string | null => {
-  const r = st.groups[g] || []
+  const r = normalizeGroupRank(g, st.groups[g])
   if (r.length < 3) return null
   return GROUPS[g].find((c) => r.indexOf(c) < 0) ?? null
 }
@@ -132,12 +134,10 @@ export function PickemPage() {
   /* ---------------- groups ---------------- */
   const chooseGroup = (g: string, code: string) => {
     if (viewing || state.locked) return
-    let rank = (state.groups[g] || []).slice()
-    const idx = rank.indexOf(code)
-    if (idx >= 0) rank = rank.slice(0, idx)
-    else if (rank.length < 3) rank.push(code)
-    else return
+    const rank = rankGroupTeam(state.groups, g, code)
+    if (!rank) return
     const groups = { ...state.groups, [g]: rank }
+    if (rank.length === 0) delete groups[g]
     const thirds = state.thirds.filter((tg) => groupDoneIn(groups, tg))
     commit({ ...state, groups, thirds, ko: {} })
   }
@@ -473,10 +473,10 @@ export function PickemPage() {
             {showReset && <button className="btn btn-ghost btn-sm" onClick={resetBracket}>{t('clear_all')}</button>}
           </div>
         </div>
-        <div className="groups-grid">
+          <div className="groups-grid">
           {GROUP_KEYS.map((g, gi) => {
-            const rank = state.groups[g] || []
-            const done = groupDoneIn(state.groups, g)
+            const rank = normalizeGroupRank(g, state.groups[g])
+            const done = rank.length >= 3
             const f = fourth(state, g)
             const sp = SPONSORS[gi % SPONSORS.length]
             return (

@@ -17,11 +17,64 @@ export function emptyState(): BracketState {
   return { groups: {}, thirds: [], ko: {}, locked: false }
 }
 
+export function normalizeGroupRank(group: string, rank: unknown): string[] {
+  const allowed = GROUPS[group]
+  if (!allowed || !Array.isArray(rank)) return []
+
+  const seen = new Set<string>()
+  const next: string[] = []
+
+  for (const value of rank) {
+    if (typeof value !== 'string') continue
+    const code = value.trim().toUpperCase()
+    if (!allowed.includes(code) || seen.has(code)) continue
+    seen.add(code)
+    next.push(code)
+    if (next.length >= 3) break
+  }
+
+  return next
+}
+
+export function rankGroupTeam(
+  groups: Record<string, string[]>,
+  group: string,
+  code: string,
+): string[] | null {
+  if (!GROUPS[group]?.includes(code)) return null
+
+  const rank = normalizeGroupRank(group, groups[group])
+  const idx = rank.indexOf(code)
+  if (idx >= 0) return rank.slice(0, idx)
+  if (rank.length < 3) return [...rank, code]
+
+  return [...rank.slice(0, 2), code]
+}
+
 /** normalise a possibly-partial saved object into a full BracketState */
 export function normalize(b: Partial<BracketState> | null | undefined): BracketState {
+  const groups: Record<string, string[]> = {}
+  for (const group of GROUP_KEYS) {
+    const rank = normalizeGroupRank(group, b?.groups?.[group])
+    if (rank.length > 0) groups[group] = rank
+  }
+
+  const seenThirds = new Set<string>()
+  const thirds = Array.isArray(b?.thirds)
+    ? b.thirds
+        .filter((group): group is string => typeof group === 'string')
+        .filter((group) => {
+          if (!GROUP_KEYS.includes(group) || seenThirds.has(group)) return false
+          if (normalizeGroupRank(group, groups[group]).length < 3) return false
+          seenThirds.add(group)
+          return true
+        })
+        .slice(0, 8)
+    : []
+
   return {
-    groups: b?.groups ?? {},
-    thirds: b?.thirds ?? [],
+    groups,
+    thirds,
     ko: b?.ko ?? {},
     locked: b?.locked ?? false,
   }

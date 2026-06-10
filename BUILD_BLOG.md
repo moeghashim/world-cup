@@ -1708,3 +1708,33 @@ side.
 
 The cumulative build estimate is now roughly `~11.9M` total tokens and `~$110`
 estimated API-equivalent cost.
+
+### v0.4.2 - Pick'em Group Selection Fix
+
+Users reported that Group C could get into a state where the visible fourth
+team, such as Brazil, could not be clicked. The bug came from two related
+edges: saved bracket data was accepted without sanitizing each group ranking,
+and the group selector ignored clicks on the auto-rendered fourth-place team
+once the first three positions were filled.
+
+The bracket helper now normalizes group rankings by group: it drops invalid
+codes, removes duplicates, keeps only teams that belong to that group, and
+keeps the top three user-controlled positions. Third-place wildcard selections
+are also filtered against completed, valid groups so old local state cannot
+leave a group visually stuck.
+
+The Pick'em UI now uses the same helper for rendering and clicks. Tapping a
+fourth-place row replaces the third-place wildcard slot, which lets users bring
+Brazil or any other fourth team back into contention without clearing the
+whole bracket.
+
+Verification ran:
+
+- `npm run test:v0.4.2`
+- `npm run lint`
+- `npm run build`
+- Playwright check against `http://127.0.0.1:5173/pickem` proving a malformed
+  Group C state heals and fourth-place Brazil is clickable and becomes third.
+
+The cumulative build estimate is now roughly `~12.0M` total tokens and `~$111`
+estimated API-equivalent cost.
