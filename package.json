@@ -19,6 +19,7 @@
     "test:v0.3": "tsx --test tests/v0.3-accounts-ux-hosts.test.ts",
     "test:v0.3.2": "tsx --test tests/v0.3.2-real-stats.test.ts",
     "test:v0.4": "tsx --test tests/v0.4-live-results-scoring.test.ts",
+    "test:v0.4.2": "tsx --test tests/v0.4.2-pickem-group-selection.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {
